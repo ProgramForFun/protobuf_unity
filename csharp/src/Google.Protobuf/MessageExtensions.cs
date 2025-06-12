@@ -22,6 +22,9 @@ namespace Google.Protobuf
     /// </summary>
     public static class MessageExtensions
     {
+        internal static CodedInputStream inputStream = new CodedInputStream(new byte[0]);
+        internal static byte[] buffer = new byte[4096];
+
         /// <summary>
         /// Merges data from the given byte array into an existing message.
         /// </summary>
@@ -239,26 +242,36 @@ namespace Google.Protobuf
         {
             ProtoPreconditions.CheckNotNull(message, nameof(message));
             ProtoPreconditions.CheckNotNull(data, nameof(data));
-            CodedInputStream input = new CodedInputStream(data)
-            {
-                DiscardUnknownFields = discardUnknownFields,
-                ExtensionRegistry = registry
-            };
-            message.MergeFrom(input);
-            input.CheckReadEndOfStreamTag();
+
+            inputStream.Reset(null, data, 0, data.Length);
+            inputStream.DiscardUnknownFields = discardUnknownFields;
+            inputStream.ExtensionRegistry = registry;
+
+            //CodedInputStream input = new CodedInputStream(data)
+            //{
+            //    DiscardUnknownFields = discardUnknownFields,
+            //    ExtensionRegistry = registry
+            //};
+            message.MergeFrom(inputStream);
+            inputStream.CheckReadEndOfStreamTag();
         }
 
         internal static void MergeFrom(this IMessage message, byte[] data, int offset, int length, bool discardUnknownFields, ExtensionRegistry registry)
         {
             ProtoPreconditions.CheckNotNull(message, nameof(message));
             ProtoPreconditions.CheckNotNull(data, nameof(data));
-            CodedInputStream input = new CodedInputStream(data, offset, length)
-            {
-                DiscardUnknownFields = discardUnknownFields,
-                ExtensionRegistry = registry
-            };
-            message.MergeFrom(input);
-            input.CheckReadEndOfStreamTag();
+
+            inputStream.Reset(null, data, offset, length);
+            inputStream.DiscardUnknownFields = discardUnknownFields;
+            inputStream.ExtensionRegistry = registry;
+
+            //CodedInputStream input = new CodedInputStream(data, offset, length)
+            //{
+            //    DiscardUnknownFields = discardUnknownFields,
+            //    ExtensionRegistry = registry
+            //};
+            message.MergeFrom(inputStream);
+            inputStream.CheckReadEndOfStreamTag();
         }
 
         internal static void MergeFrom(this IMessage message, ByteString data, bool discardUnknownFields, ExtensionRegistry registry)
@@ -276,13 +289,18 @@ namespace Google.Protobuf
         {
             ProtoPreconditions.CheckNotNull(message, nameof(message));
             ProtoPreconditions.CheckNotNull(input, nameof(input));
-            CodedInputStream codedInput = new CodedInputStream(input)
-            {
-                DiscardUnknownFields = discardUnknownFields,
-                ExtensionRegistry = registry
-            };
-            message.MergeFrom(codedInput);
-            codedInput.CheckReadEndOfStreamTag();
+
+            inputStream.Reset(input, buffer, 0, 0, false);
+            inputStream.DiscardUnknownFields = discardUnknownFields;
+            inputStream.ExtensionRegistry = registry;
+
+            //CodedInputStream codedInput = new CodedInputStream(input)
+            //{
+            //    DiscardUnknownFields = discardUnknownFields,
+            //    ExtensionRegistry = registry
+            //};
+            message.MergeFrom(inputStream);
+            inputStream.CheckReadEndOfStreamTag();
         }
 
         [SecuritySafeCritical]
