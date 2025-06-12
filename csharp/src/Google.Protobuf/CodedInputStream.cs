@@ -35,18 +35,18 @@ namespace Google.Protobuf
         /// Whether to leave the underlying stream open when disposing of this stream.
         /// This is always true when there's no stream.
         /// </summary>
-        private readonly bool leaveOpen;
+        private bool leaveOpen;
 
         /// <summary>
         /// Buffer of data read from the stream or provided at construction time.
         /// </summary>
-        private readonly byte[] buffer;
+        private byte[] buffer;
 
         /// <summary>
         /// The stream to read further input from, or null if the byte array buffer was provided
         /// directly on construction, with no further data available.
         /// </summary>
-        private readonly Stream input;
+        private Stream input;
 
         /// <summary>
         /// The parser state is kept separately so that other parse implementations can reuse the same
@@ -252,6 +252,33 @@ namespace Google.Protobuf
             {
                 input.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Reset then we can reuse it
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="buf"></param>
+        /// <param name="bufPos"></param>
+        /// <param name="bufSize"></param>
+        /// <param name="leaveStreamOpen"></param>
+        public void Reset(Stream stream, byte[] buf, int bufPos, int bufSize, bool leaveStreamOpen = true)
+        {
+            input = stream;
+            buffer = buf;
+            state.bufferPos = bufPos;
+            state.bufferSize = bufSize;
+            state.sizeLimit = DefaultSizeLimit;
+            state.recursionLimit = DefaultRecursionLimit;
+            state.bufferSizeAfterLimit = 0;
+            state.lastTag = 0;
+            state.nextTag = 0;
+            state.hasNextTag = false;
+            state.totalBytesRetired = 0;
+
+            SegmentedBufferHelper.Initialize(this, out this.state.segmentedBufferHelper);
+            leaveOpen = leaveStreamOpen;
+            state.currentLimit = int.MaxValue;
         }
 
         #region Validation
