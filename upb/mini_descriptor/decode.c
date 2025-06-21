@@ -19,6 +19,7 @@
 #include "upb/mem/alloc.h"
 #include "upb/mem/arena.h"
 #include "upb/message/internal/map_entry.h"
+#include "upb/message/internal/types.h"
 #include "upb/mini_descriptor/internal/base92.h"
 #include "upb/mini_descriptor/internal/decoder.h"
 #include "upb/mini_descriptor/internal/modifiers.h"
@@ -301,40 +302,45 @@ static void upb_MtDecoder_PushOneof(upb_MtDecoder* d,
 
 static size_t upb_MtDecoder_SizeOfRep(upb_FieldRep rep,
                                       upb_MiniTablePlatform platform) {
+  enum { string_view_size_32 = 8, string_view_size_64 = 16 };
+  UPB_STATIC_ASSERT(sizeof(upb_StringView) ==
+                        UPB_SIZE(string_view_size_32, string_view_size_64),
+                    "StringView size mismatch");
   static const uint8_t kRepToSize32[] = {
       [kUpb_FieldRep_1Byte] = 1,
       [kUpb_FieldRep_4Byte] = 4,
-      [kUpb_FieldRep_StringView] = 8,
+      [kUpb_FieldRep_StringView] = string_view_size_32,
       [kUpb_FieldRep_8Byte] = 8,
   };
   static const uint8_t kRepToSize64[] = {
       [kUpb_FieldRep_1Byte] = 1,
       [kUpb_FieldRep_4Byte] = 4,
-      [kUpb_FieldRep_StringView] = 16,
+      [kUpb_FieldRep_StringView] = string_view_size_64,
       [kUpb_FieldRep_8Byte] = 8,
   };
-  UPB_ASSERT(sizeof(upb_StringView) ==
-             UPB_SIZE(kRepToSize32, kRepToSize64)[kUpb_FieldRep_StringView]);
   return platform == kUpb_MiniTablePlatform_32Bit ? kRepToSize32[rep]
                                                   : kRepToSize64[rep];
 }
 
 static size_t upb_MtDecoder_AlignOfRep(upb_FieldRep rep,
                                        upb_MiniTablePlatform platform) {
+  enum { string_view_align_32 = 4, string_view_align_64 = 8 };
+  UPB_STATIC_ASSERT(UPB_ALIGN_OF(upb_StringView) ==
+                        UPB_SIZE(string_view_align_32, string_view_align_64),
+                    "StringView size mismatch");
+
   static const uint8_t kRepToAlign32[] = {
       [kUpb_FieldRep_1Byte] = 1,
       [kUpb_FieldRep_4Byte] = 4,
-      [kUpb_FieldRep_StringView] = 4,
+      [kUpb_FieldRep_StringView] = string_view_align_32,
       [kUpb_FieldRep_8Byte] = 8,
   };
   static const uint8_t kRepToAlign64[] = {
       [kUpb_FieldRep_1Byte] = 1,
       [kUpb_FieldRep_4Byte] = 4,
-      [kUpb_FieldRep_StringView] = 8,
+      [kUpb_FieldRep_StringView] = string_view_align_64,
       [kUpb_FieldRep_8Byte] = 8,
   };
-  UPB_ASSERT(UPB_ALIGN_OF(upb_StringView) ==
-             UPB_SIZE(kRepToAlign32, kRepToAlign64)[kUpb_FieldRep_StringView]);
   return platform == kUpb_MiniTablePlatform_32Bit ? kRepToAlign32[rep]
                                                   : kRepToAlign64[rep];
 }
@@ -657,12 +663,13 @@ static void upb_MtDecoder_AssignOffsets(upb_MtDecoder* d) {
     }
   }
 
-  // The fasttable parser (supported on 64-bit only) depends on this being a
-  // multiple of 8 in order to satisfy UPB_MALLOC_ALIGN, which is also 8.
-  //
-  // On 32-bit we could potentially make this smaller, but there is no
-  // compelling reason to optimize this right now.
-  d->table.UPB_PRIVATE(size) = UPB_ALIGN_UP(d->table.UPB_PRIVATE(size), 8);
+  // Since messages are always allocated on arenas, we can save repeatedly
+  // realigning by doing alignment at minitable construction time. We don't want
+  // to align to UPB_MALLOC_ALIGN because it can change with sanitizers, and if
+  // we're generating code we don't want to calculate size differently depending
+  // on the proto compiler's host or build configuration.
+  d->table.UPB_PRIVATE(size) =
+      UPB_ALIGN_UP(d->table.UPB_PRIVATE(size), kUpb_Message_Align);
 }
 
 static void upb_MtDecoder_ValidateEntryField(upb_MtDecoder* d,
@@ -801,7 +808,7 @@ done:
         upb_DecodeFast_GetFunctionPointer(fasttable[i].function_idx);
   }
 #endif
-
+  UPB_PRIVATE(upb_MiniTable_CheckInvariants)(ret);
   return ret;
 }
 
