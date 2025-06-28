@@ -7441,7 +7441,7 @@ void DescriptorBuilder::CheckEnumValueUniqueness(
     const EnumValueDescriptor* value = result->value(i);
     std::string stripped =
         EnumValueToPascalCase(remover.MaybeRemove(value->name()));
-    auto insert_result = values.try_emplace(stripped, value);
+    auto insert_result = values.try_emplace(std::move(stripped), value);
     bool inserted = insert_result.second;
 
     // We don't throw the error if the two conflicting symbols are identical, or
@@ -9684,7 +9684,8 @@ bool DescriptorBuilder::OptionInterpreter::InterpretSingleOption(
           return absl::StrCat("Option \"", debug_msg_name,
                               "\" unknown. Ensure that your proto",
                               " definition file imports the proto which "
-                              "defines the option (i.e. via import option).");
+                              "defines the option (i.e. via import option "
+                              "after edition 2024).");
         });
       }
     } else if (field->containing_type() != descriptor) {
