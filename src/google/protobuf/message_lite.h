@@ -987,6 +987,8 @@ class PROTOBUF_EXPORT MessageLite {
         GetClassData()->cached_size_offset);
   }
 
+  void VerifyHasBitConsistency() const;
+
  public:
   enum ParseFlags {
     // Merge vs. Parse:
@@ -1073,6 +1075,10 @@ class PROTOBUF_EXPORT MessageLite {
 
   template <typename Type>
   friend const internal::ClassData* internal::GetClassData(const Type& msg);
+
+  static bool CheckFieldPresence(const internal::ParseContext& ctx,
+                                 const MessageLite& msg,
+                                 MessageLite::ParseFlags parse_flags);
 
   void LogInitializationErrorMessage() const;
 
