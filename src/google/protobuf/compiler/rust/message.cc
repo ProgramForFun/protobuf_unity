@@ -103,18 +103,33 @@ void MessageDebug(Context& ctx, const Descriptor& msg) {
     case Kernel::kUpb:
       ctx.Emit(
           R"rs(
-        let string = unsafe {
-          $pbr$::debug_string(
-            self.raw_msg(),
-            <Self as $pbr$::AssociatedMiniTable>::mini_table()
-          )
-        };
+        let string = unsafe { $pbr$::debug_string(self.inner.ptr()) };
         write!(f, "{}", string)
       )rs");
       return;
   }
 
   ABSL_LOG(FATAL) << "unreachable";
+}
+
+void MessageMutFromParent(Context& ctx, const Descriptor& msg) {
+  ctx.Emit({{"MsgPtrType",
+             [&] {
+               ctx.Emit(ctx.is_cpp() ? "$pbr$::RawMessage"
+                                     : "$pbr$::MessagePtr<$Msg$>");
+             }}},
+           R"rs(
+          #[doc(hidden)]
+          pub fn from_parent<ParentT: $pb$::Message>(
+                     _private: $pbi$::Private,
+                     parent: $pbr$::MessageMutInner<'msg, ParentT>,
+                     ptr: $MsgPtrType$)
+            -> Self {
+            Self {
+              inner: $pbr$::MessageMutInner::from_parent(parent, ptr)
+            }
+          }
+      )rs");
 }
 
 void CppMessageExterns(Context& ctx, const Descriptor& msg) {
@@ -166,16 +181,9 @@ void IntoProxiedForMessage(Context& ctx, const Descriptor& msg) {
         impl<'msg> $pb$::IntoProxied<$Msg$> for $Msg$View<'msg> {
           fn into_proxied(self, _private: $pbi$::Private) -> $Msg$ {
             let mut dst = $Msg$::new();
-            let dst_raw = $pbr$::UpbGetMessagePtrMut::get_raw_message_mut(&mut dst, $pbi$::Private);
-            let dst_arena = $pbr$::UpbGetArena::get_arena(&mut dst, $pbi$::Private);
-            let src_raw = $pbr$::UpbGetMessagePtr::get_raw_message(&self, $pbi$::Private);
-
-            unsafe { $pbr$::upb_Message_DeepCopy(
-              dst_raw,
-              src_raw,
-              <Self as $pbr$::AssociatedMiniTable>::mini_table(),
-              dst_arena.raw(),
-            ) };
+            assert!(unsafe {
+              dst.inner.ptr_mut().deep_copy(self.inner.ptr(), dst.inner.arena())
+            });
             dst
           }
         }
@@ -573,11 +581,15 @@ void TypeConversions(Context& ctx, const Descriptor& msg) {
 
 void GenerateDefaultInstanceImpl(Context& ctx, const Descriptor& msg) {
   if (ctx.is_upb()) {
-    ctx.Emit("$pbr$::ScratchSpace::zeroed_block()");
+    ctx.Emit("$pbr$::MessageViewInner::default()");
   } else {
     ctx.Emit(
         {{"default_instance_thunk", ThunkName(ctx, msg, "default_instance")}},
-        "$default_instance_thunk$()");
+        R"rs(
+        unsafe {
+          $pbr$::MessageViewInner::wrap_raw($default_instance_thunk$())
+        }
+        )rs");
   }
 }
 
@@ -621,6 +633,7 @@ void GenerateRs(Context& ctx, const Descriptor& msg, const upb::DefPool& pool) {
           {"Msg::serialize", [&] { MessageSerialize(ctx, msg); }},
           {"Msg::drop", [&] { MessageDrop(ctx, msg); }},
           {"Msg::debug", [&] { MessageDebug(ctx, msg); }},
+          {"MsgMut::from_parent", [&] { MessageMutFromParent(ctx, msg); }},
           {"default_instance_impl",
            [&] { GenerateDefaultInstanceImpl(ctx, msg); }},
           {"accessor_fns",
@@ -818,8 +831,7 @@ void GenerateRs(Context& ctx, const Descriptor& msg, const upb::DefPool& pool) {
 
         impl $std$::default::Default for $Msg$View<'_> {
           fn default() -> $Msg$View<'static> {
-            let inner = unsafe { $pbr$::MessageViewInner::wrap_raw($default_instance_impl$) };
-            $Msg$View::new($pbi$::Private, inner)
+            $Msg$View::new($pbi$::Private, $default_instance_impl$)
           }
         }
 
@@ -899,16 +911,7 @@ void GenerateRs(Context& ctx, const Descriptor& msg, const upb::DefPool& pool) {
 
         #[allow(dead_code)]
         impl<'msg> $Msg$Mut<'msg> {
-          #[doc(hidden)]
-          pub fn from_parent<ParentT: $pb$::Message>(
-                     _private: $pbi$::Private,
-                     parent: $pbr$::MessageMutInner<'msg, ParentT>,
-                     msg: $pbr$::RawMessage)
-            -> Self {
-            Self {
-              inner: $pbr$::MessageMutInner::from_parent(parent, msg)
-            }
-          }
+          $MsgMut::from_parent$
 
           #[doc(hidden)]
           pub fn new(_private: $pbi$::Private, inner: $pbr$::MessageMutInner<'msg, $Msg$>) -> Self {
@@ -1006,13 +1009,13 @@ void GenerateRs(Context& ctx, const Descriptor& msg, const upb::DefPool& pool) {
             $pb$::ClearAndParse::clear_and_parse_dont_enforce_required(&mut msg, data).map(|_| msg)
           }
 
-          pub fn as_view(&self) -> $Msg$View {
+          pub fn as_view(&self) -> $Msg$View<'_> {
             $Msg$View::new(
                 $pbi$::Private,
                 $pbr$::MessageViewInner::view_of_owned(&self.inner))
           }
 
-          pub fn as_mut(&mut self) -> $Msg$Mut {
+          pub fn as_mut(&mut self) -> $Msg$Mut<'_> {
             let inner = $pbr$::MessageMutInner::mut_of_owned(&mut self.inner);
             $Msg$Mut::new($pbi$::Private, inner)
           }
@@ -1036,14 +1039,14 @@ void GenerateRs(Context& ctx, const Descriptor& msg, const upb::DefPool& pool) {
 
         impl $pb$::AsView for $Msg$ {
           type Proxied = Self;
-          fn as_view(&self) -> $Msg$View {
+          fn as_view(&self) -> $Msg$View<'_> {
             self.as_view()
           }
         }
 
         impl $pb$::AsMut for $Msg$ {
           type MutProxied = Self;
-          fn as_mut(&mut self) -> $Msg$Mut {
+          fn as_mut(&mut self) -> $Msg$Mut<'_> {
             self.as_mut()
           }
         }

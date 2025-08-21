@@ -9,6 +9,7 @@
 #ifndef GOOGLE_PROTOBUF_JSON_INTERNAL_LEXER_H__
 #define GOOGLE_PROTOBUF_JSON_INTERNAL_LEXER_H__
 
+#include <cstddef>
 #include <cstdint>
 #include <utility>
 
@@ -48,7 +49,7 @@ struct ParseOptions {
   // What those extensions were is explicitly not documented, beyond what exists
   // in the unit tests; we intend to remove this setting eventually. See
   // b/234868512.
-  bool allow_legacy_syntax = false;
+  bool allow_legacy_nonconformant_behavior = false;
 };
 
 // A position in JSON input, for error context.
@@ -198,6 +199,8 @@ class JsonLexer {
     JsonLocation loc = json_loc_;
     auto taken = stream_.Take(len);
     RETURN_IF_ERROR(taken.status());
+    json_loc_.offset += len;
+    json_loc_.col += len;
     return LocationWith<MaybeOwnedString>{*std::move(taken), loc};
   }
 
@@ -206,6 +209,9 @@ class JsonLexer {
     JsonLocation loc = json_loc_;
     auto taken = stream_.TakeWhile(std::move(p));
     RETURN_IF_ERROR(taken.status());
+    size_t len = taken->AsView().size();
+    json_loc_.offset += len;
+    json_loc_.col += len;
     return LocationWith<MaybeOwnedString>{*std::move(taken), loc};
   }
 
@@ -271,7 +277,7 @@ absl::Status JsonLexer::VisitArray(F f) {
     has_comma = Peek(",");
   } while (!Peek("]"));
 
-  if (!options_.allow_legacy_syntax && has_comma) {
+  if (!options_.allow_legacy_nonconformant_behavior && has_comma) {
     return Invalid("expected ']'");
   }
 
@@ -302,7 +308,7 @@ absl::Status JsonLexer::VisitObject(F f) {
     absl::StatusOr<LocationWith<MaybeOwnedString>> key;
     if (stream_.PeekChar() == '"' || stream_.PeekChar() == '\'') {
       key = ParseUtf8();
-    } else if (options_.allow_legacy_syntax) {
+    } else if (options_.allow_legacy_nonconformant_behavior) {
       key = ParseBareWord();
     } else {
       return Invalid("expected '\"'");
@@ -315,7 +321,7 @@ absl::Status JsonLexer::VisitObject(F f) {
   } while (!Peek("}"));
   Pop();
 
-  if (!options_.allow_legacy_syntax && has_comma) {
+  if (!options_.allow_legacy_nonconformant_behavior && has_comma) {
     return Invalid("expected '}'");
   }
 

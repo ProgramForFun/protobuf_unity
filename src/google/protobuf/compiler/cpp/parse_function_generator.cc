@@ -26,6 +26,7 @@
 #include "google/protobuf/descriptor.h"
 #include "google/protobuf/generated_message_tctable_gen.h"
 #include "google/protobuf/generated_message_tctable_impl.h"
+#include "google/protobuf/has_bits.h"
 
 namespace google {
 namespace protobuf {
@@ -90,7 +91,8 @@ ParseFunctionGenerator::BuildFieldOptions(
     size_t index = static_cast<size_t>(field->index());
     fields.push_back({
         field,
-        index < has_bit_indices.size() ? has_bit_indices[index] : -1,
+        index < has_bit_indices.size() ? has_bit_indices[index]
+                                       : internal::kNoHasbit,
         GetPresenceProbability(field, options)
             .value_or(kUnknownPresenceProbability),
         GetLazyStyle(field, options, scc_analyzer),
@@ -458,7 +460,6 @@ void ParseFunctionGenerator::GenerateTailCallTable(io::Printer* p) {
           p->Emit(
               {
                   {"strict", utf8_check == Utf8CheckMode::kStrict},
-                  {"verify", utf8_check == Utf8CheckMode::kVerify},
                   {"validate", validated_enum},
                   {"key_wire", map_key->type()},
                   {"value_wire", map_value->type()},
@@ -466,9 +467,8 @@ void ParseFunctionGenerator::GenerateTailCallTable(io::Printer* p) {
                    !HasDescriptorMethods(aux_entry.field->file(), options_)},
               },
               R"cc(
-                {::_pbi::TcParser::GetMapAuxInfo($strict$, $verify$, $validate$,
-                                                 $key_wire$, $value_wire$,
-                                                 $is_lite$)},
+                {::_pbi::TcParser::GetMapAuxInfo(
+                    $strict$, $validate$, $key_wire$, $value_wire$, $is_lite$)},
               )cc");
           break;
         }
@@ -672,15 +672,13 @@ void ParseFunctionGenerator::GenerateFieldEntries(io::Printer* p) {
             if (oneof) {
               p->Emit(absl::StrCat("_Internal::kOneofCaseOffset + ",
                                    4 * oneof->index(), ","));
-            } else if (num_hasbits_ > 0 || IsMapEntryMessage(descriptor_)) {
+            } else {
               std::string hb_content =
                   entry.hasbit_idx >= 0
                       ? absl::StrCat("_Internal::kHasBitsOffset + ",
                                      entry.hasbit_idx, ",")
-                      : absl::StrCat(entry.hasbit_idx, ",");
+                      : "-1,";
               p->Emit(hb_content);
-            } else {
-              p->Emit("0,");
             }
           }},
          {"aux_idx", entry.aux_idx},

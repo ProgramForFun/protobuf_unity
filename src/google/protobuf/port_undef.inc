@@ -73,6 +73,7 @@
 #undef PROTOBUF_FUTURE_DESCRIPTOR_EXTENSION_DECL
 #undef PROTOBUF_FUTURE_REMOVE_CREATEMESSAGE
 #undef PROTOBUF_FUTURE_ADD_NODISCARD
+#undef PROTOBUF_FUTURE_NO_RECURSIVE_MESSAGE_COPY
 #endif
 
 // Restore macros that may have been #undef'd in port_def.inc.
@@ -155,12 +156,12 @@
 #pragma pop_macro("GID_MAX")
 #endif  // defined(ANDROID) || defined(__ANDROID__)
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 #pragma pop_macro("TRUE")
 #pragma pop_macro("FALSE")
 #pragma pop_macro("UID_MAX")
 #pragma pop_macro("GID_MAX")
-#endif  // __FreeBSD__
+#endif  // defined(__FreeBSD__) || defined(__OpenBSD__)
 
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
 #pragma pop_macro("DEBUG")

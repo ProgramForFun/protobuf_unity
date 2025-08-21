@@ -109,7 +109,6 @@ bool EpsCopyInputStream::ParseEndsInSlopRegion(const char* begin, int overrun,
   return ParsingEndsInBuffer(ptr, end, depth);
 }
 
-
 template <bool kExperimentalV2>
 const char* EpsCopyInputStream::NextBuffer(int overrun, int depth) {
   if (next_chunk_ == nullptr) return nullptr;  // We've reached end of stream.
@@ -593,6 +592,7 @@ const char* InlineGreedyStringParser(std::string* s, const char* ptr,
   if (!ptr) return nullptr;
   return ctx->ReadString(ptr, size, s);
 }
+
 
 
 template <typename T, bool sign>

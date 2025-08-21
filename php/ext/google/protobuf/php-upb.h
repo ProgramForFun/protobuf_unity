@@ -441,11 +441,7 @@ Error, UINTPTR_MAX is undefined
 #if defined(__cplusplus)
 #if defined(__clang__) || UPB_GNUC_MIN(6, 0)
 // https://gcc.gnu.org/gcc-6/changes.html
-#if __cplusplus >= 201402L
 #define UPB_DEPRECATED [[deprecated]]
-#else
-#define UPB_DEPRECATED __attribute__((deprecated))
-#endif
 #else
 #define UPB_DEPRECATED
 #endif
@@ -5889,7 +5885,8 @@ typedef enum {
   kUpb_EncodeStatus_OutOfMemory = 1,  // Arena alloc failed
   kUpb_EncodeStatus_MaxDepthExceeded = 2,
 
-  // kUpb_EncodeOption_CheckRequired failed but the parse otherwise succeeded.
+  // One or more required fields are missing. Only returned if
+  // kUpb_EncodeOption_CheckRequired is set.
   kUpb_EncodeStatus_MissingRequired = 3,
 } upb_EncodeStatus;
 // LINT.ThenChange(//depot/google3/third_party/protobuf/rust/upb.rs:encode_status)
@@ -16225,7 +16222,7 @@ upb_ServiceDef* _upb_ServiceDefs_New(upb_DefBuilder* ctx, int n,
 // features. This is used for feature resolution under Editions.
 // NOLINTBEGIN
 // clang-format off
-#define UPB_INTERNAL_UPB_EDITION_DEFAULTS "\n\027\030\204\007\"\000*\020\010\001\020\002\030\002 \003(\0010\0028\002@\001\n\027\030\347\007\"\000*\020\010\002\020\001\030\001 \002(\0010\0018\002@\001\n\027\030\350\007\"\014\010\001\020\001\030\001 \002(\0010\001*\0048\002@\001 \346\007(\350\007"
+#define UPB_INTERNAL_UPB_EDITION_DEFAULTS "\n\027\030\204\007\"\000*\020\010\001\020\002\030\002 \003(\0010\0028\002@\001\n\027\030\347\007\"\000*\020\010\002\020\001\030\001 \002(\0010\0018\002@\001\n\027\030\350\007\"\014\010\001\020\001\030\001 \002(\0010\001*\0048\002@\001\n\027\030\351\007\"\020\010\001\020\001\030\001 \002(\0010\0018\001@\002*\000 \346\007(\351\007"
 // clang-format on
 // NOLINTEND
 
@@ -16720,3 +16717,6 @@ UPB_PRIVATE(upb_WireWriter_VarintUnusedSizeFromLeadingZeros64)(uint64_t clz) {
 #undef UPB_HAS_BUILTIN
 #undef UPB_HAS_EXTENSION
 #undef UPB_HAS_FEATURE
+#undef UPB_XSAN_MEMBER
+#undef UPB_XSAN
+#undef UPB_XSAN_STRUCT_SIZE

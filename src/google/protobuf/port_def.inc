@@ -157,6 +157,10 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
 // Owner: ckennelly@, mkruskal@
 #define PROTOBUF_FUTURE_ADD_NODISCARD [[nodiscard]]
 
+// Removes the ability to copy messages into themselves.
+// Owner: cknittel@, mkruskal@
+#define PROTOBUF_FUTURE_NO_RECURSIVE_MESSAGE_COPY 1
+
 #else
 
 #define PROTOBUF_FUTURE_ADD_NODISCARD
@@ -586,7 +590,8 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
 #error PROTOBUF_DESCRIPTOR_WEAK_MESSAGES_ALLOWED was previously defined
 #endif
 #if defined(__GNUC__) && defined(__clang__) && !defined(__APPLE__) && \
-    !defined(_MSC_VER) && !defined(_WIN32)
+    !defined(_MSC_VER) && !defined(_WIN32) && !defined(__wasm__) &&   \
+    !defined(__EMSCRIPTEN__)
 #define PROTOBUF_DESCRIPTOR_WEAK_MESSAGES_ALLOWED
 #endif
 
@@ -746,7 +751,7 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
 #undef GID_MAX
 #endif  // defined(ANDROID) || defined(__ANDROID__)
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__OpenBSD__)
 // Inconvenient macro names from /usr/include/sys/param.h.
 #pragma push_macro("TRUE")
 #undef TRUE
@@ -757,7 +762,7 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
 #undef UID_MAX
 #pragma push_macro("GID_MAX")
 #undef GID_MAX
-#endif  // __FreeBSD__
+#endif  // defined(__FreeBSD__) || defined(__OpenBSD__)
 
 #if defined(__clang__) || defined(__GNUC__) || defined(_MSC_VER)
 // Don't let Objective-C Macros interfere with proto identifiers with the same
