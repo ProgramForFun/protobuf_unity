@@ -22,13 +22,8 @@
 #include "upb/reflection/def.hpp"
 #include "upb_generator/common/cpp_to_upb_def.h"
 
-// This type exists to work around an absl type that has not yet been
-// released.
-struct SourceLocation {
-  static SourceLocation current() { return {}; }
-  absl::string_view file_name() { return "<unknown>"; }
-  int line() { return 0; }
-};
+// Must be last.
+#include "upb/port/def.inc"
 
 namespace google {
 namespace protobuf {
@@ -62,21 +57,15 @@ class Context final {
   }
 
   void Emit(absl::Span<const io::Printer::Sub> vars, absl::string_view format,
-            absl::SourceLocation loc = absl::SourceLocation::current()) {
+            google::protobuf::io::Printer::SourceLocation loc =
+                google::protobuf::io::Printer::SourceLocation::current()) {
     printer_.Emit(vars, format, loc);
   }
 
   void Emit(absl::string_view format,
-            absl::SourceLocation loc = absl::SourceLocation::current()) {
+            google::protobuf::io::Printer::SourceLocation loc =
+                google::protobuf::io::Printer::SourceLocation::current()) {
     printer_.Emit(format, loc);
-  }
-
-  // TODO: b/373438292 - Remove EmitLegacy in favor of Emit.
-  // This is an interim solution while we migrate from Output to io::Printer
-  template <class... Arg>
-  void EmitLegacy(absl::string_view format, const Arg&... arg) {
-    auto res = absl::Substitute(format, arg...);
-    printer_.Emit(res, absl::SourceLocation::current());
   }
 
   const Options& options() { return options_; }
@@ -85,6 +74,12 @@ class Context final {
   inline std::string GetLayoutIndex(const FieldDescriptor* field) {
     return absl::StrCat(
         upb::generator::FindBaseFieldDef(pool_, field).layout_index());
+  }
+
+  inline int GetLayoutSize(const Descriptor* descriptor) {
+    return upb::generator::FindMessageDef(pool_, descriptor)
+        .mini_table()
+        ->UPB_PRIVATE(size);
   }
 
   Context(const Context&) = delete;
@@ -156,5 +151,7 @@ void WrapNamespace(const google::protobuf::FileDescriptor* file, Context& ctx, T
 }  // namespace hpb_generator
 }  // namespace protobuf
 }  // namespace google
+
+#include "upb/port/undef.inc"
 
 #endif  // GOOGLE_PROTOBUF_COMPILER_HPB_CONTEXT_H__

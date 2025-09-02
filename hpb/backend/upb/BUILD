@@ -23,6 +23,9 @@ cc_library(
         "//hpb/internal",
         "//hpb/internal:message_lock",
         "//hpb/internal:template_help",
+        "//upb/mem",
+        "//upb/message",
+        "//upb/port",
         "//upb/wire",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:string_view",
@@ -126,5 +129,15 @@ cc_library(
         "//upb/mem",
         "//upb/message",
         "//upb/message:copy",
+    ],
+)
+
+cc_library(
+    name = "error",
+    hdrs = ["error.h"],
+    visibility = ["//hpb:__subpackages__"],
+    deps = [
+        "//upb/wire",
+        "@abseil-cpp//absl/log:absl_log",
     ],
 )

@@ -298,6 +298,12 @@ Error, UINTPTR_MAX is undefined
 #define UPB_ASSERT(expr) assert(expr)
 #endif
 
+#if !defined(NDEBUG) && !defined(UPB_TSAN)
+#define UPB_ENABLE_REF_CYCLE_CHECKS 1
+#else
+#define UPB_ENABLE_REF_CYCLE_CHECKS 0
+#endif
+
 #if defined(__GNUC__) || defined(__clang__)
 #define UPB_UNREACHABLE()    \
   do {                       \
@@ -955,7 +961,14 @@ UPB_INLINE void UPB_PRIVATE(upb_Xsan_AccessReadWrite)(upb_Xsan *xsan) {
 //
 // We need this because the decoder inlines a upb_Arena for performance but
 // the full struct is not visible outside of arena.c. Yes, I know, it's awful.
-#define UPB_ARENA_SIZE_HACK (10 + (UPB_XSAN_STRUCT_SIZE * 2))
+#ifndef NDEBUG
+#define UPB_ARENA_BASE_SIZE_HACK 11
+#else
+#define UPB_ARENA_BASE_SIZE_HACK 10
+#endif
+
+#define UPB_ARENA_SIZE_HACK \
+  (UPB_ARENA_BASE_SIZE_HACK + (UPB_XSAN_STRUCT_SIZE * 2))
 
 // LINT.IfChange(upb_Arena)
 
@@ -1132,10 +1145,66 @@ bool upb_Arena_IncRefFor(const upb_Arena* a, const void* owner);
 // This operation is safe to use concurrently from multiple threads.
 void upb_Arena_DecRefFor(const upb_Arena* a, const void* owner);
 
+// Creates a reference between the arenas `from` and `to`, guaranteeing that
+// the latter will not be freed until `from` is freed.
+//
+// Users must avoid all of the following error conditions, which will be
+// checked in debug mode but are UB in opt:
+//
+// - Creating reference cycles between arenas.
+// - Creating a reference between two arenas that are fused, either now
+//   or in the future.
+//
+// Creating a reference multiple times between the same two arenas is not UB but
+// is considered wasteful and may be disallowed in the future.
+//
+// Note that fuses can participate in reference cycles. The following set of
+// calls creates a cycle A -> B -> C -> A
+//   Fuse(A, B);
+//   Ref(B, C);
+//   Ref(C, A);
+//
+// From this perspective, the second rule is just a special-case of the first.
+// This set of calls is disallowed because it is effectively creating a
+// cycle A -> B -> A
+//   Fuse(A, B);
+//   Ref(B, A);
+//
+// Fuse is special because it creates what is effectively a bidirectional
+// ref, but it is not considered a cycle and will be collected correctly.
+//
+// Note that `from` is not `const`, so it may not be called concurrently
+// with any other function on `from`.
+//
+// Returns whether the reference was created successfully.
+bool upb_Arena_RefArena(upb_Arena* from, const upb_Arena* to);
+
+#ifndef NDEBUG
+// Returns true if upb_Arena_RefArena(from, to) was previously called.
+// Note that this does not take fuses into account, and it does not follow
+// chains of references; it must have been these two arenas exactly that
+// created a reference.
+bool upb_Arena_HasRef(const upb_Arena* from, const upb_Arena* to);
+#endif
+
 // This operation is safe to use concurrently from multiple threads.
 uintptr_t upb_Arena_SpaceAllocated(const upb_Arena* a, size_t* fused_count);
 // This operation is safe to use concurrently from multiple threads.
 uint32_t upb_Arena_DebugRefCount(const upb_Arena* a);
+
+#if UPB_ENABLE_REF_CYCLE_CHECKS
+// Returns true if there is a chain of arena refs that spans `from` -> `to`.
+// Fused arenas are taken into account; for example, this series of calls
+// will cause the function to return true:
+//
+// 1. upb_Arena_Fuse(a, b)
+// 2. upb_Arena_RefArena(from, a)
+// 3. upb_Arena_RefArena(b, to)
+//
+// However this function does not return true if `from` and `to` are directly
+// fused.
+bool upb_Arena_HasRefChain(const upb_Arena* from, const upb_Arena* to);
+#endif
 
 UPB_API_INLINE upb_Arena* upb_Arena_New(void) {
   return upb_Arena_Init(NULL, 0, &upb_alloc_global);
@@ -13361,6 +13430,7 @@ bool upb_EnumDef_MiniDescriptorEncode(const upb_EnumDef* e, upb_Arena* a,
 const char* upb_EnumDef_Name(const upb_EnumDef* e);
 const UPB_DESC(EnumOptions) * upb_EnumDef_Options(const upb_EnumDef* e);
 const UPB_DESC(FeatureSet) * upb_EnumDef_ResolvedFeatures(const upb_EnumDef* e);
+UPB_DESC(SymbolVisibility) upb_EnumDef_Visibility(const upb_EnumDef* e);
 
 upb_StringView upb_EnumDef_ReservedName(const upb_EnumDef* e, int i);
 int upb_EnumDef_ReservedNameCount(const upb_EnumDef* e);
@@ -13705,6 +13775,8 @@ int upb_MessageDef_ReservedRangeCount(const upb_MessageDef* m);
 
 UPB_API upb_Syntax upb_MessageDef_Syntax(const upb_MessageDef* m);
 UPB_API upb_WellKnown upb_MessageDef_WellKnownType(const upb_MessageDef* m);
+UPB_API UPB_DESC(SymbolVisibility)
+    upb_MessageDef_Visibility(const upb_MessageDef* m);
 
 #ifdef __cplusplus
 } /* extern "C" */
@@ -14900,7 +14972,9 @@ extern "C" {
 // stream guarantees that after upb_EpsCopyInputStream_IsDone() is called,
 // the decoder can read this many bytes without performing another bounds
 // check.  The stream will copy into a patch buffer as necessary to guarantee
-// this invariant.
+// this invariant. Since tags can only be up to 5 bytes, and a max-length scalar
+// field can be 10 bytes, only 15 is required; but sizing up to 16 permits more
+// efficient fixed size copies.
 #define kUpb_EpsCopyInputStream_SlopBytes 16
 
 typedef struct {
@@ -14911,6 +14985,12 @@ typedef struct {
   int limit;                 // Submessage limit relative to end
   bool error;                // To distinguish between EOF and error.
   bool aliasing;
+#ifndef NDEBUG
+  int guaranteed_bytes;
+#endif
+  // Allocate double the size of what's required; this permits a fixed-size copy
+  // from the input buffer, regardless of how many bytes actually remain in the
+  // input buffer.
   char patch[kUpb_EpsCopyInputStream_SlopBytes * 2];
 } upb_EpsCopyInputStream;
 
@@ -14926,6 +15006,32 @@ typedef const char* upb_EpsCopyInputStream_BufferFlipCallback(
 
 typedef const char* upb_EpsCopyInputStream_IsDoneFallbackFunc(
     upb_EpsCopyInputStream* e, const char* ptr, int overrun);
+
+UPB_INLINE void UPB_PRIVATE(upb_EpsCopyInputStream_BoundsChecked)(
+    upb_EpsCopyInputStream* e) {
+#ifndef NDEBUG
+  e->guaranteed_bytes = kUpb_EpsCopyInputStream_SlopBytes;
+#endif
+}
+
+UPB_INLINE void UPB_PRIVATE(upb_EpsCopyInputStream_BoundsHit)(
+    upb_EpsCopyInputStream* e) {
+#ifndef NDEBUG
+  e->guaranteed_bytes = 0;
+#endif
+}
+
+// Signals the maximum number that the operation about to be performed may
+// consume.
+UPB_INLINE void UPB_PRIVATE(upb_EpsCopyInputStream_ConsumeBytes)(
+    upb_EpsCopyInputStream* e, int n) {
+#ifndef NDEBUG
+  if (e) {
+    UPB_ASSERT(e->guaranteed_bytes >= n);
+    e->guaranteed_bytes -= n;
+  }
+#endif
+}
 
 // Initializes a upb_EpsCopyInputStream using the contents of the buffer
 // [*ptr, size].  Updates `*ptr` as necessary to guarantee that at least
@@ -14949,6 +15055,7 @@ UPB_INLINE void upb_EpsCopyInputStream_Init(upb_EpsCopyInputStream* e,
   e->aliasing = enable_aliasing;
   e->limit_ptr = e->end;
   e->error = false;
+  UPB_PRIVATE(upb_EpsCopyInputStream_BoundsChecked)(e);
 }
 
 typedef enum {
@@ -14969,10 +15076,13 @@ UPB_INLINE upb_IsDoneStatus upb_EpsCopyInputStream_IsDoneStatus(
     upb_EpsCopyInputStream* e, const char* ptr, int* overrun) {
   *overrun = ptr - e->end;
   if (UPB_LIKELY(ptr < e->limit_ptr)) {
+    UPB_PRIVATE(upb_EpsCopyInputStream_BoundsChecked)(e);
     return kUpb_IsDoneStatus_NotDone;
   } else if (UPB_LIKELY(*overrun == e->limit)) {
+    UPB_PRIVATE(upb_EpsCopyInputStream_BoundsHit)(e);
     return kUpb_IsDoneStatus_Done;
   } else {
+    UPB_PRIVATE(upb_EpsCopyInputStream_BoundsHit)(e);
     return kUpb_IsDoneStatus_NeedFallback;
   }
 }
@@ -14990,11 +15100,18 @@ UPB_INLINE bool upb_EpsCopyInputStream_IsDoneWithCallback(
   int overrun;
   switch (upb_EpsCopyInputStream_IsDoneStatus(e, *ptr, &overrun)) {
     case kUpb_IsDoneStatus_Done:
+      UPB_PRIVATE(upb_EpsCopyInputStream_BoundsHit)(e);
       return true;
     case kUpb_IsDoneStatus_NotDone:
+      UPB_PRIVATE(upb_EpsCopyInputStream_BoundsChecked)(e);
       return false;
     case kUpb_IsDoneStatus_NeedFallback:
       *ptr = func(e, *ptr, overrun);
+      if (*ptr) {
+        UPB_PRIVATE(upb_EpsCopyInputStream_BoundsChecked)(e);
+      } else {
+        UPB_PRIVATE(upb_EpsCopyInputStream_BoundsHit)(e);
+      }
       return *ptr == NULL;
   }
   UPB_UNREACHABLE();
@@ -15241,7 +15358,11 @@ UPB_INLINE const char* _upb_EpsCopyInputStream_IsDoneFallbackInline(
     e->limit_ptr = e->end + e->limit;
     UPB_ASSERT(ptr < e->limit_ptr);
     e->input_delta = (uintptr_t)old_end - (uintptr_t)new_start;
-    return callback(e, old_end, new_start);
+    const char* ret = callback(e, old_end, new_start);
+    if (ret) {
+      UPB_PRIVATE(upb_EpsCopyInputStream_BoundsChecked)(e);
+    }
+    return ret;
   } else {
     UPB_ASSERT(overrun > e->limit);
     e->error = true;
@@ -15296,6 +15417,10 @@ UPB_FORCEINLINE bool upb_EpsCopyInputStream_TryParseDelimitedFast(
 #ifndef UPB_WIRE_INTERNAL_READER_H_
 #define UPB_WIRE_INTERNAL_READER_H_
 
+#include <stddef.h>
+#include <stdint.h>
+
+
 // Must be last.
 
 #define kUpb_WireReader_WireTypeBits 3
@@ -15311,22 +15436,36 @@ extern "C" {
 #endif
 
 UPB_PRIVATE(_upb_WireReader_LongVarint)
-UPB_PRIVATE(_upb_WireReader_ReadLongVarint)(const char* ptr, uint64_t val);
+UPB_PRIVATE(_upb_WireReader_ReadLongVarint32)(const char* ptr, uint32_t val);
+UPB_PRIVATE(_upb_WireReader_LongVarint)
+UPB_PRIVATE(_upb_WireReader_ReadLongVarint64)(const char* ptr, uint64_t val);
 
 UPB_FORCEINLINE const char* UPB_PRIVATE(_upb_WireReader_ReadVarint)(
-    const char* ptr, uint64_t* val, int maxlen, uint64_t maxval) {
-  uint64_t byte = (uint8_t)*ptr;
+    const char* ptr, uint64_t* val, upb_EpsCopyInputStream* stream) {
+  UPB_PRIVATE(upb_EpsCopyInputStream_ConsumeBytes)(stream, 10);
+  uint8_t byte = *ptr;
   if (UPB_LIKELY((byte & 0x80) == 0)) {
-    *val = (uint32_t)byte;
+    *val = byte;
     return ptr + 1;
   }
-  const char* start = ptr;
   UPB_PRIVATE(_upb_WireReader_LongVarint)
-  res = UPB_PRIVATE(_upb_WireReader_ReadLongVarint)(ptr, byte);
-  if (!res.ptr || (maxlen < 10 && res.ptr - start > maxlen) ||
-      res.val > maxval) {
-    return NULL;  // Malformed.
+  res = UPB_PRIVATE(_upb_WireReader_ReadLongVarint64)(ptr, byte);
+  if (UPB_UNLIKELY(!res.ptr)) return NULL;
+  *val = res.val;
+  return res.ptr;
+}
+
+UPB_FORCEINLINE const char* UPB_PRIVATE(_upb_WireReader_ReadTag)(
+    const char* ptr, uint32_t* val, upb_EpsCopyInputStream* stream) {
+  UPB_PRIVATE(upb_EpsCopyInputStream_ConsumeBytes)(stream, 5);
+  uint8_t byte = *ptr;
+  if (UPB_LIKELY((byte & 0x80) == 0)) {
+    *val = byte;
+    return ptr + 1;
   }
+  UPB_PRIVATE(_upb_WireReader_LongVarint)
+  res = UPB_PRIVATE(_upb_WireReader_ReadLongVarint32)(ptr, byte);
+  if (UPB_UNLIKELY(!res.ptr)) return NULL;
   *val = res.val;
   return res.ptr;
 }
@@ -15379,13 +15518,9 @@ extern "C" {
 // REQUIRES: there must be at least 10 bytes of data available at `ptr`.
 // Bounds checks must be performed before calling this function, preferably
 // by calling upb_EpsCopyInputStream_IsDone().
-UPB_FORCEINLINE const char* upb_WireReader_ReadTag(const char* ptr,
-                                                   uint32_t* tag) {
-  uint64_t val;
-  ptr = UPB_PRIVATE(_upb_WireReader_ReadVarint)(ptr, &val, 5, UINT32_MAX);
-  if (!ptr) return NULL;
-  *tag = val;
-  return ptr;
+UPB_FORCEINLINE const char* upb_WireReader_ReadTag(
+    const char* ptr, uint32_t* tag, upb_EpsCopyInputStream* stream) {
+  return UPB_PRIVATE(_upb_WireReader_ReadTag)(ptr, tag, stream);
 }
 
 // Given a tag, returns the field number.
@@ -15394,9 +15529,9 @@ UPB_API_INLINE uint32_t upb_WireReader_GetFieldNumber(uint32_t tag);
 // Given a tag, returns the wire type.
 UPB_API_INLINE uint8_t upb_WireReader_GetWireType(uint32_t tag);
 
-UPB_INLINE const char* upb_WireReader_ReadVarint(const char* ptr,
-                                                 uint64_t* val) {
-  return UPB_PRIVATE(_upb_WireReader_ReadVarint)(ptr, val, 10, UINT64_MAX);
+UPB_INLINE const char* upb_WireReader_ReadVarint(
+    const char* ptr, uint64_t* val, upb_EpsCopyInputStream* stream) {
+  return UPB_PRIVATE(_upb_WireReader_ReadVarint)(ptr, val, stream);
 }
 
 // Skips data for a varint, returning a pointer past the end of the varint, or
@@ -15405,9 +15540,10 @@ UPB_INLINE const char* upb_WireReader_ReadVarint(const char* ptr,
 // REQUIRES: there must be at least 10 bytes of data available at `ptr`.
 // Bounds checks must be performed before calling this function, preferably
 // by calling upb_EpsCopyInputStream_IsDone().
-UPB_INLINE const char* upb_WireReader_SkipVarint(const char* ptr) {
+UPB_INLINE const char* upb_WireReader_SkipVarint(
+    const char* ptr, upb_EpsCopyInputStream* stream) {
   uint64_t val;
-  return upb_WireReader_ReadVarint(ptr, &val);
+  return upb_WireReader_ReadVarint(ptr, &val, stream);
 }
 
 // Reads a varint indicating the size of a delimited field into `size`, or
@@ -15416,9 +15552,10 @@ UPB_INLINE const char* upb_WireReader_SkipVarint(const char* ptr) {
 // REQUIRES: there must be at least 10 bytes of data available at `ptr`.
 // Bounds checks must be performed before calling this function, preferably
 // by calling upb_EpsCopyInputStream_IsDone().
-UPB_INLINE const char* upb_WireReader_ReadSize(const char* ptr, int* size) {
+UPB_INLINE const char* upb_WireReader_ReadSize(const char* ptr, int* size,
+                                               upb_EpsCopyInputStream* stream) {
   uint64_t size64;
-  ptr = upb_WireReader_ReadVarint(ptr, &size64);
+  ptr = upb_WireReader_ReadVarint(ptr, &size64, stream);
   if (!ptr || size64 >= INT32_MAX) return NULL;
   *size = size64;
   return ptr;
@@ -15429,7 +15566,9 @@ UPB_INLINE const char* upb_WireReader_ReadSize(const char* ptr, int* size) {
 // REQUIRES: there must be at least 4 bytes of data available at `ptr`.
 // Bounds checks must be performed before calling this function, preferably
 // by calling upb_EpsCopyInputStream_IsDone().
-UPB_INLINE const char* upb_WireReader_ReadFixed32(const char* ptr, void* val) {
+UPB_INLINE const char* upb_WireReader_ReadFixed32(
+    const char* ptr, void* val, upb_EpsCopyInputStream* stream) {
+  UPB_PRIVATE(upb_EpsCopyInputStream_ConsumeBytes)(stream, 4);
   uint32_t uval;
   memcpy(&uval, ptr, 4);
   uval = upb_BigEndian32(uval);
@@ -15442,7 +15581,9 @@ UPB_INLINE const char* upb_WireReader_ReadFixed32(const char* ptr, void* val) {
 // REQUIRES: there must be at least 4 bytes of data available at `ptr`.
 // Bounds checks must be performed before calling this function, preferably
 // by calling upb_EpsCopyInputStream_IsDone().
-UPB_INLINE const char* upb_WireReader_ReadFixed64(const char* ptr, void* val) {
+UPB_INLINE const char* upb_WireReader_ReadFixed64(
+    const char* ptr, void* val, upb_EpsCopyInputStream* stream) {
+  UPB_PRIVATE(upb_EpsCopyInputStream_ConsumeBytes)(stream, 8);
   uint64_t uval;
   memcpy(&uval, ptr, 8);
   uval = upb_BigEndian64(uval);
@@ -15473,14 +15614,16 @@ UPB_INLINE const char* _upb_WireReader_SkipValue(
     upb_EpsCopyInputStream* stream) {
   switch (upb_WireReader_GetWireType(tag)) {
     case kUpb_WireType_Varint:
-      return upb_WireReader_SkipVarint(ptr);
+      return upb_WireReader_SkipVarint(ptr, stream);
     case kUpb_WireType_32Bit:
+      UPB_PRIVATE(upb_EpsCopyInputStream_ConsumeBytes)(stream, 4);
       return ptr + 4;
     case kUpb_WireType_64Bit:
+      UPB_PRIVATE(upb_EpsCopyInputStream_ConsumeBytes)(stream, 8);
       return ptr + 8;
     case kUpb_WireType_Delimited: {
       int size;
-      ptr = upb_WireReader_ReadSize(ptr, &size);
+      ptr = upb_WireReader_ReadSize(ptr, &size, stream);
       if (!ptr || !upb_EpsCopyInputStream_CheckSize(stream, ptr, size)) {
         return NULL;
       }
@@ -16720,3 +16863,4 @@ UPB_PRIVATE(upb_WireWriter_VarintUnusedSizeFromLeadingZeros64)(uint64_t clz) {
 #undef UPB_XSAN_MEMBER
 #undef UPB_XSAN
 #undef UPB_XSAN_STRUCT_SIZE
+#undef UPB_ENABLE_REF_CYCLE_CHECKS
