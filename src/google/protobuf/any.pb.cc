@@ -62,9 +62,9 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_EXPORT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 AnyDefaultTypeInternal _Any_default_instance_;
 }  // namespace protobuf
 }  // namespace google
-static constexpr const ::_pb::EnumDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_enum_descriptors_google_2fprotobuf_2fany_2eproto = nullptr;
-static constexpr const ::_pb::ServiceDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_google_2fprotobuf_2fany_2eproto = nullptr;
 const ::uint32_t
     TableStruct_google_2fprotobuf_2fany_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -258,10 +258,12 @@ Any::_table_ = {
   }, {{
     // bytes value = 2;
     {::_pbi::TcParser::FastBS1,
-     {18, 1, 0, PROTOBUF_FIELD_OFFSET(Any, _impl_.value_)}},
+     {18, 1, 0,
+      PROTOBUF_FIELD_OFFSET(Any, _impl_.value_)}},
     // string type_url = 1;
     {::_pbi::TcParser::FastUS1,
-     {10, 0, 0, PROTOBUF_FIELD_OFFSET(Any, _impl_.type_url_)}},
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(Any, _impl_.type_url_)}},
   }}, {{
     65535, 65535
   }}, {{

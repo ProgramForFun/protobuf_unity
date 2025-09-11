@@ -54,9 +54,9 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_EXPORT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 DurationDefaultTypeInternal _Duration_default_instance_;
 }  // namespace protobuf
 }  // namespace google
-static constexpr const ::_pb::EnumDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_enum_descriptors_google_2fprotobuf_2fduration_2eproto = nullptr;
-static constexpr const ::_pb::ServiceDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_google_2fprotobuf_2fduration_2eproto = nullptr;
 const ::uint32_t
     TableStruct_google_2fprotobuf_2fduration_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -227,10 +227,12 @@ Duration::_table_ = {
   }, {{
     // int32 nanos = 2;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Duration, _impl_.nanos_), 1>(),
-     {16, 1, 0, PROTOBUF_FIELD_OFFSET(Duration, _impl_.nanos_)}},
+     {16, 1, 0,
+      PROTOBUF_FIELD_OFFSET(Duration, _impl_.nanos_)}},
     // int64 seconds = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Duration, _impl_.seconds_), 0>(),
-     {8, 0, 0, PROTOBUF_FIELD_OFFSET(Duration, _impl_.seconds_)}},
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(Duration, _impl_.seconds_)}},
   }}, {{
     65535, 65535
   }}, {{

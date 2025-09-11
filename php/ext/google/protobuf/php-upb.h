@@ -506,8 +506,7 @@ Error, UINTPTR_MAX is undefined
 #if defined(__ELF__) || defined(__wasm__)
 
 #define UPB_LINKARR_APPEND(name) \
-  __attribute__((retain, used,   \
-                 section("linkarr_" #name))) UPB_NO_SANITIZE_ADDRESS
+  __attribute__((section("linkarr_" #name))) UPB_NO_SANITIZE_ADDRESS
 #define UPB_LINKARR_DECLARE(name, type) \
   extern type __start_linkarr_##name;   \
   extern type __stop_linkarr_##name;    \
@@ -519,8 +518,7 @@ Error, UINTPTR_MAX is undefined
 
 /* As described in: https://stackoverflow.com/a/22366882 */
 #define UPB_LINKARR_APPEND(name) \
-  __attribute__((retain, used,   \
-                 section("__DATA,__la_" #name))) UPB_NO_SANITIZE_ADDRESS
+  __attribute__((section("__DATA,__la_" #name))) UPB_NO_SANITIZE_ADDRESS
 #define UPB_LINKARR_DECLARE(name, type)     \
   extern type __start_linkarr_##name __asm( \
       "section$start$__DATA$__la_" #name);  \
@@ -540,9 +538,8 @@ Error, UINTPTR_MAX is undefined
 
 // Usage of __attribute__ here probably means this is Clang-specific, and would
 // not work on MSVC.
-#define UPB_LINKARR_APPEND(name)         \
-  __declspec(allocate("la_" #name "$j")) \
-  __attribute__((retain, used)) UPB_NO_SANITIZE_ADDRESS
+#define UPB_LINKARR_APPEND(name) \
+  __declspec(allocate("la_" #name "$j")) UPB_NO_SANITIZE_ADDRESS
 #define UPB_LINKARR_DECLARE(name, type)                               \
   __declspec(allocate("la_" #name "$a")) type __start_linkarr_##name; \
   __declspec(allocate("la_" #name "$z")) type __stop_linkarr_##name;  \
@@ -3272,6 +3269,11 @@ UPB_API_INLINE bool upb_MiniTableExtension_SetSubEnum(
   return true;
 }
 
+UPB_API_INLINE const upb_MiniTableField* upb_MiniTableExtension_ToField(
+    const struct upb_MiniTableExtension* e) {
+  return &e->UPB_PRIVATE(field);
+}
+
 UPB_INLINE upb_FieldRep UPB_PRIVATE(_upb_MiniTableExtension_GetRep)(
     const struct upb_MiniTableExtension* e) {
   return UPB_PRIVATE(_upb_MiniTableField_GetRep)(&e->UPB_PRIVATE(field));
@@ -3312,6 +3314,9 @@ UPB_API_INLINE bool upb_MiniTableExtension_SetSubMessage(
 
 UPB_API_INLINE bool upb_MiniTableExtension_SetSubEnum(
     upb_MiniTableExtension* e, const upb_MiniTableEnum* m);
+
+UPB_API_INLINE const upb_MiniTableField* upb_MiniTableExtension_ToField(
+    const upb_MiniTableExtension* e);
 
 #ifdef __cplusplus
 } /* extern "C" */

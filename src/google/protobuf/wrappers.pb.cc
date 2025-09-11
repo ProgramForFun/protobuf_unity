@@ -257,9 +257,9 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_EXPORT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 BoolValueDefaultTypeInternal _BoolValue_default_instance_;
 }  // namespace protobuf
 }  // namespace google
-static constexpr const ::_pb::EnumDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_enum_descriptors_google_2fprotobuf_2fwrappers_2eproto = nullptr;
-static constexpr const ::_pb::ServiceDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_google_2fprotobuf_2fwrappers_2eproto = nullptr;
 const ::uint32_t
     TableStruct_google_2fprotobuf_2fwrappers_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -485,7 +485,8 @@ DoubleValue::_table_ = {
   }, {{
     // double value = 1;
     {::_pbi::TcParser::FastF64S1,
-     {9, 0, 0, PROTOBUF_FIELD_OFFSET(DoubleValue, _impl_.value_)}},
+     {9, 0, 0,
+      PROTOBUF_FIELD_OFFSET(DoubleValue, _impl_.value_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -731,7 +732,8 @@ FloatValue::_table_ = {
   }, {{
     // float value = 1;
     {::_pbi::TcParser::FastF32S1,
-     {13, 0, 0, PROTOBUF_FIELD_OFFSET(FloatValue, _impl_.value_)}},
+     {13, 0, 0,
+      PROTOBUF_FIELD_OFFSET(FloatValue, _impl_.value_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -977,7 +979,8 @@ Int64Value::_table_ = {
   }, {{
     // int64 value = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(Int64Value, _impl_.value_), 0>(),
-     {8, 0, 0, PROTOBUF_FIELD_OFFSET(Int64Value, _impl_.value_)}},
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(Int64Value, _impl_.value_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -1224,7 +1227,8 @@ UInt64Value::_table_ = {
   }, {{
     // uint64 value = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint64_t, offsetof(UInt64Value, _impl_.value_), 0>(),
-     {8, 0, 0, PROTOBUF_FIELD_OFFSET(UInt64Value, _impl_.value_)}},
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(UInt64Value, _impl_.value_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -1471,7 +1475,8 @@ Int32Value::_table_ = {
   }, {{
     // int32 value = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(Int32Value, _impl_.value_), 0>(),
-     {8, 0, 0, PROTOBUF_FIELD_OFFSET(Int32Value, _impl_.value_)}},
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(Int32Value, _impl_.value_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -1718,7 +1723,8 @@ UInt32Value::_table_ = {
   }, {{
     // uint32 value = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(UInt32Value, _impl_.value_), 0>(),
-     {8, 0, 0, PROTOBUF_FIELD_OFFSET(UInt32Value, _impl_.value_)}},
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(UInt32Value, _impl_.value_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -1965,7 +1971,8 @@ BoolValue::_table_ = {
   }, {{
     // bool value = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(BoolValue, _impl_.value_), 0>(),
-     {8, 0, 0, PROTOBUF_FIELD_OFFSET(BoolValue, _impl_.value_)}},
+     {8, 0, 0,
+      PROTOBUF_FIELD_OFFSET(BoolValue, _impl_.value_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2225,7 +2232,8 @@ StringValue::_table_ = {
   }, {{
     // string value = 1;
     {::_pbi::TcParser::FastUS1,
-     {10, 0, 0, PROTOBUF_FIELD_OFFSET(StringValue, _impl_.value_)}},
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(StringValue, _impl_.value_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2499,7 +2507,8 @@ BytesValue::_table_ = {
   }, {{
     // bytes value = 1;
     {::_pbi::TcParser::FastBS1,
-     {10, 0, 0, PROTOBUF_FIELD_OFFSET(BytesValue, _impl_.value_)}},
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(BytesValue, _impl_.value_)}},
   }}, {{
     65535, 65535
   }}, {{

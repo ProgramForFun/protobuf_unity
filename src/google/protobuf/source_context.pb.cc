@@ -55,9 +55,9 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_EXPORT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 SourceContextDefaultTypeInternal _SourceContext_default_instance_;
 }  // namespace protobuf
 }  // namespace google
-static constexpr const ::_pb::EnumDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_enum_descriptors_google_2fprotobuf_2fsource_5fcontext_2eproto = nullptr;
-static constexpr const ::_pb::ServiceDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_google_2fprotobuf_2fsource_5fcontext_2eproto = nullptr;
 const ::uint32_t
     TableStruct_google_2fprotobuf_2fsource_5fcontext_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -235,7 +235,8 @@ SourceContext::_table_ = {
   }, {{
     // string file_name = 1;
     {::_pbi::TcParser::FastUS1,
-     {10, 0, 0, PROTOBUF_FIELD_OFFSET(SourceContext, _impl_.file_name_)}},
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(SourceContext, _impl_.file_name_)}},
   }}, {{
     65535, 65535
   }}, {{

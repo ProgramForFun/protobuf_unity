@@ -53,9 +53,9 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_EXPORT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 FieldMaskDefaultTypeInternal _FieldMask_default_instance_;
 }  // namespace protobuf
 }  // namespace google
-static constexpr const ::_pb::EnumDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_enum_descriptors_google_2fprotobuf_2ffield_5fmask_2eproto = nullptr;
-static constexpr const ::_pb::ServiceDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_google_2fprotobuf_2ffield_5fmask_2eproto = nullptr;
 const ::uint32_t
     TableStruct_google_2fprotobuf_2ffield_5fmask_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -244,7 +244,8 @@ FieldMask::_table_ = {
   }, {{
     // repeated string paths = 1;
     {::_pbi::TcParser::FastUR1,
-     {10, 0, 0, PROTOBUF_FIELD_OFFSET(FieldMask, _impl_.paths_)}},
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(FieldMask, _impl_.paths_)}},
   }}, {{
     65535, 65535
   }}, {{

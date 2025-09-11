@@ -124,7 +124,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_EXPORT
 }  // namespace google
 static const ::_pb::EnumDescriptor* PROTOBUF_NONNULL
     file_level_enum_descriptors_google_2fprotobuf_2fstruct_2eproto[1];
-static constexpr const ::_pb::ServiceDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_google_2fprotobuf_2fstruct_2eproto = nullptr;
 const ::uint32_t
     TableStruct_google_2fprotobuf_2fstruct_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -290,10 +290,12 @@ Struct_FieldsEntry_DoNotUse::_table_ = {
   }, {{
     // .google.protobuf.Value value = 2;
     {::_pbi::TcParser::FastMtS1,
-     {18, 1, 0, PROTOBUF_FIELD_OFFSET(Struct_FieldsEntry_DoNotUse, _impl_.value_)}},
+     {18, 1, 0,
+      PROTOBUF_FIELD_OFFSET(Struct_FieldsEntry_DoNotUse, _impl_.value_)}},
     // string key = 1;
     {::_pbi::TcParser::FastUS1,
-     {10, 0, 0, PROTOBUF_FIELD_OFFSET(Struct_FieldsEntry_DoNotUse, _impl_.key_)}},
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(Struct_FieldsEntry_DoNotUse, _impl_.key_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -1231,7 +1233,8 @@ ListValue::_table_ = {
   }, {{
     // repeated .google.protobuf.Value values = 1;
     {::_pbi::TcParser::FastMtR1,
-     {10, 0, 0, PROTOBUF_FIELD_OFFSET(ListValue, _impl_.values_)}},
+     {10, 0, 0,
+      PROTOBUF_FIELD_OFFSET(ListValue, _impl_.values_)}},
   }}, {{
     65535, 65535
   }}, {{

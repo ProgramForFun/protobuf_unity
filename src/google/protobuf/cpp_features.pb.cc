@@ -55,7 +55,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_EXPORT
 }  // namespace pb
 static const ::_pb::EnumDescriptor* PROTOBUF_NONNULL
     file_level_enum_descriptors_google_2fprotobuf_2fcpp_5ffeatures_2eproto[1];
-static constexpr const ::_pb::ServiceDescriptor *PROTOBUF_NONNULL *PROTOBUF_NULLABLE
+static constexpr const ::_pb::ServiceDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
     file_level_service_descriptors_google_2fprotobuf_2fcpp_5ffeatures_2eproto = nullptr;
 const ::uint32_t
     TableStruct_google_2fprotobuf_2fcpp_5ffeatures_2eproto::offsets[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
@@ -249,13 +249,16 @@ CppFeatures::_table_ = {
     {::_pbi::TcParser::MiniParse, {}},
     // optional bool legacy_closed_enum = 1 [retention = RETENTION_RUNTIME, targets = TARGET_TYPE_FIELD, targets = TARGET_TYPE_FILE, edition_defaults = {
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(CppFeatures, _impl_.legacy_closed_enum_), 1>(),
-     {8, 1, 0, PROTOBUF_FIELD_OFFSET(CppFeatures, _impl_.legacy_closed_enum_)}},
+     {8, 1, 0,
+      PROTOBUF_FIELD_OFFSET(CppFeatures, _impl_.legacy_closed_enum_)}},
     // optional .pb.CppFeatures.StringType string_type = 2 [retention = RETENTION_RUNTIME, targets = TARGET_TYPE_FIELD, targets = TARGET_TYPE_FILE, edition_defaults = {
     {::_pbi::TcParser::FastEr0S1,
-     {16, 0, 3, PROTOBUF_FIELD_OFFSET(CppFeatures, _impl_.string_type_)}},
+     {16, 0, 3,
+      PROTOBUF_FIELD_OFFSET(CppFeatures, _impl_.string_type_)}},
     // optional bool enum_name_uses_string_view = 3 [retention = RETENTION_RUNTIME, targets = TARGET_TYPE_ENUM, targets = TARGET_TYPE_FILE, edition_defaults = {
     {::_pbi::TcParser::SingularVarintNoZag1<bool, offsetof(CppFeatures, _impl_.enum_name_uses_string_view_), 2>(),
-     {24, 2, 0, PROTOBUF_FIELD_OFFSET(CppFeatures, _impl_.enum_name_uses_string_view_)}},
+     {24, 2, 0,
+      PROTOBUF_FIELD_OFFSET(CppFeatures, _impl_.enum_name_uses_string_view_)}},
   }}, {{
     65535, 65535
   }}, {{

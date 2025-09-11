@@ -29,7 +29,6 @@ import com.google.protobuf.DescriptorProtos.OneofDescriptorProto;
 import com.google.protobuf.DescriptorProtos.OneofOptions;
 import com.google.protobuf.DescriptorProtos.ServiceDescriptorProto;
 import com.google.protobuf.DescriptorProtos.ServiceOptions;
-import com.google.protobuf.Descriptors.DescriptorValidationException;
 import com.google.protobuf.JavaFeaturesProto.JavaFeatures;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -171,6 +170,15 @@ public final class Descriptors {
     @Override
     public FileDescriptor getFile() {
       return this;
+    }
+
+    @Override
+    GenericDescriptor getParent() {
+      return null;
+    }
+
+    public boolean isPlaceholder() {
+      return placeholder;
     }
 
     /** Returns the same as getName(). */
@@ -570,6 +578,7 @@ public final class Descriptors {
     private final FileDescriptor[] dependencies;
     private final FileDescriptor[] publicDependencies;
     private final FileDescriptorTables tables;
+    private final boolean placeholder;
     private volatile boolean featuresResolved;
 
     private FileDescriptor(
@@ -605,6 +614,8 @@ public final class Descriptors {
       }
       this.publicDependencies = new FileDescriptor[publicDependencies.size()];
       publicDependencies.toArray(this.publicDependencies);
+
+      placeholder = false;
 
       tables.addPackage(getPackage(), this);
 
@@ -643,7 +654,6 @@ public final class Descriptors {
 
     /** Create a placeholder FileDescriptor for a message Descriptor. */
     FileDescriptor(String packageName, Descriptor message) throws DescriptorValidationException {
-      this.parent = null;
       this.tables = new FileDescriptorTables(new FileDescriptor[0], true);
       this.proto =
           FileDescriptorProto.newBuilder()
@@ -659,6 +669,8 @@ public final class Descriptors {
       enumTypes = EMPTY_ENUM_DESCRIPTORS;
       services = EMPTY_SERVICE_DESCRIPTORS;
       extensions = EMPTY_FIELD_DESCRIPTORS;
+
+      placeholder = true;
 
       tables.addPackage(packageName, this);
       tables.addSymbol(message);
@@ -708,13 +720,14 @@ public final class Descriptors {
 
     @Override
     FeatureSet inferLegacyProtoFeatures() {
-      FeatureSet.Builder features = FeatureSet.newBuilder();
       if (getEdition().getNumber() >= Edition.EDITION_2023.getNumber()) {
-        return features.build();
+        return FeatureSet.getDefaultInstance();
       }
 
+      FeatureSet.Builder features = null;
       if (getEdition() == Edition.EDITION_PROTO2) {
         if (proto.getOptions().getJavaStringCheckUtf8()) {
+          features = FeatureSet.newBuilder();
           features.setExtension(
               JavaFeaturesProto.java_,
               JavaFeatures.newBuilder()
@@ -722,20 +735,8 @@ public final class Descriptors {
                   .build());
         }
       }
-      return features.build();
-    }
 
-    @Override
-    boolean hasInferredLegacyProtoFeatures() {
-      if (getEdition().getNumber() >= Edition.EDITION_2023.getNumber()) {
-        return false;
-      }
-      if (getEdition() == Edition.EDITION_PROTO2) {
-        if (proto.getOptions().getJavaStringCheckUtf8()) {
-          return true;
-        }
-      }
-      return false;
+      return features != null ? features.build() : FeatureSet.getDefaultInstance();
     }
 
     /** Look up and cross-link all field types, etc. */
@@ -844,12 +845,24 @@ public final class Descriptors {
     /** Get the {@link FileDescriptor} containing this descriptor. */
     @Override
     public FileDescriptor getFile() {
-      return file;
+      return parent.getFile();
+    }
+
+    @Override
+    GenericDescriptor getParent() {
+      return parent;
+    }
+
+    public boolean isPlaceholder() {
+      return placeholder;
     }
 
     /** If this is a nested type, get the outer descriptor, otherwise null. */
     public Descriptor getContainingType() {
-      return containingType;
+      if (parent instanceof Descriptor) {
+        return (Descriptor) parent;
+      }
+      return null;
     }
 
     /** Get the {@code MessageOptions}, defined in {@code descriptor.proto}. */
@@ -1015,7 +1028,7 @@ public final class Descriptors {
      * @return The field's descriptor, or {@code null} if not found.
      */
     public FieldDescriptor findFieldByName(final String name) {
-      final GenericDescriptor result = file.tables.findSymbol(fullName + '.' + name);
+      final GenericDescriptor result = getFile().tables.findSymbol(fullName + '.' + name);
       if (result instanceof FieldDescriptor) {
         return (FieldDescriptor) result;
       } else {
@@ -1041,7 +1054,7 @@ public final class Descriptors {
      * @return The types's descriptor, or {@code null} if not found.
      */
     public Descriptor findNestedTypeByName(final String name) {
-      final GenericDescriptor result = file.tables.findSymbol(fullName + '.' + name);
+      final GenericDescriptor result = getFile().tables.findSymbol(fullName + '.' + name);
       if (result instanceof Descriptor) {
         return (Descriptor) result;
       } else {
@@ -1056,7 +1069,7 @@ public final class Descriptors {
      * @return The types's descriptor, or {@code null} if not found.
      */
     public EnumDescriptor findEnumTypeByName(final String name) {
-      final GenericDescriptor result = file.tables.findSymbol(fullName + '.' + name);
+      final GenericDescriptor result = getFile().tables.findSymbol(fullName + '.' + name);
       if (result instanceof EnumDescriptor) {
         return (EnumDescriptor) result;
       } else {
@@ -1068,8 +1081,7 @@ public final class Descriptors {
     private DescriptorProto proto;
     private volatile MessageOptions options;
     private final String fullName;
-    private final FileDescriptor file;
-    private final Descriptor containingType;
+    private final GenericDescriptor parent;
     private final Descriptor[] nestedTypes;
     private final EnumDescriptor[] enumTypes;
     private final FieldDescriptor[] fields;
@@ -1080,6 +1092,8 @@ public final class Descriptors {
 
     private final int[] extensionRangeLowerBounds;
     private final int[] extensionRangeUpperBounds;
+
+    private final boolean placeholder;
 
     // Used to create a placeholder when the type cannot be found.
     Descriptor(final String fullname) throws DescriptorValidationException {
@@ -1098,7 +1112,6 @@ public final class Descriptors {
                   DescriptorProto.ExtensionRange.newBuilder().setStart(1).setEnd(536870912).build())
               .build();
       this.fullName = fullname;
-      this.containingType = null;
 
       this.nestedTypes = EMPTY_DESCRIPTORS;
       this.enumTypes = EMPTY_ENUM_DESCRIPTORS;
@@ -1109,11 +1122,12 @@ public final class Descriptors {
       this.realOneofCount = 0;
 
       // Create a placeholder FileDescriptor to hold this message.
-      this.file = new FileDescriptor(packageName, this);
-      this.parent = this.file;
+      this.parent = new FileDescriptor(packageName, this);
 
       extensionRangeLowerBounds = new int[] {1};
       extensionRangeUpperBounds = new int[] {536870912};
+
+      placeholder = true;
     }
 
     private Descriptor(
@@ -1130,15 +1144,13 @@ public final class Descriptors {
       this.index = index;
       this.proto = proto;
       fullName = computeFullName(file, parent, proto.getName());
-      this.file = file;
-      containingType = parent;
 
       oneofs =
           (proto.getOneofDeclCount() > 0)
               ? new OneofDescriptor[proto.getOneofDeclCount()]
               : EMPTY_ONEOF_DESCRIPTORS;
       for (int i = 0; i < proto.getOneofDeclCount(); i++) {
-        oneofs[i] = new OneofDescriptor(proto.getOneofDecl(i), file, this, i);
+        oneofs[i] = new OneofDescriptor(proto.getOneofDecl(i), this, i);
       }
 
       nestedTypes =
@@ -1197,6 +1209,8 @@ public final class Descriptors {
         }
       }
       this.realOneofCount = this.oneofs.length - syntheticOneofCount;
+
+      placeholder = false;
 
       file.tables.addSymbol(this);
 
@@ -1388,7 +1402,12 @@ public final class Descriptors {
     /** Get the {@code FileDescriptor} containing this descriptor. */
     @Override
     public FileDescriptor getFile() {
-      return file;
+      return parent.getFile();
+    }
+
+    @Override
+    GenericDescriptor getParent() {
+      return parent;
     }
 
     /** Get the field's declared type. */
@@ -1397,7 +1416,8 @@ public final class Descriptors {
       // since these are used before feature resolution when parsing java feature set defaults
       // (custom options) into unknown fields.
       if (type == Type.MESSAGE
-          && !(messageType != null && messageType.toProto().getOptions().getMapEntry())
+          && !(typeDescriptor != null
+              && ((Descriptor) typeDescriptor).toProto().getOptions().getMapEntry())
           && !(containingType != null && containingType.toProto().getOptions().getMapEntry())
           && this.features != null
           && getFeatures().getMessageEncoding() == FeatureSet.MessageEncoding.DELIMITED) {
@@ -1550,7 +1570,7 @@ public final class Descriptors {
      */
     boolean hasOptionalKeyword() {
       return isProto3Optional
-          || (file.getEdition() == Edition.EDITION_PROTO2
+          || (getFile().getEdition() == Edition.EDITION_PROTO2
               && !isRequired()
               && !isRepeated()
               && getContainingOneof() == null);
@@ -1642,7 +1662,7 @@ public final class Descriptors {
         throw new UnsupportedOperationException(
             String.format("This field is not of message type. (%s)", fullName));
       }
-      return messageType;
+      return (Descriptor) typeDescriptor;
     }
 
     /** For enum fields, gets the field's type. */
@@ -1652,7 +1672,7 @@ public final class Descriptors {
         throw new UnsupportedOperationException(
             String.format("This field is not of enum type. (%s)", fullName));
       }
-      return enumType;
+      return (EnumDescriptor) typeDescriptor;
     }
 
     /**
@@ -1681,12 +1701,12 @@ public final class Descriptors {
       // extension itself involves calling legacyEnumFieldTreatedAsClosed() which would otherwise
       // infinite loop.
       if (getFile().getDependencies().isEmpty()) {
-        return getType() == Type.ENUM && enumType.isClosed();
+        return getType() == Type.ENUM && getEnumType().isClosed();
       }
 
       return getType() == Type.ENUM
           && (getFeatures().getExtension(JavaFeaturesProto.java_).getLegacyClosedEnum()
-              || enumType.isClosed());
+              || getEnumType().isClosed());
     }
 
     /**
@@ -1718,26 +1738,47 @@ public final class Descriptors {
     private volatile FieldOptions options;
     private final String fullName;
     private String jsonName;
-    private final FileDescriptor file;
+    private final GenericDescriptor parent;
     private final Descriptor extensionScope;
     private final boolean isProto3Optional;
 
-    private enum Sensitivity {
-      UNKNOWN,
-      SENSITIVE,
-      NOT_SENSITIVE
+    static final class RedactionState {
+      private static final RedactionState FALSE_FALSE = new RedactionState(false, false);
+      private static final RedactionState FALSE_TRUE = new RedactionState(false, true);
+      private static final RedactionState TRUE_FALSE = new RedactionState(true, false);
+      private static final RedactionState TRUE_TRUE = new RedactionState(true, true);
+
+      final boolean redact;
+      final boolean report;
+
+      private RedactionState(boolean redact, boolean report) {
+        this.redact = redact;
+        this.report = report;
+      }
+
+      private static RedactionState of(boolean redact) {
+        return of(redact, false);
+      }
+
+      private static RedactionState of(boolean redact, boolean report) {
+        if (redact) {
+          return report ? TRUE_TRUE : TRUE_FALSE;
+        }
+        return report ? FALSE_TRUE : FALSE_FALSE;
+      }
+
+      private static RedactionState combine(RedactionState lhs, RedactionState rhs) {
+        return of(lhs.redact || rhs.redact, rhs.report);
+      }
     }
 
-    // Caches the result of isSensitive() for performance reasons.
-    private volatile Sensitivity sensitivity = Sensitivity.UNKNOWN;
-    private volatile boolean isReportable = false;
+    private volatile RedactionState redactionState;
 
     // Possibly initialized during cross-linking.
     private Type type;
     private Descriptor containingType;
-    private Descriptor messageType;
     private OneofDescriptor containingOneof;
-    private EnumDescriptor enumType;
+    private GenericDescriptor typeDescriptor;
     private Object defaultValue;
 
     public enum Type {
@@ -1844,11 +1885,9 @@ public final class Descriptors {
         final int index,
         final boolean isExtension)
         throws DescriptorValidationException {
-      this.parent = parent;
       this.index = index;
       this.proto = proto;
       fullName = computeFullName(file, parent, proto.getName());
-      this.file = file;
 
       if (proto.hasType()) {
         type = Type.valueOf(proto.getType());
@@ -1867,10 +1906,13 @@ public final class Descriptors {
         }
         containingType = null; // Will be filled in when cross-linking
         if (parent != null) {
+          // Message scoped extension.
           extensionScope = parent;
+          this.parent = parent;
         } else {
+          // File scoped extension.
           extensionScope = null;
-          this.parent = file;
+          this.parent = checkNotNull(file);
         }
 
         if (proto.hasOneofIndex()) {
@@ -1894,9 +1936,10 @@ public final class Descriptors {
           }
           containingOneof = parent.getOneofs().get(proto.getOneofIndex());
           containingOneof.fieldCount++;
-          this.parent = containingOneof;
+          this.parent = checkNotNull(containingOneof);
         } else {
           containingOneof = null;
+          this.parent = checkNotNull(parent);
         }
         extensionScope = null;
       }
@@ -1905,73 +1948,68 @@ public final class Descriptors {
     }
 
     @SuppressWarnings("unchecked") // List<EnumValueDescriptor> guaranteed by protobuf runtime.
-    private List<Boolean> isOptionSensitive(FieldDescriptor field, Object value) {
+    private static RedactionState isOptionSensitive(FieldDescriptor field, Object value) {
       if (field.getType() == Descriptors.FieldDescriptor.Type.ENUM) {
         if (field.isRepeated()) {
           for (EnumValueDescriptor v : (List<EnumValueDescriptor>) value) {
             if (v.getOptions().getDebugRedact()) {
-              return Arrays.asList(true, false);
+              return RedactionState.of(true, false);
             }
           }
         } else {
           if (((EnumValueDescriptor) value).getOptions().getDebugRedact()) {
-            return Arrays.asList(true, false);
+            return RedactionState.of(true, false);
           }
         }
       } else if (field.getJavaType() == Descriptors.FieldDescriptor.JavaType.MESSAGE) {
         if (field.isRepeated()) {
           for (Message m : (List<Message>) value) {
             for (Map.Entry<FieldDescriptor, Object> entry : m.getAllFields().entrySet()) {
-              List<Boolean> result = isOptionSensitive(entry.getKey(), entry.getValue());
-              if (result.get(0)) {
-                return result;
+              RedactionState state = isOptionSensitive(entry.getKey(), entry.getValue());
+              if (state.redact) {
+                return state;
               }
             }
           }
         } else {
           for (Map.Entry<FieldDescriptor, Object> entry :
               ((Message) value).getAllFields().entrySet()) {
-            List<Boolean> result = isOptionSensitive(entry.getKey(), entry.getValue());
-            if (result.get(0)) {
-              return result;
+            RedactionState state = isOptionSensitive(entry.getKey(), entry.getValue());
+            if (state.redact) {
+              return state;
             }
           }
         }
       }
-      return Arrays.asList(false, false);
+      return RedactionState.of(false);
     }
 
-    // Lazily calculates if the field is marked as sensitive, and caches results.
-    private List<Boolean> calculateSensitivityData() {
-      if (sensitivity == Sensitivity.UNKNOWN) {
+    // Lazily calculates the redact state of the field, caching the result.
+    RedactionState getRedactionState() {
+      RedactionState state = redactionState;
+      if (state == null) {
         // If the field is directly marked with debug_redact=true, then it is sensitive.
         synchronized (this) {
-          if (sensitivity == Sensitivity.UNKNOWN) {
-            boolean isSensitive = proto.getOptions().getDebugRedact();
+          state = redactionState;
+          if (state == null) {
+            FieldOptions options = getOptions();
+            state = RedactionState.of(options.getDebugRedact());
             // Check if the FieldOptions contain any enums that are marked as debug_redact=true,
             // either directly or indirectly via a message option.
             for (Map.Entry<Descriptors.FieldDescriptor, Object> entry :
-                proto.getOptions().getAllFields().entrySet()) {
-              List<Boolean> result = isOptionSensitive(entry.getKey(), entry.getValue());
-              isSensitive = isSensitive || result.get(0);
-              isReportable = result.get(1);
-              if (isSensitive) {
+                options.getAllFields().entrySet()) {
+              state =
+                  RedactionState.combine(
+                      state, isOptionSensitive(entry.getKey(), entry.getValue()));
+              if (state.redact) {
                 break;
               }
             }
-            sensitivity = isSensitive ? Sensitivity.SENSITIVE : Sensitivity.NOT_SENSITIVE;
+            redactionState = state;
           }
         }
       }
-      return Arrays.asList(sensitivity == Sensitivity.SENSITIVE, isReportable);
-    }
-
-    boolean isSensitive() {
-      return calculateSensitivityData().get(0);
-    }
-
-    boolean isReportable() {
-      return calculateSensitivityData().get(1);
+      return state;
     }
 
     /** See {@link FileDescriptor#resolveAllFeatures}. */
@@ -1981,57 +2019,42 @@ public final class Descriptors {
 
     @Override
     FeatureSet inferLegacyProtoFeatures() {
-      FeatureSet.Builder features = FeatureSet.newBuilder();
       if (getFile().getEdition().getNumber() >= Edition.EDITION_2023.getNumber()) {
-        return features.build();
+        return FeatureSet.getDefaultInstance();
       }
 
+      FeatureSet.Builder features = null;
+
       if (proto.getLabel() == FieldDescriptorProto.Label.LABEL_REQUIRED) {
+        features = FeatureSet.newBuilder();
         features.setFieldPresence(FeatureSet.FieldPresence.LEGACY_REQUIRED);
       }
 
       if (proto.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
+        if (features == null) {
+          features = FeatureSet.newBuilder();
+        }
         features.setMessageEncoding(FeatureSet.MessageEncoding.DELIMITED);
       }
 
       if (getFile().getEdition() == Edition.EDITION_PROTO2 && proto.getOptions().getPacked()) {
+        if (features == null) {
+          features = FeatureSet.newBuilder();
+        }
         features.setRepeatedFieldEncoding(FeatureSet.RepeatedFieldEncoding.PACKED);
       }
 
       if (getFile().getEdition() == Edition.EDITION_PROTO3) {
         if (proto.getOptions().hasPacked() && !proto.getOptions().getPacked()) {
+          if (features == null) {
+            features = FeatureSet.newBuilder();
+          }
           features.setRepeatedFieldEncoding(FeatureSet.RepeatedFieldEncoding.EXPANDED);
         }
 
       }
-      return features.build();
-    }
 
-    @Override
-    boolean hasInferredLegacyProtoFeatures() {
-      if (getFile().getEdition().getNumber() >= Edition.EDITION_2023.getNumber()) {
-        return false;
-      }
-
-      if (proto.getLabel() == FieldDescriptorProto.Label.LABEL_REQUIRED) {
-        return true;
-      }
-
-      if (proto.getType() == FieldDescriptorProto.Type.TYPE_GROUP) {
-        return true;
-      }
-
-      if (proto.getOptions().getPacked()) {
-        return true;
-      }
-
-      if (getFile().getEdition() == Edition.EDITION_PROTO3) {
-        if (proto.getOptions().hasPacked() && !proto.getOptions().getPacked()) {
-          return true;
-        }
-
-      }
-      return false;
+      return features != null ? features.build() : FeatureSet.getDefaultInstance();
     }
 
     @Override
@@ -2051,8 +2074,10 @@ public final class Descriptors {
     private void crossLink() throws DescriptorValidationException {
       if (proto.hasExtendee()) {
         final GenericDescriptor extendee =
-            file.tables.lookupSymbol(
-                proto.getExtendee(), this, FileDescriptorTables.SearchFilter.TYPES_ONLY);
+            getFile()
+                .tables
+                .lookupSymbol(
+                    proto.getExtendee(), this, FileDescriptorTables.SearchFilter.TYPES_ONLY);
         if (!(extendee instanceof Descriptor)) {
           throw new DescriptorValidationException(
               this, '\"' + proto.getExtendee() + "\" is not a message type.");
@@ -2072,8 +2097,10 @@ public final class Descriptors {
 
       if (proto.hasTypeName()) {
         final GenericDescriptor typeDescriptor =
-            file.tables.lookupSymbol(
-                proto.getTypeName(), this, FileDescriptorTables.SearchFilter.TYPES_ONLY);
+            getFile()
+                .tables
+                .lookupSymbol(
+                    proto.getTypeName(), this, FileDescriptorTables.SearchFilter.TYPES_ONLY);
 
         if (!proto.hasType()) {
           // Choose field type based on symbol.
@@ -2094,7 +2121,7 @@ public final class Descriptors {
             throw new DescriptorValidationException(
                 this, '\"' + proto.getTypeName() + "\" is not a message type.");
           }
-          messageType = (Descriptor) typeDescriptor;
+          this.typeDescriptor = typeDescriptor;
 
           if (proto.hasDefaultValue()) {
             throw new DescriptorValidationException(this, "Messages can't have default values.");
@@ -2104,7 +2131,7 @@ public final class Descriptors {
             throw new DescriptorValidationException(
                 this, '\"' + proto.getTypeName() + "\" is not an enum type.");
           }
-          enumType = (EnumDescriptor) typeDescriptor;
+          this.typeDescriptor = typeDescriptor;
         } else {
           throw new DescriptorValidationException(this, "Field with primitive type has type_name.");
         }
@@ -2186,7 +2213,7 @@ public final class Descriptors {
               }
               break;
             case ENUM:
-              defaultValue = enumType.findValueByName(proto.getDefaultValue());
+              defaultValue = getEnumType().findValueByName(proto.getDefaultValue());
               if (defaultValue == null) {
                 throw new DescriptorValidationException(
                     this, "Unknown enum default value: \"" + proto.getDefaultValue() + '\"');
@@ -2209,7 +2236,7 @@ public final class Descriptors {
             case ENUM:
               // We guarantee elsewhere that an enum type always has at least
               // one possible value.
-              defaultValue = enumType.getValues().get(0);
+              defaultValue = getEnumType().getValues().get(0);
               break;
             case MESSAGE:
               defaultValue = null;
@@ -2281,7 +2308,16 @@ public final class Descriptors {
     /** Get the {@link FileDescriptor} containing this descriptor. */
     @Override
     public FileDescriptor getFile() {
-      return file;
+      return parent.getFile();
+    }
+
+    @Override
+    GenericDescriptor getParent() {
+      return parent;
+    }
+
+    public boolean isPlaceholder() {
+      return false;
     }
 
     /**
@@ -2314,7 +2350,10 @@ public final class Descriptors {
 
     /** If this is a nested type, get the outer descriptor, otherwise null. */
     public Descriptor getContainingType() {
-      return containingType;
+      if (parent instanceof Descriptor) {
+        return (Descriptor) parent;
+      }
+      return null;
     }
 
     /** Get the {@code EnumOptions}, defined in {@code descriptor.proto}. */
@@ -2369,7 +2408,7 @@ public final class Descriptors {
      * @return the value's descriptor, or {@code null} if not found
      */
     public EnumValueDescriptor findValueByName(final String name) {
-      final GenericDescriptor result = file.tables.findSymbol(fullName + '.' + name);
+      final GenericDescriptor result = getFile().tables.findSymbol(fullName + '.' + name);
       if (result instanceof EnumValueDescriptor) {
         return (EnumValueDescriptor) result;
       } else {
@@ -2446,8 +2485,7 @@ public final class Descriptors {
     private EnumDescriptorProto proto;
     private volatile EnumOptions options;
     private final String fullName;
-    private final FileDescriptor file;
-    private final Descriptor containingType;
+    private final GenericDescriptor parent;
     private final EnumValueDescriptor[] values;
     private final EnumValueDescriptor[] valuesSortedByNumber;
     private final int distinctNumbers;
@@ -2468,8 +2506,6 @@ public final class Descriptors {
       this.index = index;
       this.proto = proto;
       fullName = computeFullName(file, parent, proto.getName());
-      this.file = file;
-      containingType = parent;
 
       if (proto.getValueCount() == 0) {
         // We cannot allow enums with no values because this would mean there
@@ -2479,7 +2515,7 @@ public final class Descriptors {
 
       values = new EnumValueDescriptor[proto.getValueCount()];
       for (int i = 0; i < proto.getValueCount(); i++) {
-        values[i] = new EnumValueDescriptor(proto.getValue(i), file, this, i);
+        values[i] = new EnumValueDescriptor(proto.getValue(i), this, i);
       }
       valuesSortedByNumber = values.clone();
       Arrays.sort(valuesSortedByNumber, EnumValueDescriptor.BY_NUMBER);
@@ -2590,7 +2626,12 @@ public final class Descriptors {
     /** Get the {@link FileDescriptor} containing this descriptor. */
     @Override
     public FileDescriptor getFile() {
-      return type.file;
+      return type.getFile();
+    }
+
+    @Override
+    GenericDescriptor getParent() {
+      return type;
     }
 
     /** Get the value's enum type. */
@@ -2624,17 +2665,13 @@ public final class Descriptors {
     private final EnumDescriptor type;
 
     private EnumValueDescriptor(
-        final EnumValueDescriptorProto proto,
-        final FileDescriptor file,
-        final EnumDescriptor parent,
-        final int index)
+        final EnumValueDescriptorProto proto, final EnumDescriptor parent, final int index)
         throws DescriptorValidationException {
-      this.parent = parent;
       this.index = index;
       this.proto = proto;
       this.type = parent;
       this.fullName = parent.getFullName() + '.' + proto.getName();
-      file.tables.addSymbol(this);
+      type.getFile().tables.addSymbol(this);
     }
 
     // Create an unknown enum value.
@@ -2642,7 +2679,6 @@ public final class Descriptors {
       String name = "UNKNOWN_ENUM_VALUE_" + parent.getName() + "_" + number;
       EnumValueDescriptorProto proto =
           EnumValueDescriptorProto.newBuilder().setName(name).setNumber(number).build();
-      this.parent = parent;
       this.index = -1;
       this.proto = proto;
       this.type = parent;
@@ -2701,6 +2737,11 @@ public final class Descriptors {
     /** Get the {@link FileDescriptor} containing this descriptor. */
     @Override
     public FileDescriptor getFile() {
+      return file;
+    }
+
+    @Override
+    GenericDescriptor getParent() {
       return file;
     }
 
@@ -2763,7 +2804,6 @@ public final class Descriptors {
     private ServiceDescriptor(
         final ServiceDescriptorProto proto, final FileDescriptor file, final int index)
         throws DescriptorValidationException {
-      this.parent = file;
       this.index = index;
       this.proto = proto;
       fullName = computeFullName(file, null, proto.getName());
@@ -2771,7 +2811,7 @@ public final class Descriptors {
 
       methods = new MethodDescriptor[proto.getMethodCount()];
       for (int i = 0; i < proto.getMethodCount(); i++) {
-        methods[i] = new MethodDescriptor(proto.getMethod(i), file, this, i);
+        methods[i] = new MethodDescriptor(proto.getMethod(i), this, i);
       }
 
       file.tables.addSymbol(this);
@@ -2840,7 +2880,12 @@ public final class Descriptors {
     /** Get the {@link FileDescriptor} containing this descriptor. */
     @Override
     public FileDescriptor getFile() {
-      return file;
+      return service.file;
+    }
+
+    @Override
+    GenericDescriptor getParent() {
+      return service;
     }
 
     /** Get the method's service type. */
@@ -2891,7 +2936,6 @@ public final class Descriptors {
     private MethodDescriptorProto proto;
     private volatile MethodOptions options;
     private final String fullName;
-    private final FileDescriptor file;
     private final ServiceDescriptor service;
 
     // Initialized during cross-linking.
@@ -2899,20 +2943,15 @@ public final class Descriptors {
     private Descriptor outputType;
 
     private MethodDescriptor(
-        final MethodDescriptorProto proto,
-        final FileDescriptor file,
-        final ServiceDescriptor parent,
-        final int index)
+        final MethodDescriptorProto proto, final ServiceDescriptor parent, final int index)
         throws DescriptorValidationException {
-      this.parent = parent;
       this.index = index;
       this.proto = proto;
-      this.file = file;
-      service = parent;
+      this.service = parent;
 
       fullName = parent.getFullName() + '.' + proto.getName();
 
-      file.tables.addSymbol(this);
+      service.file.tables.addSymbol(this);
     }
 
     /** See {@link FileDescriptor#resolveAllFeatures}. */
@@ -2954,6 +2993,9 @@ public final class Descriptors {
 
   // =================================================================
 
+  /**
+   * @throws NullPointerException if both `file` and `parent` are null.
+   */
   private static String computeFullName(
       final FileDescriptor file, final Descriptor parent, final String name) {
     if (parent != null) {
@@ -2986,11 +3028,16 @@ public final class Descriptors {
 
     public abstract FileDescriptor getFile();
 
+    abstract GenericDescriptor getParent();
+
     void resolveFeatures(FeatureSet unresolvedFeatures) throws DescriptorValidationException {
-      if (this.parent != null
+      GenericDescriptor parent = getParent();
+      FeatureSet inferredLegacyFeatures = null;
+      if (parent != null
           && unresolvedFeatures.equals(FeatureSet.getDefaultInstance())
-          && !hasInferredLegacyProtoFeatures()) {
-        this.features = this.parent.features;
+          && (inferredLegacyFeatures = inferLegacyProtoFeatures())
+              .equals(FeatureSet.getDefaultInstance())) {
+        this.features = parent.features;
         validateFeatures();
         return;
       }
@@ -3002,7 +3049,7 @@ public final class Descriptors {
         if (f.getNumber() == JavaFeaturesProto.java_.getNumber()
             && f != JavaFeaturesProto.java_.getDescriptor()) {
           hasPossibleCustomJavaFeature = true;
-          continue;
+          break;
         }
       }
       boolean hasPossibleUnknownJavaFeature =
@@ -3024,13 +3071,16 @@ public final class Descriptors {
       }
 
       FeatureSet.Builder features;
-      if (this.parent == null) {
+      if (parent == null) {
         Edition edition = getFile().getEdition();
         features = getEditionDefaults(edition).toBuilder();
       } else {
-        features = this.parent.features.toBuilder();
+        features = parent.features.toBuilder();
       }
-      features.mergeFrom(inferLegacyProtoFeatures());
+      if (inferredLegacyFeatures == null) {
+        inferredLegacyFeatures = inferLegacyProtoFeatures();
+      }
+      features.mergeFrom(inferredLegacyFeatures);
       features.mergeFrom(unresolvedFeatures);
       this.features = internFeatures(features.build());
       validateFeatures();
@@ -3038,10 +3088,6 @@ public final class Descriptors {
 
     FeatureSet inferLegacyProtoFeatures() {
       return FeatureSet.getDefaultInstance();
-    }
-
-    boolean hasInferredLegacyProtoFeatures() {
-      return false;
     }
 
     void validateFeatures() throws DescriptorValidationException {}
@@ -3061,7 +3107,6 @@ public final class Descriptors {
       return this.features;
     }
 
-    GenericDescriptor parent;
     volatile FeatureSet features;
   }
 
@@ -3383,6 +3428,11 @@ public final class Descriptors {
       }
 
       @Override
+      GenericDescriptor getParent() {
+        return file;
+      }
+
+      @Override
       public FileDescriptor getFile() {
         return file;
       }
@@ -3475,7 +3525,12 @@ public final class Descriptors {
 
     @Override
     public FileDescriptor getFile() {
-      return file;
+      return containingType.getFile();
+    }
+
+    @Override
+    GenericDescriptor getParent() {
+      return containingType;
     }
 
     @Override
@@ -3539,14 +3594,9 @@ public final class Descriptors {
     }
 
     private OneofDescriptor(
-        final OneofDescriptorProto proto,
-        final FileDescriptor file,
-        final Descriptor parent,
-        final int index) {
-      this.parent = parent;
+        final OneofDescriptorProto proto, final Descriptor parent, final int index) {
       this.proto = proto;
-      fullName = computeFullName(file, parent, proto.getName());
-      this.file = file;
+      fullName = computeFullName(null, parent, proto.getName());
       this.index = index;
 
       containingType = parent;
@@ -3557,9 +3607,8 @@ public final class Descriptors {
     private OneofDescriptorProto proto;
     private volatile OneofOptions options;
     private final String fullName;
-    private final FileDescriptor file;
+    private final Descriptor containingType;
 
-    private Descriptor containingType;
     private int fieldCount;
     private FieldDescriptor[] fields;
   }

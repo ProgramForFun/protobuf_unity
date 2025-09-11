@@ -19,10 +19,6 @@ load(
     "//hpb/bazel:hpb_proto_library.bzl",
     "hpb_proto_library",
 )
-load(
-    "//upb/bazel:build_defs.bzl",
-    "UPB_DEFAULT_CPPOPTS",
-)
 
 package(default_applicable_licenses = ["//:license"])
 
@@ -150,7 +146,6 @@ hpb_proto_library(
 cc_test(
     name = "test_generated_cc_code",
     srcs = ["test_generated.cc"],
-    copts = UPB_DEFAULT_CPPOPTS,
     deps = [
         # google_only_begin_legacy_marker
         ":legacy_name_test_proto",
@@ -179,7 +174,6 @@ cc_test(
 cc_test(
     name = "extension_test",
     srcs = ["extension_test.cc"],
-    copts = UPB_DEFAULT_CPPOPTS,
     deps = [
         ":test_model_hpb_proto",
         ":test_model_upb_proto",
@@ -189,6 +183,7 @@ cc_test(
         "//hpb:requires",
         "//hpb/backend/upb:interop",
         "//upb/mem",
+        "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/strings:string_view",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
@@ -198,7 +193,6 @@ cc_test(
 cc_test(
     name = "repeated_test",
     srcs = ["repeated_test.cc"],
-    copts = UPB_DEFAULT_CPPOPTS,
     deps = [
         ":test_model_hpb_proto",
         ":test_model_upb_proto",
@@ -213,7 +207,6 @@ cc_test(
 cc_test(
     name = "test_hpb_bzl_alias",
     srcs = ["test_hpb_bzl_alias.cc"],
-    copts = UPB_DEFAULT_CPPOPTS,
     deps = [
         ":set_alias_no_srcs_hpb_proto",
         "//hpb",
@@ -226,7 +219,6 @@ cc_test(
 cc_test(
     name = "multibackend_test",
     srcs = ["multibackend_test.cc"],
-    copts = UPB_DEFAULT_CPPOPTS,
     deps = [
         ":test_model_hpb_proto",
         "//hpb",
