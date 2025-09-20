@@ -20,7 +20,9 @@
 #include "hpb/arena.h"
 #include "hpb/backend/upb/interop.h"
 #include "hpb/hpb.h"
+#include "hpb/options.h"
 #include "hpb/requires.h"
+#include "hpb/status.h"
 #include "upb/mem/arena.h"
 
 namespace {
@@ -39,8 +41,8 @@ using ::hpb_unittest::someotherpackage::protos::int64_ext;
 using ::hpb_unittest::someotherpackage::protos::repeated_int32_ext;
 using ::hpb_unittest::someotherpackage::protos::repeated_int64_ext;
 using ::hpb_unittest::someotherpackage::protos::repeated_string_ext;
+using ::hpb_unittest::someotherpackage::protos::string_escape_ext;
 using ::hpb_unittest::someotherpackage::protos::string_ext;
-using ::hpb_unittest::someotherpackage::protos::string_trigraph_ext;
 using ::hpb_unittest::someotherpackage::protos::uint32_ext;
 using ::hpb_unittest::someotherpackage::protos::uint64_ext;
 
@@ -392,11 +394,11 @@ TEST(CppGeneratedCode, GetExtensionStringWithDefault) {
   EXPECT_THAT(res, IsOkAndHolds("mishpacha"));
 }
 
-TEST(CppGeneratedCode, GetExtensionStringWithDefaultAndTrigraph) {
+TEST(CppGeneratedCode, GetExtensionStringWithDefaultAndTestEscaping) {
   TestModel model;
-  auto res = hpb::GetExtension(&model, string_trigraph_ext);
+  auto res = hpb::GetExtension(&model, string_escape_ext);
   EXPECT_TRUE(res.ok());
-  EXPECT_THAT(res, IsOkAndHolds("bseder??!bseder"));
+  EXPECT_THAT(res, IsOkAndHolds("bseder\"bseder"));
 }
 
 TEST(CppGeneratedCode, GetExtensionOnMutableChild) {
@@ -486,6 +488,30 @@ TEST(CppGeneratedCode, ParseWithExtensionRegistry) {
             hpb::GetExtension(&parsed_model, ThemeExtension::theme_extension)
                 .value()
                 ->ext_name());
+}
+
+TEST(CppGeneratedCode, HpbStatusGeneratedRegistry) {
+  TestModel model;
+  ThemeExtension extension1;
+  extension1.set_ext_name("Hello World");
+  EXPECT_EQ(true, ::hpb::SetExtension(&model, ThemeExtension::theme_extension,
+                                      extension1)
+                      .ok());
+  hpb::Arena arena;
+  auto bytes = ::hpb::Serialize(&model, arena);
+  EXPECT_EQ(true, bytes.ok());
+
+  // By default, hpb::ParseOptionsDefault uses the generated registry.
+  hpb::StatusOr<TestModel> parsed_model =
+      ::hpb::Parse<TestModel>(bytes.value(), hpb::ParseOptionsDefault());
+  EXPECT_EQ(true, parsed_model.ok());
+  EXPECT_EQ(true, hpb::GetExtension(&parsed_model.value(),
+                                    ThemeExtension::theme_extension)
+                      .ok());
+  EXPECT_EQ("Hello World", hpb::GetExtension(&parsed_model.value(),
+                                             ThemeExtension::theme_extension)
+                               .value()
+                               ->ext_name());
 }
 
 TEST(CppGeneratedCode, ClearSubMessage) {

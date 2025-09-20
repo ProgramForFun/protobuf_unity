@@ -178,14 +178,13 @@ void ExtensionSet::RegisterMessageExtension(const MessageLite* extendee,
 
 ExtensionSet::~ExtensionSet() {
   // Deletes all allocated extensions.
-  if (arena_ == nullptr) {
-    ForEach([](int /* number */, Extension& ext) { ext.Free(); },
-            PrefetchNta{});
-    if (ABSL_PREDICT_FALSE(is_large())) {
-      delete map_.large;
-    } else {
-      DeleteFlatMap(map_.flat, flat_capacity_);
-    }
+  ABSL_DCHECK(arena_ == nullptr);
+
+  ForEach([](int /* number */, Extension& ext) { ext.Free(); }, PrefetchNta{});
+  if (ABSL_PREDICT_FALSE(is_large())) {
+    delete map_.large;
+  } else {
+    DeleteFlatMap(map_.flat, flat_capacity_);
   }
 }
 
@@ -218,6 +217,12 @@ void ExtensionSet::DeleteFlatMap(const ExtensionSet::KeyValue* flat,
 // void ExtensionSet::AppendToList(const Descriptor* extendee,
 //                                 const DescriptorPool* pool,
 //                                 vector<const FieldDescriptor*>* output) const
+
+bool ExtensionSet::IsEmpty() const {
+  if (IsCompletelyEmpty()) return true;
+  return !AnyOfNoPrefetch(
+      [](const int number, const Extension& ext) { return ext.IsSet(); });
+}
 
 bool ExtensionSet::Has(int number) const {
   const Extension* ext = FindOrNull(number);
@@ -659,7 +664,7 @@ MessageLite* ExtensionSet::AddMessage(int number, FieldType type,
   }
   return reinterpret_cast<internal::RepeatedPtrFieldBase*>(
              extension->ptr.repeated_message_value)
-      ->AddFromClassData<GenericTypeHandler<MessageLite>>(class_data);
+      ->AddFromClassData<GenericTypeHandler<MessageLite>>(arena_, class_data);
 }
 
 // Defined in extension_set_heavy.cc.
@@ -1019,7 +1024,7 @@ void ExtensionSet::Swap(const MessageLite* extendee, ExtensionSet* other) {
 
 void ExtensionSet::InternalSwap(ExtensionSet* other) {
   using std::swap;
-  swap(arena_, other->arena_);
+  ABSL_DCHECK_EQ(arena_, other->arena_);
   swap(flat_capacity_, other->flat_capacity_);
   swap(flat_size_, other->flat_size_);
   swap(map_, other->map_);

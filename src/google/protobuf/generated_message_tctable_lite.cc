@@ -99,6 +99,16 @@ PROTOBUF_ALWAYS_INLINE void SetCachedHasBitForRepeated(uint64_t& cached_hasbits,
 
 }  // namespace
 
+LazyEagerVerifyFnType TcParser::GetLazyEagerVerifyFn(
+    const google::protobuf::internal::TcParseTableBase* table, uint32_t field_number) {
+  auto* entry = TcParser::FindFieldEntry(table, field_number);
+  if (ABSL_PREDICT_FALSE(entry == nullptr)) return nullptr;
+  if (ABSL_PREDICT_FALSE(entry->aux_idx == entry->kNoAuxIdx)) return nullptr;
+
+  const auto* aux = table->field_aux(entry);
+  return aux[1].verify_func;
+}
+
 absl::Status TcParser::VerifyHasBitConsistency(const MessageLite* msg,
                                                const TcParseTableBase* table) {
   namespace fl = internal::field_layout;
@@ -315,9 +325,7 @@ PROTOBUF_NOINLINE const char* TcParser::ParseLoopPreserveNone(
 }
 
 // On the fast path, a (matching) 1-byte tag already has the decoded value.
-static uint32_t FastDecodeTag(uint8_t coded_tag) {
-  return coded_tag;
-}
+static uint32_t FastDecodeTag(uint8_t coded_tag) { return coded_tag; }
 
 // On the fast path, a (matching) 2-byte tag always needs to be decoded.
 static uint32_t FastDecodeTag(uint16_t coded_tag) {
@@ -566,21 +574,21 @@ PROTOBUF_ALWAYS_INLINE const char* TcParser::MiniParse(PROTOBUF_TC_PARAM_DECL) {
   static_assert(7 == FieldKind::kFkMap, "Invalid table order");
 
   static_assert(8 == (+field_layout::kSplitMask | FieldKind::kFkNone),
-    "Invalid table order");
+                "Invalid table order");
   static_assert(9 == (+field_layout::kSplitMask | FieldKind::kFkVarint),
-    "Invalid table order");
+                "Invalid table order");
   static_assert(10 == (+field_layout::kSplitMask | FieldKind::kFkPackedVarint),
-    "Invalid table order");
+                "Invalid table order");
   static_assert(11 == (+field_layout::kSplitMask | FieldKind::kFkFixed),
-    "Invalid table order");
+                "Invalid table order");
   static_assert(12 == (+field_layout::kSplitMask | FieldKind::kFkPackedFixed),
-    "Invalid table order");
+                "Invalid table order");
   static_assert(13 == (+field_layout::kSplitMask | FieldKind::kFkString),
-    "Invalid table order");
+                "Invalid table order");
   static_assert(14 == (+field_layout::kSplitMask | FieldKind::kFkMessage),
-    "Invalid table order");
+                "Invalid table order");
   static_assert(15 == (+field_layout::kSplitMask | FieldKind::kFkMap),
-    "Invalid table order");
+                "Invalid table order");
 
   TailCallParseFunc parse_fn = kMiniParseTable[field_type];
   if (export_called_function) *test_out = {parse_fn, tag, entry};
@@ -631,9 +639,9 @@ PROTOBUF_ALWAYS_INLINE MessageLite* TcParser::NewMessage(
 }
 
 MessageLite* TcParser::AddMessage(const TcParseTableBase* table,
-                                  RepeatedPtrFieldBase& field) {
+                                  RepeatedPtrFieldBase& field, Arena* arena) {
   return field.AddFromClassData<GenericTypeHandler<MessageLite>>(
-      table->class_data);
+      arena, table->class_data);
 }
 
 template <typename TagType, bool group_coding, bool aux_is_table>
@@ -726,15 +734,16 @@ PROTOBUF_ALWAYS_INLINE const char* TcParser::RepeatedParseMessageAuxImpl(
   }
   PROTOBUF_PREFETCH_WITH_OFFSET(ptr, 256);
   SetCachedHasBitForRepeated(hasbits, data.hasbit_idx());
+  Arena* arena = msg->GetArena();
   const auto expected_tag = UnalignedLoad<TagType>(ptr);
   const auto aux = *table->field_aux(data.aux_idx());
   auto& field = RefAt<RepeatedPtrFieldBase>(msg, data.offset());
-  ABSL_DCHECK_EQ(field.GetArena(), msg->GetArena());
+  ABSL_DCHECK_EQ(field.GetArena(), arena);
   const TcParseTableBase* inner_table =
       aux_is_table ? aux.table : aux.message_default()->GetTcParseTable();
   do {
     ptr += sizeof(TagType);
-    MessageLite* submsg = AddMessage(inner_table, field);
+    MessageLite* submsg = AddMessage(inner_table, field, arena);
     const auto inner_loop = [&](const char* ptr) {
       return ParseLoop(submsg, ptr, ctx, inner_table);
     };
@@ -1821,7 +1830,7 @@ PROTOBUF_ALWAYS_INLINE const char* TcParser::RepeatedString(
                         field.PrepareForParse())) {
     do {
       ptr += sizeof(TagType);
-      ptr = ParseRepeatedStringOnce(ptr, serial_arena, ctx, field);
+      ptr = ParseRepeatedStringOnce(ptr, arena, serial_arena, ctx, field);
 
       if (ABSL_PREDICT_FALSE(ptr == nullptr || !validate_last_string())) {
         PROTOBUF_MUSTTAIL return Error(PROTOBUF_TC_PARAM_NO_DATA_PASS);
@@ -2550,12 +2559,12 @@ PROTOBUF_NOINLINE const char* TcParser::MpString(PROTOBUF_TC_PARAM_DECL) {
 }
 
 PROTOBUF_ALWAYS_INLINE const char* TcParser::ParseRepeatedStringOnce(
-    const char* ptr, SerialArena* serial_arena, ParseContext* ctx,
+    const char* ptr, Arena* arena, SerialArena* serial_arena, ParseContext* ctx,
     RepeatedPtrField<std::string>& field) {
   int size = ReadSize(&ptr);
   if (ABSL_PREDICT_FALSE(!ptr)) return {};
   auto* str = new (serial_arena->AllocateFromStringBlock()) std::string();
-  field.AddAllocatedForParse(str);
+  field.AddAllocatedForParse(str, arena);
   ptr = ctx->ReadString(ptr, size, str);
   if (ABSL_PREDICT_FALSE(!ptr)) return {};
   PROTOBUF_ASSUME(ptr != nullptr);
@@ -2593,7 +2602,7 @@ PROTOBUF_NOINLINE const char* TcParser::MpRepeatedString(
                             field.PrepareForParse())) {
         do {
           ptr = ptr2;
-          ptr = ParseRepeatedStringOnce(ptr, serial_arena, ctx, field);
+          ptr = ParseRepeatedStringOnce(ptr, arena, serial_arena, ctx, field);
           if (ABSL_PREDICT_FALSE(ptr == nullptr ||
                                  !MpVerifyUtf8(field[field.size() - 1], table,
                                                entry, xform_val))) {
@@ -2751,7 +2760,7 @@ const char* TcParser::MpRepeatedMessageOrGroup(PROTOBUF_TC_PARAM_DECL) {
   const char* ptr2 = ptr;
   uint32_t next_tag;
   do {
-    MessageLite* value = AddMessage(inner_table, field);
+    MessageLite* value = AddMessage(inner_table, field, msg->GetArena());
     const auto inner_loop = [&](const char* ptr) {
       return ParseLoopPreserveNone(value, ptr, ctx, inner_table);
     };

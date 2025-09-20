@@ -7,7 +7,7 @@
 
 //! UPB FFI wrapper code for use by Rust Protobuf.
 
-use crate::__internal::{Enum, MatcherEq, Private, SealedInternal};
+use crate::__internal::{MatcherEq, Private, SealedInternal};
 use crate::{
     AsMut, AsView, Clear, ClearAndParse, CopyFrom, IntoProxied, Map, MapIter, MapMut, MapView,
     MergeFrom, Message, MessageMut, MessageMutInterop, MessageView, MessageViewInterop, Mut,
@@ -27,13 +27,12 @@ extern crate upb;
 #[cfg(not(bzl))]
 use crate::upb;
 
-// Temporarily 'pub' since the gencode is directly referencing various parts of upb.
 pub use upb::Arena;
 pub use upb::AssociatedMiniTable;
 pub use upb::AssociatedMiniTableEnum;
 pub use upb::MessagePtr;
-pub use upb::RawMiniTable;
-pub use upb::RawMiniTableEnum;
+pub type MiniTablePtr = upb::RawMiniTable;
+pub type MiniTableEnumPtr = upb::RawMiniTableEnum;
 use upb::*;
 
 pub fn debug_string<T: UpbGetMessagePtr>(msg: &T) -> String {
@@ -49,20 +48,20 @@ pub(crate) type PtrAndLen = upb::StringView;
 // This struct represents a raw minitable pointer. We need it to be Send and Sync so that we can
 // store it in a static OnceLock for lazy initialization of minitables. It should not be used for
 // any other purpose.
-pub struct MiniTablePtr(pub RawMiniTable);
-unsafe impl Send for MiniTablePtr {}
-unsafe impl Sync for MiniTablePtr {}
+pub struct MiniTableInitPtr(pub MiniTablePtr);
+unsafe impl Send for MiniTableInitPtr {}
+unsafe impl Sync for MiniTableInitPtr {}
 
 // Same as above, but for enum minitables.
-pub struct MiniTableEnumPtr(pub RawMiniTableEnum);
-unsafe impl Send for MiniTableEnumPtr {}
-unsafe impl Sync for MiniTableEnumPtr {}
+pub struct MiniTableEnumInitPtr(pub MiniTableEnumPtr);
+unsafe impl Send for MiniTableEnumInitPtr {}
+unsafe impl Sync for MiniTableEnumInitPtr {}
 
 /// # Safety
 /// - `mini_descriptor` must be a valid MiniDescriptor.
-pub unsafe fn build_mini_table(mini_descriptor: &'static str) -> RawMiniTable {
+pub unsafe fn build_mini_table(mini_descriptor: &'static str) -> MiniTablePtr {
     unsafe {
-        NonNull::new_unchecked(upb_MiniTable_Build(
+        MiniTablePtr::new(upb_MiniTable_Build(
             mini_descriptor.as_ptr(),
             mini_descriptor.len(),
             THREAD_LOCAL_ARENA.with(|a| a.raw()),
@@ -73,9 +72,9 @@ pub unsafe fn build_mini_table(mini_descriptor: &'static str) -> RawMiniTable {
 
 /// # Safety
 /// - `mini_descriptor` must be a valid enum MiniDescriptor.
-pub unsafe fn build_enum_mini_table(mini_descriptor: &'static str) -> RawMiniTableEnum {
+pub unsafe fn build_enum_mini_table(mini_descriptor: &'static str) -> MiniTableEnumPtr {
     unsafe {
-        NonNull::new_unchecked(upb_MiniTableEnum_Build(
+        MiniTableEnumPtr::new(upb_MiniTableEnum_Build(
             mini_descriptor.as_ptr(),
             mini_descriptor.len(),
             THREAD_LOCAL_ARENA.with(|a| a.raw()),
@@ -86,10 +85,10 @@ pub unsafe fn build_enum_mini_table(mini_descriptor: &'static str) -> RawMiniTab
 
 /// # Safety
 /// - All arguments must point to valid MiniTables.
-pub fn link_mini_table(
-    mini_table: RawMiniTable,
-    submessages: &[RawMiniTable],
-    subenums: &[RawMiniTableEnum],
+pub unsafe fn link_mini_table(
+    mini_table: MiniTablePtr,
+    submessages: &[MiniTablePtr],
+    subenums: &[MiniTableEnumPtr],
 ) {
     unsafe {
         assert!(upb_MiniTable_Link(
@@ -133,17 +132,6 @@ thread_local! {
     // We need to avoid dropping this Arena, because we use it to build mini tables that
     // effectively have 'static lifetimes.
     pub static THREAD_LOCAL_ARENA: ManuallyDrop<Arena> = ManuallyDrop::new(Arena::new());
-}
-
-#[doc(hidden)]
-pub type SerializedData = upb::OwnedArenaBox<[u8]>;
-
-impl SealedInternal for SerializedData {}
-
-impl IntoProxied<ProtoBytes> for SerializedData {
-    fn into_proxied(self, _private: Private) -> ProtoBytes {
-        ProtoBytes { inner: InnerProtoString(self) }
-    }
 }
 
 #[derive(Debug)]
@@ -532,55 +520,6 @@ impl<'msg, T> RepeatedMut<'msg, T> {
     pub fn arena(&self, _private: Private) -> &'msg Arena {
         self.inner.arena
     }
-}
-
-/// Cast a `RepeatedView<SomeEnum>` to `RepeatedView<i32>`.
-pub fn cast_enum_repeated_view<E: Enum + ProxiedInRepeated>(
-    repeated: RepeatedView<E>,
-) -> RepeatedView<i32> {
-    // SAFETY: Reading an enum array as an i32 array is sound.
-    unsafe { RepeatedView::from_raw(Private, repeated.as_raw(Private)) }
-}
-
-/// Cast a `RepeatedMut<SomeEnum>` to `RepeatedMut<i32>`.
-///
-/// Writing an unknown value is sound because all enums
-/// are representationally open.
-pub fn cast_enum_repeated_mut<E: Enum + ProxiedInRepeated>(
-    repeated: RepeatedMut<E>,
-) -> RepeatedMut<i32> {
-    // SAFETY:
-    // - Reading an enum array as an i32 array is sound.
-    // - No shared mutation is possible through the output.
-    unsafe {
-        let InnerRepeatedMut { arena, raw, .. } = repeated.inner;
-        RepeatedMut::from_inner(Private, InnerRepeatedMut { arena, raw })
-    }
-}
-
-/// Cast a `RepeatedMut<SomeEnum>` to `RepeatedMut<i32>` and call
-/// repeated_reserve.
-pub fn reserve_enum_repeated_mut<E: Enum + ProxiedInRepeated>(
-    repeated: RepeatedMut<E>,
-    additional: usize,
-) {
-    let int_repeated = cast_enum_repeated_mut(repeated);
-    ProxiedInRepeated::repeated_reserve(int_repeated, additional);
-}
-
-pub fn new_enum_repeated<E: Enum + ProxiedInRepeated>() -> Repeated<E> {
-    let arena = Arena::new();
-    // SAFETY:
-    // - `upb_Array_New` is unsafe but assumed to be sound when called on a valid
-    //   arena.
-    unsafe {
-        let raw = upb_Array_New(arena.raw(), upb::CType::Int32);
-        Repeated::from_inner(Private, InnerRepeated::from_raw_parts(raw, arena))
-    }
-}
-
-pub fn free_enum_repeated<E: Enum + ProxiedInRepeated>(_repeated: &mut Repeated<E>) {
-    // No-op: the memory will be dropped by the arena.
 }
 
 /// Returns a static empty RepeatedView.
@@ -1063,13 +1002,20 @@ where
         value: impl IntoProxied<Self>,
     ) -> bool {
         let arena = map.inner(Private).raw_arena();
-        unsafe {
-            upb_Map_InsertAndReturnIfInserted(
+        let insert_status = unsafe {
+            upb_Map_Insert(
                 map.as_raw(Private),
                 Key::to_message_value(key),
                 Self::into_message_value_fuse_if_required(arena, value.into_proxied(Private)),
                 arena,
             )
+        };
+        match insert_status {
+            upb::MapInsertStatus::Inserted => true,
+            upb::MapInsertStatus::Replaced => false,
+            upb::MapInsertStatus::OutOfMemory => {
+                panic!("map insert failed (alloc should be infallible)")
+            }
         }
     }
 
@@ -1110,32 +1056,6 @@ where
             // SAFETY: MapIter<K, V> returns key and values message values
             //         with the variants for K and V active.
             .map(|(k, v)| unsafe { (Key::from_message_value(k), Self::from_message_value(v)) })
-    }
-}
-
-/// `upb_Map_Insert`, but returns a `bool` for whether insert occurred.
-///
-/// Returns `true` if the entry was newly inserted.
-///
-/// # Panics
-/// Panics if the arena is out of memory.
-///
-/// # Safety
-/// The same as `upb_Map_Insert`:
-/// - `map` must be a valid map.
-/// - The `arena` must be valid and outlive the map.
-/// - The inserted value must outlive the map.
-#[allow(non_snake_case)]
-pub unsafe fn upb_Map_InsertAndReturnIfInserted(
-    map: RawMap,
-    key: upb_MessageValue,
-    value: upb_MessageValue,
-    arena: RawArena,
-) -> bool {
-    match unsafe { upb_Map_Insert(map, key, value, arena) } {
-        upb::MapInsertStatus::Inserted => true,
-        upb::MapInsertStatus::Replaced => false,
-        upb::MapInsertStatus::OutOfMemory => panic!("map arena is out of memory"),
     }
 }
 

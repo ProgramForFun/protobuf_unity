@@ -43,6 +43,7 @@ class UnknownFieldSet;
 
 namespace internal {
 
+
 enum {
   kInlinedStringAuxIdx = 0,
   kSplitOffsetAuxIdx = 1,
@@ -746,7 +747,7 @@ class PROTOBUF_EXPORT TcParser final {
       uint16_t type_card, TcParseTableBase::FieldAux aux);
   static MessageLite* NewMessage(const TcParseTableBase* table, Arena* arena);
   static MessageLite* AddMessage(const TcParseTableBase* table,
-                                 RepeatedPtrFieldBase& field);
+                                 RepeatedPtrFieldBase& field, Arena* arena);
 
   template <typename T>
   static inline const T& GetFieldAtMaybeSplit(const void* x, size_t offset,
@@ -853,6 +854,9 @@ class PROTOBUF_EXPORT TcParser final {
   // Optimized small tag varint parser for int32/int64
   template <typename FieldType>
   PROTOBUF_CC static const char* FastVarintS1(PROTOBUF_TC_PARAM_DECL);
+
+  static LazyEagerVerifyFnType GetLazyEagerVerifyFn(
+      const google::protobuf::internal::TcParseTableBase* table, uint32_t field_number);
 
   friend class GeneratedTcTableLiteTest;
   static void* MaybeGetSplitBase(MessageLite* msg, bool is_split,
@@ -1024,8 +1028,8 @@ class PROTOBUF_EXPORT TcParser final {
   PROTOBUF_CC static inline const char* RepeatedCord(PROTOBUF_TC_PARAM_DECL);
 
   static inline const char* ParseRepeatedStringOnce(
-      const char* ptr, SerialArena* serial_arena, ParseContext* ctx,
-      RepeatedPtrField<std::string>& field);
+      const char* ptr, Arena* arena, SerialArena* serial_arena,
+      ParseContext* ctx, RepeatedPtrField<std::string>& field);
 
   PROTOBUF_NOINLINE
   static void AddUnknownEnum(MessageLite* msg, const TcParseTableBase* table,
