@@ -25,8 +25,7 @@ pub use crate::cord::{ProtoBytesCow, ProtoStringCow};
 pub use crate::map::{Map, MapIter, MapMut, MapView, ProxiedInMapValue};
 pub use crate::optional::Optional;
 pub use crate::proxied::{
-    AsMut, AsView, IntoMut, IntoProxied, IntoView, Mut, MutProxied, MutProxy, Proxied, Proxy, View,
-    ViewProxy,
+    AsMut, AsView, IntoMut, IntoProxied, IntoView, Mut, MutProxied, Proxied, View,
 };
 pub use crate::r#enum::{Enum, UnknownEnumValue};
 pub use crate::repeated::{ProxiedInRepeated, Repeated, RepeatedIter, RepeatedMut, RepeatedView};
@@ -78,8 +77,8 @@ use utf8;
 
 // If the Upb and C++ kernels are both linked into the same binary, this symbol
 // will be defined twice and cause a link error.
-#[no_mangle]
-extern "C" fn __Disallow_Upb_And_Cpp_In_Same_Binary() {}
+#[unsafe(no_mangle)]
+unsafe extern "C" fn __Disallow_Upb_And_Cpp_In_Same_Binary() {}
 
 /// An error that happened during parsing.
 #[derive(Debug, Clone)]

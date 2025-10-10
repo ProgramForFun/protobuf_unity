@@ -277,9 +277,6 @@ void GenerateEnumDefinition(Context& ctx, const EnumDescriptor& desc,
         type View<'a> = $name$;
       }
 
-      impl $pb$::Proxy<'_> for $name$ {}
-      impl $pb$::ViewProxy<'_> for $name$ {}
-
       impl $pb$::AsView for $name$ {
         type Proxied = $name$;
 
@@ -320,7 +317,7 @@ void GenerateEnumDefinition(Context& ctx, const EnumDescriptor& desc,
         }
 
         unsafe fn repeated_free(_private: $pbi$::Private, f: &mut $pb$::Repeated<Self>) {
-          $pbr$::free_enum_repeated(f)
+          unsafe { $pbr$::free_enum_repeated(f) }
         }
 
         fn repeated_len(r: $pb$::View<$pb$::Repeated<Self>>) -> usize {

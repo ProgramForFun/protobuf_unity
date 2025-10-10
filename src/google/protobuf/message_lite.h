@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "absl/base/attributes.h"
+#include "absl/base/config.h"
 #include "absl/log/absl_check.h"
 #include "absl/numeric/bits.h"
 #include "absl/strings/cord.h"
@@ -81,6 +82,10 @@ class MessageTableTester;
 }  // namespace compiler
 
 namespace internal {
+
+// TODO: Remove this once we have a better way to do this.
+PROTOBUF_EXPORT void GenericSwap(MessageLite* lhs, MessageLite* rhs);
+PROTOBUF_EXPORT void GenericSwap(Message* lhs, Message* rhs);
 
 namespace v2 {
 class TableDriven;
@@ -309,6 +314,9 @@ struct DescriptorTable;
 class DescriptorPoolExtensionFinder;
 class ExtensionSet;
 class HasBitsTestPeer;
+class InternalMetadataOffset;
+template <typename T, size_t kFieldOffset>
+struct InternalMetadataOffsetHelper;
 class LazyField;
 class RepeatedPtrFieldBase;
 class TcParser;
@@ -1109,6 +1117,9 @@ class PROTOBUF_EXPORT MessageLite {
   friend class internal::DescriptorPoolExtensionFinder;
   friend class internal::ExtensionSet;
   friend class internal::HasBitsTestPeer;
+  friend class internal::InternalMetadataOffset;
+  template <typename T, size_t kFieldOffset>
+  friend struct internal::InternalMetadataOffsetHelper;
   friend class internal::LazyField;
   friend class internal::SwapFieldHelper;
   friend class internal::TcParser;
@@ -1131,6 +1142,8 @@ class PROTOBUF_EXPORT MessageLite {
 
   template <typename Type>
   friend const internal::ClassData* internal::GetClassData(const Type& msg);
+  friend void internal::GenericSwap(MessageLite* lhs, MessageLite* rhs);
+  friend void internal::GenericSwap(Message* lhs, Message* rhs);
 
   static bool CheckFieldPresence(const internal::ParseContext& ctx,
                                  const MessageLite& msg,
@@ -1433,11 +1446,19 @@ template <typename MessageLite>
 PROTOBUF_ALWAYS_INLINE MessageLite* MessageCreator::New(
     const MessageLite* prototype_for_func,
     const MessageLite* prototype_for_copy, Arena* arena) const {
-  return PlacementNew(prototype_for_func, prototype_for_copy,
-                      arena != nullptr
-                          ? arena->AllocateAligned(allocation_size_)
-                          : ::operator new(allocation_size_),
-                      arena);
+  void* mem;
+  if (arena != nullptr) {
+    mem = arena->AllocateAligned(allocation_size_);
+  } else {
+#if ABSL_HAVE_BUILTIN(__builtin_operator_new)
+    // Allows the compiler to merge or optimize away the allocation even if it
+    // would violate the observability guarantees of ::operator new.
+    mem = __builtin_operator_new(allocation_size_);
+#else
+    mem = ::operator new(allocation_size_);
+#endif
+  }
+  return PlacementNew(prototype_for_func, prototype_for_copy, mem, arena);
 }
 
 }  // namespace internal

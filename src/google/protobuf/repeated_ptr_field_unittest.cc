@@ -29,7 +29,6 @@
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
 #include "google/protobuf/arena_test_util.h"
-#include "google/protobuf/internal_visibility_for_testing.h"
 #include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/message.h"
 #include "google/protobuf/unittest.pb.h"
@@ -820,7 +819,6 @@ TEST(RepeatedPtrFieldTest, Erase) {
 }
 
 TEST(RepeatedPtrFieldTest, CopyConstruct) {
-  auto token = internal::InternalVisibilityForTesting{};
   RepeatedPtrField<std::string> source;
   source.Add()->assign("1");
   source.Add()->assign("2");
@@ -830,23 +828,26 @@ TEST(RepeatedPtrFieldTest, CopyConstruct) {
   EXPECT_EQ("1", destination1.Get(0));
   EXPECT_EQ("2", destination1.Get(1));
 
-  RepeatedPtrField<std::string> destination2(token, nullptr, source);
-  ASSERT_EQ(2, destination2.size());
-  EXPECT_EQ("1", destination2.Get(0));
-  EXPECT_EQ("2", destination2.Get(1));
+  const auto* destination2 =
+      Arena::Create<RepeatedPtrField<std::string>>(nullptr, source);
+  ASSERT_EQ(2, destination2->size());
+  EXPECT_EQ("1", destination2->Get(0));
+  EXPECT_EQ("2", destination2->Get(1));
+
+  delete destination2;
 }
 
 TEST(RepeatedPtrFieldTest, CopyConstructWithArena) {
-  auto token = internal::InternalVisibilityForTesting{};
   RepeatedPtrField<std::string> source;
   source.Add()->assign("1");
   source.Add()->assign("2");
 
   Arena arena;
-  RepeatedPtrField<std::string> destination(token, &arena, source);
-  ASSERT_EQ(2, destination.size());
-  EXPECT_EQ("1", destination.Get(0));
-  EXPECT_EQ("2", destination.Get(1));
+  const auto* destination =
+      Arena::Create<RepeatedPtrField<std::string>>(&arena, source);
+  ASSERT_EQ(2, destination->size());
+  EXPECT_EQ("1", destination->Get(0));
+  EXPECT_EQ("2", destination->Get(1));
 }
 
 TEST(RepeatedPtrFieldTest, IteratorConstruct_String) {
@@ -1186,15 +1187,18 @@ TEST(RepeatedPtrFieldDeathTest, CheckedGetOrAbortTest) {
   RepeatedPtrField<std::string> field;
 
   // Empty container tests.
-  EXPECT_DEATH(internal::CheckedGetOrAbort(field, -1), "index: -1, size: 0");
+  EXPECT_DEATH(internal::CheckedGetOrAbort(field, -1),
+               "Index \\(-1\\) out of bounds of container with size \\(0\\)");
   EXPECT_DEATH(internal::CheckedGetOrAbort(field, field.size()),
-               "index: 0, size: 0");
+               "Index \\(0\\) out of bounds of container with size \\(0\\)");
 
   // Non-empty container tests
   field.Add()->assign("foo");
   field.Add()->assign("bar");
-  EXPECT_DEATH(internal::CheckedGetOrAbort(field, 2), "index: 2, size: 2");
-  EXPECT_DEATH(internal::CheckedGetOrAbort(field, -1), "index: -1, size: 2");
+  EXPECT_DEATH(internal::CheckedGetOrAbort(field, 2),
+               "Index \\(2\\) out of bounds of container with size \\(2\\)");
+  EXPECT_DEATH(internal::CheckedGetOrAbort(field, -1),
+               "Index \\(-1\\) out of bounds of container with size \\(2\\)");
 }
 
 TEST(RepeatedPtrFieldDeathTest, CheckedMutableOrAbortTest) {
@@ -1202,16 +1206,17 @@ TEST(RepeatedPtrFieldDeathTest, CheckedMutableOrAbortTest) {
 
   // Empty container tests.
   EXPECT_DEATH(internal::CheckedMutableOrAbort(&field, -1),
-               "index: -1, size: 0");
+               "Index \\(-1\\) out of bounds of container with size \\(0\\)");
   EXPECT_DEATH(internal::CheckedMutableOrAbort(&field, field.size()),
-               "index: 0, size: 0");
+               "Index \\(0\\) out of bounds of container with size \\(0\\)");
 
   // Non-empty container tests
   field.Add()->assign("foo");
   field.Add()->assign("bar");
-  EXPECT_DEATH(internal::CheckedMutableOrAbort(&field, 2), "index: 2, size: 2");
+  EXPECT_DEATH(internal::CheckedMutableOrAbort(&field, 2),
+               "Index \\(2\\) out of bounds of container with size \\(2\\)");
   EXPECT_DEATH(internal::CheckedMutableOrAbort(&field, -1),
-               "index: -1, size: 2");
+               "Index \\(-1\\) out of bounds of container with size \\(2\\)");
 }
 // ===================================================================
 

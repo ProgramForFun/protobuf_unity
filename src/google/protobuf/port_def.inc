@@ -165,6 +165,14 @@ static_assert(PROTOBUF_ABSL_MIN(20230125, 3),
 // Owner: cknittel@, mkruskal@
 #define PROTOBUF_FUTURE_REMOVE_REPEATED_PTR_FIELD_ARENA_CONSTRUCTOR 1
 
+// Removes the public Map(Arena*) constructor.
+// Owner: cknittel@, mkruskal@
+#define PROTOBUF_FUTURE_REMOVE_MAP_FIELD_ARENA_CONSTRUCTOR 1
+
+// Removes the public RepeatedField(Arena*) constructor.
+// Owner: cknittel@, mkruskal@
+#define PROTOBUF_FUTURE_REMOVE_REPEATED_FIELD_ARENA_CONSTRUCTOR 1
+
 #else
 
 #define PROTOBUF_FUTURE_ADD_NODISCARD
@@ -796,6 +804,13 @@ namespace internal {
 #define PROTOBUF_NONNULL
 #define PROTOBUF_NULLABLE
 #endif
+
+#ifdef PROTOBUF_NO_MERGE
+#error PROTOBUF_NO_MERGE was previously defined
+#endif  // PROTOBUF_NO_MERGE
+#ifndef PROTOBUF_NO_MERGE
+#define PROTOBUF_NO_MERGE
+#endif  // PROTOBUF_NO_MERGE
 
 #ifdef PROTOBUF_PRESERVE_ALL
 #error PROTOBUF_PRESERVE_ALL was previously defined

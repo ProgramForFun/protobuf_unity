@@ -61,6 +61,12 @@ void EnumLiteGenerator::Generate(io::Printer* printer) {
   WriteEnumDocComment(printer, descriptor_, context_->options());
   MaybePrintGeneratedAnnotation(context_, printer, descriptor_, immutable_api_);
 
+  if (CheckLargeEnum(descriptor_)) {
+    GenerateLarge(printer, descriptor_, immutable_api_, context_,
+                  name_resolver_);
+    return;
+  }
+
 
   printer->Print(
       "$deprecation$public enum $classname$\n"
