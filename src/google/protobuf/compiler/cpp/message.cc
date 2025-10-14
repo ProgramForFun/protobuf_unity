@@ -940,7 +940,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
               const ABSL_ATTRIBUTE_LIFETIME_BOUND {
         $WeakDescriptorSelfPin$;
         $annotate_extension_get$;
-        return _proto_TypeTraits::Get(id.number(), $extensions$, id.default_value());
+        return _proto_TypeTraits::Get(GetArena(), id.number(), $extensions$,
+                                      id.default_value());
       }
 
       template <typename _proto_TypeTraits, $pbi$::FieldType _field_type,
@@ -951,7 +952,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
           ABSL_ATTRIBUTE_LIFETIME_BOUND {
         $WeakDescriptorSelfPin$;
         $annotate_extension_mutable$;
-        return _proto_TypeTraits::Mutable(id.number(), _field_type, &$extensions$);
+        return _proto_TypeTraits::Mutable(GetArena(), id.number(), _field_type,
+                                          &$extensions$);
       }
 
       template <typename _proto_TypeTraits, $pbi$::FieldType _field_type,
@@ -961,7 +963,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
                                            _field_type, _is_packed>& id,
           typename _proto_TypeTraits::Singular::ConstType value) {
         $WeakDescriptorSelfPin$;
-        _proto_TypeTraits::Set(id.number(), _field_type, value, &$extensions$);
+        _proto_TypeTraits::Set(GetArena(), id.number(), _field_type, value,
+                               &$extensions$);
         $annotate_extension_set$;
       }
 
@@ -972,8 +975,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
                                            _field_type, _is_packed>& id,
           typename _proto_TypeTraits::Singular::MutableType value) {
         $WeakDescriptorSelfPin$;
-        _proto_TypeTraits::SetAllocated(id.number(), _field_type, value,
-                                        &$extensions$);
+        _proto_TypeTraits::SetAllocated(GetArena(), id.number(), _field_type,
+                                        value, &$extensions$);
         $annotate_extension_set$;
       }
       template <typename _proto_TypeTraits, $pbi$::FieldType _field_type,
@@ -983,8 +986,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
                                            _field_type, _is_packed>& id,
           typename _proto_TypeTraits::Singular::MutableType value) {
         $WeakDescriptorSelfPin$;
-        _proto_TypeTraits::UnsafeArenaSetAllocated(id.number(), _field_type,
-                                                   value, &$extensions$);
+        _proto_TypeTraits::UnsafeArenaSetAllocated(
+            GetArena(), id.number(), _field_type, value, &$extensions$);
         $annotate_extension_set$;
       }
       template <typename _proto_TypeTraits, $pbi$::FieldType _field_type,
@@ -994,7 +997,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
                        $Msg$, _proto_TypeTraits, _field_type, _is_packed>& id) {
         $WeakDescriptorSelfPin$;
         $annotate_extension_release$;
-        return _proto_TypeTraits::Release(id.number(), _field_type, &$extensions$);
+        return _proto_TypeTraits::Release(GetArena(), id.number(), _field_type,
+                                          &$extensions$);
       }
       template <typename _proto_TypeTraits, $pbi$::FieldType _field_type,
                 bool _is_packed>
@@ -1004,8 +1008,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
                                            _field_type, _is_packed>& id) {
         $WeakDescriptorSelfPin$;
         $annotate_extension_release$;
-        return _proto_TypeTraits::UnsafeArenaRelease(id.number(), _field_type,
-                                                     &$extensions$);
+        return _proto_TypeTraits::UnsafeArenaRelease(
+            GetArena(), id.number(), _field_type, &$extensions$);
       }
 
       template <typename _proto_TypeTraits, $pbi$::FieldType _field_type,
@@ -1066,7 +1070,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
           ABSL_ATTRIBUTE_LIFETIME_BOUND {
         $WeakDescriptorSelfPin$;
         typename _proto_TypeTraits::Repeated::MutableType to_add =
-            _proto_TypeTraits::Add(id.number(), _field_type, &$extensions$);
+            _proto_TypeTraits::Add(GetArena(), id.number(), _field_type,
+                                   &$extensions$);
         $annotate_repeated_extension_add_mutable$;
         return to_add;
       }
@@ -1078,8 +1083,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
                                            _field_type, _is_packed>& id,
           typename _proto_TypeTraits::Repeated::ConstType value) {
         $WeakDescriptorSelfPin$;
-        _proto_TypeTraits::Add(id.number(), _field_type, _is_packed, value,
-                               &$extensions$);
+        _proto_TypeTraits::Add(GetArena(), id.number(), _field_type, _is_packed,
+                               value, &$extensions$);
         $annotate_repeated_extension_add$;
       }
 
@@ -1105,8 +1110,8 @@ void MessageGenerator::GenerateFieldAccessorDeclarations(io::Printer* p) {
           ABSL_ATTRIBUTE_LIFETIME_BOUND {
         $WeakDescriptorSelfPin$;
         $annotate_repeated_extension_list_mutable$;
-        return _proto_TypeTraits::MutableRepeated(id.number(), _field_type,
-                                                  _is_packed, &$extensions$);
+        return _proto_TypeTraits::MutableRepeated(
+            GetArena(), id.number(), _field_type, _is_packed, &$extensions$);
       }
     )cc");
 
@@ -2870,7 +2875,13 @@ void MessageGenerator::GenerateImplMemberInit(io::Printer* p,
     if (descriptor_->extension_range_count() > 0 &&
         init_type != InitType::kConstexpr) {
       separator();
-      p->Emit("_extensions_{visibility, arena}");
+      p->Emit(R"cc(
+#ifdef PROTOBUF_INTERNAL_REMOVE_ARENA_PTRS_EXTENSION_SET
+        _extensions_ {}
+#else
+        _extensions_ { visibility, arena }
+#endif
+      )cc");
     }
   };
 
@@ -3385,7 +3396,8 @@ void MessageGenerator::GenerateCopyInitFields(io::Printer* p) const {
 
   if (descriptor_->extension_range_count() > 0) {
     p->Emit(R"cc(
-      _impl_._extensions_.MergeFrom(this, from._impl_._extensions_);
+      _impl_._extensions_.MergeFrom(arena, this, from._impl_._extensions_,
+                                    from.GetArena());
     )cc");
   }
 
@@ -3985,7 +3997,11 @@ MessageGenerator::NewOpRequirements MessageGenerator::GetNewOp(
     op.needs_to_run_constructor = true;
   }
 
-  if (descriptor_->extension_range_count() > 0) {
+  // Extension set does not use arena offsets, since we were able to remove all
+  // uses of `GetArena()` by passing the arena pointer from above. We will
+  // flag-gate the removal of the arena pointer in the extension set with the
+  // arena offset changes for measurement purposes.
+  if (descriptor_->extension_range_count() > 0 && !use_arena_offset) {
     op.needs_arena_seeding = true;
     ++arena_seeding_count;
     if (arena_emitter) {
@@ -4140,7 +4156,7 @@ void MessageGenerator::GenerateClassData(io::Printer* p) {
   const bool has_repeated_ptr_field = absl::c_any_of(
       FieldRange(descriptor_),
       [](const FieldDescriptor* field) { return IsRepeatedPtrField(field); });
-  if (has_repeated_ptr_field) {
+  if (has_repeated_ptr_field || descriptor_->extension_range_count() > 0) {
     p->Emit({{"new_op", [&] { GenerateNewOp(p, /*use_arena_offset=*/false); }},
              {"new_op_with_arena_offset",
               [&] { GenerateNewOp(p, /*use_arena_offset=*/true); }}},
@@ -4341,6 +4357,9 @@ bool MessageGenerator::RequiresArena(GeneratorFunction function) const {
     if (field_generators_.get(field).RequiresArena(function)) {
       return true;
     }
+  }
+  if (descriptor_->extension_range_count() > 0) {
+    return true;
   }
   return false;
 }
@@ -4595,8 +4614,8 @@ void MessageGenerator::GenerateClassSpecificMergeImpl(io::Printer* p) {
           // the opportunity for tail calls.
           if (descriptor_->extension_range_count() > 0) {
             p->Emit(R"cc(
-              _this->$extensions$.MergeFrom(&default_instance(),
-                                            from.$extensions$);
+              _this->$extensions$.MergeFrom(arena, &default_instance(),
+                                            from.$extensions$, from.GetArena());
             )cc");
           }
         }}},
@@ -5670,7 +5689,8 @@ void MessageGenerator::GenerateIsInitialized(io::Printer* p) {
            [&] {
              if (descriptor_->extension_range_count() == 0) return;
              p->Emit(R"cc(
-               if (!this_.$extensions$.IsInitialized(&default_instance())) {
+               if (!this_.$extensions$.IsInitialized(this_.GetArena(),
+                                                     &default_instance())) {
                  return false;
                }
              )cc");

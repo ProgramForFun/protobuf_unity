@@ -160,7 +160,7 @@ DynamicMapField::DynamicMapField(const Message* default_entry,
 
 DynamicMapField::~DynamicMapField() {
   ABSL_DCHECK_EQ(map_.arena(), nullptr);
-  map_.ClearTable(false);
+  map_.ClearTable(/*arena=*/nullptr, /*reset=*/false);
 }
 
 }  // namespace internal
@@ -500,7 +500,11 @@ void DynamicMessage::SharedCtor(bool lock_factory) {
   }
 
   if (type_info_->extensions_offset != -1) {
+#ifdef PROTOBUF_INTERNAL_REMOVE_ARENA_PTRS_EXTENSION_SET
+    new (MutableExtensionsRaw()) ExtensionSet();
+#else
     new (MutableExtensionsRaw()) ExtensionSet(arena);
+#endif
   }
   for (int i = 0; i < descriptor->field_count(); i++) {
     const FieldDescriptor* field = descriptor->field(i);
@@ -986,7 +990,7 @@ const Message* DynamicMessageFactory::GetPrototypeNoLock(
   // Construct the reflection object.
 
   // Allocate the prototype fields.
-  void* base = operator new(size);
+  void* base = internal::Allocate(size);
   memset(base, 0, size);
 
   // We have already locked the factory so we should not lock in the constructor
