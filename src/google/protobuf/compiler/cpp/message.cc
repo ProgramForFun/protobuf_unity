@@ -53,6 +53,7 @@
 #include "google/protobuf/descriptor.pb.h"
 #include "google/protobuf/has_bits.h"
 #include "google/protobuf/io/printer.h"
+#include "google/protobuf/port.h"
 #include "google/protobuf/wire_format.h"
 #include "google/protobuf/wire_format_lite.h"
 
@@ -116,6 +117,23 @@ void DebugAssertUniformLikelyPresence(
   });
 }
 
+// Returns true if any field in the message uses arena offsets. If this is true,
+// the message will generate two `ClassData`s, one for use when the arena offset
+// feature is disabled, and one for when it is enabled.
+//
+// The reason for generating two different `ClassData`s is that fields using
+// arena offsets are initialized differently than they are currently. If a field
+// uses arena offsets, it no longer needs arena seeding, and it is not
+// zero-initializable.
+bool MessageHasFieldUsingArenaOffset(const Descriptor* descriptor) {
+  return absl::c_any_of(
+             FieldRange(descriptor),
+             [](const FieldDescriptor* field) {
+               return field->is_repeated() || field->is_map();
+             }) ||
+         descriptor->extension_range_count() > 0;
+}
+
 // Generates a condition that checks presence of a field. If probability is
 // provided, the condition will be wrapped with
 // PROTOBUF_EXPECT_TRUE_WITH_PROBABILITY.
@@ -142,9 +160,13 @@ std::string GenerateConditionMaybeWithProbability(
         (is_batch ? "Batch" : ""), (is_repeated ? "ForRepeated" : ""),
         *has_array_index, mask);
   }
-  if (probability.has_value()) {
-    return absl::StrFormat("PROTOBUF_EXPECT_TRUE_WITH_PROBABILITY(%s, %.3f)",
-                           condition, *probability);
+  // TODO: b/393587858 - Remove the experimental flag once the ablation
+  // experiment is complete.
+  if constexpr (internal::EnableProtoFieldPresenceHints()) {
+    if (probability.has_value()) {
+      return absl::StrFormat("PROTOBUF_EXPECT_TRUE_WITH_PROBABILITY(%s, %.3f)",
+                             condition, *probability);
+    }
   }
   return condition;
 }
@@ -4036,12 +4058,15 @@ MessageGenerator::NewOpRequirements MessageGenerator::GetNewOp(
     } else if (field->real_containing_oneof() != nullptr) {
       /* nothing to do */
     } else if (field->is_map()) {
-      op.needs_arena_seeding = true;
-      // MapField contains an internal vtable pointer we need to copy.
+      // MapField contains an internal vtable pointer and arena offset we need
+      // to copy.
       op.needs_memcpy = true;
-      print_arena_offset();
+      if (!use_arena_offset) {
+        op.needs_arena_seeding = true;
+        print_arena_offset();
+      }
     } else if (field->is_repeated()) {
-      if (use_arena_offset && IsRepeatedPtrField(field)) {
+      if (use_arena_offset) {
         op.needs_memcpy = true;
       } else {
         op.needs_arena_seeding = true;
@@ -4153,10 +4178,7 @@ void MessageGenerator::GenerateClassData(io::Printer* p) {
     }
   )cc");
 
-  const bool has_repeated_ptr_field = absl::c_any_of(
-      FieldRange(descriptor_),
-      [](const FieldDescriptor* field) { return IsRepeatedPtrField(field); });
-  if (has_repeated_ptr_field || descriptor_->extension_range_count() > 0) {
+  if (MessageHasFieldUsingArenaOffset(descriptor_)) {
     p->Emit({{"new_op", [&] { GenerateNewOp(p, /*use_arena_offset=*/false); }},
              {"new_op_with_arena_offset",
               [&] { GenerateNewOp(p, /*use_arena_offset=*/true); }}},
