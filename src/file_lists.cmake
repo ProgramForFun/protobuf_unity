@@ -679,6 +679,7 @@ set(libupb_srcs
   ${protobuf_SOURCE_DIR}/upb/mini_descriptor/internal/base92.c
   ${protobuf_SOURCE_DIR}/upb/mini_descriptor/internal/encode.c
   ${protobuf_SOURCE_DIR}/upb/mini_descriptor/link.c
+  ${protobuf_SOURCE_DIR}/upb/mini_table/debug_string.c
   ${protobuf_SOURCE_DIR}/upb/mini_table/extension_registry.c
   ${protobuf_SOURCE_DIR}/upb/mini_table/internal/message.c
   ${protobuf_SOURCE_DIR}/upb/mini_table/message.c
@@ -750,13 +751,11 @@ set(libupb_hdrs
   ${protobuf_SOURCE_DIR}/upb/message/internal/map_entry.h
   ${protobuf_SOURCE_DIR}/upb/message/internal/map_sorter.h
   ${protobuf_SOURCE_DIR}/upb/message/internal/message.h
-  ${protobuf_SOURCE_DIR}/upb/message/internal/tagged_ptr.h
   ${protobuf_SOURCE_DIR}/upb/message/internal/types.h
   ${protobuf_SOURCE_DIR}/upb/message/map.h
   ${protobuf_SOURCE_DIR}/upb/message/map_gencode_util.h
   ${protobuf_SOURCE_DIR}/upb/message/merge.h
   ${protobuf_SOURCE_DIR}/upb/message/message.h
-  ${protobuf_SOURCE_DIR}/upb/message/tagged_ptr.h
   ${protobuf_SOURCE_DIR}/upb/message/value.h
   ${protobuf_SOURCE_DIR}/upb/mini_descriptor/build_enum.h
   ${protobuf_SOURCE_DIR}/upb/mini_descriptor/decode.h
@@ -767,6 +766,7 @@ set(libupb_hdrs
   ${protobuf_SOURCE_DIR}/upb/mini_descriptor/internal/modifiers.h
   ${protobuf_SOURCE_DIR}/upb/mini_descriptor/internal/wire_constants.h
   ${protobuf_SOURCE_DIR}/upb/mini_descriptor/link.h
+  ${protobuf_SOURCE_DIR}/upb/mini_table/debug_string.h
   ${protobuf_SOURCE_DIR}/upb/mini_table/enum.h
   ${protobuf_SOURCE_DIR}/upb/mini_table/extension.h
   ${protobuf_SOURCE_DIR}/upb/mini_table/extension_registry.h
