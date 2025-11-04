@@ -19,11 +19,16 @@
 #include <string>
 
 #include "google/protobuf/descriptor.pb.h"
+#include "absl/base/attributes.h"
 #include "absl/base/const_init.h"
+#include "absl/base/thread_annotations.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/absl_check.h"
 #include "absl/strings/string_view.h"
+#ifdef Py_GIL_DISABLED
+// Only include mutex for free-threaded builds
 #include "absl/synchronization/mutex.h"
+#endif
 #include "google/protobuf/descriptor.h"
 #include "google/protobuf/dynamic_message.h"
 #include "google/protobuf/internal_feature_helper.h"
@@ -73,14 +78,64 @@ namespace google {
 namespace protobuf {
 namespace python {
 
+// Zero-cost mutex wrapper that compiles away to nothing in GIL-enabled builds.
+// Similar to nanobind's ft_mutex pattern.
+class ABSL_LOCKABLE ABSL_ATTRIBUTE_WARN_UNUSED FreeThreadingMutex {
+ public:
+  FreeThreadingMutex() = default;
+  explicit constexpr FreeThreadingMutex(absl::ConstInitType)
+#ifdef Py_GIL_DISABLED
+      : mutex_(absl::kConstInit)
+#endif
+  {
+  }
+  FreeThreadingMutex(const FreeThreadingMutex&) = delete;
+  FreeThreadingMutex& operator=(const FreeThreadingMutex&) = delete;
+
+#ifndef Py_GIL_DISABLED
+  // GIL-enabled build: no-op mutex (zero cost)
+  void Lock() {}
+  void Unlock() {}
+#else
+  // Free-threaded build: real mutex
+  void Lock() ABSL_EXCLUSIVE_LOCK_FUNCTION() { mutex_.Lock(); }
+  void Unlock() ABSL_UNLOCK_FUNCTION() { mutex_.Unlock(); }
+
+ private:
+  absl::Mutex mutex_;
+#endif
+};
+
+// RAII lock guard for FreeThreadingMutex
+class ABSL_SCOPED_LOCKABLE FreeThreadingLockGuard {
+ public:
+  explicit FreeThreadingLockGuard(FreeThreadingMutex& mutex)
+      ABSL_EXCLUSIVE_LOCK_FUNCTION(mutex)
+      : mutex_(mutex) {
+    mutex_.Lock();
+  }
+  ~FreeThreadingLockGuard() ABSL_UNLOCK_FUNCTION() { mutex_.Unlock(); }
+
+  FreeThreadingLockGuard(const FreeThreadingLockGuard&) = delete;
+  FreeThreadingLockGuard& operator=(const FreeThreadingLockGuard&) = delete;
+
+ private:
+  FreeThreadingMutex& mutex_;
+};
+
+// Mutex to protect interned_descriptors from concurrent access in
+// free-threading Python builds. Zero-cost in GIL-enabled builds.
+// NOTE: Free-threading support is still experimental.
+FreeThreadingMutex interned_descriptors_mutex(absl::kConstInit);
+
 // Store interned descriptors, so that the same C++ descriptor yields the same
 // Python object. Objects are not immortal: this map does not own the
 // references, and items are deleted when the last reference to the object is
 // released.
 // This is enough to support the "is" operator on live objects.
 // All descriptors are stored here.
-absl::flat_hash_map<const void*, PyObject*>* interned_descriptors;
-absl::Mutex interned_descriptors_lock(absl::kConstInit);
+absl::flat_hash_map<const void*, PyObject*>* interned_descriptors
+    ABSL_PT_GUARDED_BY(interned_descriptors_mutex);
 
 PyObject* PyString_FromCppString(absl::string_view str) {
   return PyUnicode_FromStringAndSize(str.data(),
@@ -402,24 +457,28 @@ PyObject* NewInternedDescriptor(PyTypeObject* type,
     return nullptr;
   }
 
-  absl::MutexLock lock(&interned_descriptors_lock);
   // See if the object is in the map of interned descriptors
-  auto it = interned_descriptors->find(descriptor);
-  if (it != interned_descriptors->end()) {
-    ABSL_DCHECK(Py_TYPE(it->second) == type);
-    Py_INCREF(it->second);
-    return it->second;
+  PyObject* existing = nullptr;
+  {
+    FreeThreadingLockGuard lock(interned_descriptors_mutex);
+    auto it = interned_descriptors->find(descriptor);
+    if (it != interned_descriptors->end()) {
+      ABSL_DCHECK(Py_TYPE(it->second) == type);
+      existing = it->second;
+    }
   }
+  // Py_INCREF must be called outside the lock to avoid deadlock
+  if (existing != nullptr) {
+    Py_INCREF(existing);
+    return existing;
+  }
+
   // Create a new descriptor object
   PyBaseDescriptor* py_descriptor = PyObject_GC_New(PyBaseDescriptor, type);
   if (py_descriptor == nullptr) {
     return nullptr;
   }
   py_descriptor->descriptor = descriptor;
-
-  // and cache it.
-  interned_descriptors->insert(
-      std::make_pair(descriptor, reinterpret_cast<PyObject*>(py_descriptor)));
 
   // Ensures that the DescriptorPool stays alive.
   PyDescriptorPool* pool =
@@ -434,6 +493,26 @@ PyObject* NewInternedDescriptor(PyTypeObject* type,
 
   PyObject_GC_Track(py_descriptor);
 
+  // Cache the fully initialized descriptor.
+  // Check again if another thread cached it while we were initializing.
+  {
+    FreeThreadingLockGuard lock(interned_descriptors_mutex);
+    auto [it, inserted] = interned_descriptors->insert(
+        std::make_pair(descriptor, reinterpret_cast<PyObject*>(py_descriptor)));
+    if (!inserted) {
+      // Another thread beat us to it. Use the existing descriptor.
+      ABSL_DCHECK(Py_TYPE(it->second) == type);
+      existing = it->second;
+    }
+  }
+
+  // If another thread cached first, clean up our descriptor and use theirs
+  if (existing != nullptr) {
+    Py_DECREF(py_descriptor);
+    Py_INCREF(existing);
+    return existing;
+  }
+
   if (was_created) {
     *was_created = true;
   }
@@ -442,13 +521,11 @@ PyObject* NewInternedDescriptor(PyTypeObject* type,
 
 static void Dealloc(PyObject* pself) {
   PyBaseDescriptor* self = reinterpret_cast<PyBaseDescriptor*>(pself);
-
+  // Remove from interned dictionary
   {
-    absl::MutexLock mu(&interned_descriptors_lock);
-    // Remove from interned dictionary
+    FreeThreadingLockGuard lock(interned_descriptors_mutex);
     interned_descriptors->erase(self->descriptor);
   }
-
   Py_CLEAR(self->pool);
   PyObject_GC_UnTrack(pself);
   Py_TYPE(self)->tp_free(pself);

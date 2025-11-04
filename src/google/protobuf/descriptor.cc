@@ -8086,8 +8086,10 @@ void DescriptorBuilder::CrossLinkField(FieldDescriptor* field,
           // because that locks the pool's mutex, which we have already locked
           // at this point.
           const EnumValueDescriptor* default_value =
-              LookupSymbolNoPlaceholder(proto.default_value(),
-                                        field->enum_type()->full_name())
+              field->enum_type()
+                  ->file()
+                  ->tables_
+                  ->FindNestedSymbol(field->enum_type(), proto.default_value())
                   .enum_value_descriptor();
 
           if (default_value != nullptr &&
@@ -8389,10 +8391,10 @@ void DescriptorBuilder::ValidateOptions(const FileDescriptor* file,
   if (file->edition() >= Edition::EDITION_2024) {
     if (file->options().has_java_multiple_files()) {
       AddError(file->name(), proto, DescriptorPool::ErrorCollector::OPTION_NAME,
-               "The file option `java_multiple_files` is not supported in "
-               "editions 2024 and above, which defaults to the feature value of"
-               " `nest_in_file_class = NO` (equivalent to "
-               "`java_multiple_files = true`).");
+               "The `java_multiple_files` behavior is enabled by default in "
+               "editions 2024 and above.  To disable it, you can set "
+               "`features.(pb.java).nest_in_file_class = YES` on individual "
+               "messages, enums, or services.");
     }
     if (file->weak_dependency_count() > 0) {
       AddError("weak", proto, DescriptorPool::ErrorCollector::IMPORT,
