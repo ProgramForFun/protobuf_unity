@@ -85,7 +85,7 @@ Error, UINTPTR_MAX is undefined
 /* If we always read/write as a consistent type to each address, this shouldn't
  * violate aliasing.
  */
-#define UPB_PTR_AT(msg, ofs, type) ((type*)((char*)(msg) + (ofs)))
+#define UPB_PTR_AT(msg, ofs, type) ((type *)((char *)(msg) + (ofs)))
 
 // A flexible array member may have lower alignment requirements than the struct
 // overall - in that case, it can overlap with the trailing padding of the rest
@@ -492,12 +492,6 @@ Error, UINTPTR_MAX is undefined
 #define UPB_NO_SANITIZE_ADDRESS
 #endif
 
-#if defined(__GNUC__) && (defined(__clang__) || UPB_GNUC_MIN(11, 0))
-#define UPB_RETAIN __attribute__((retain))
-#else
-#define UPB_RETAIN
-#endif
-
 // Linker arrays combine elements from multiple translation units into a single
 // array that can be iterated over at runtime.
 //
@@ -522,20 +516,14 @@ Error, UINTPTR_MAX is undefined
 //     }
 //   }
 
-#define UPB_LINKARR_ATTR
-
-#define UPB_LINKARR_SENTINEL UPB_RETAIN __attribute__((weak, used))
-
 #if defined(__ELF__) || defined(__wasm__)
 
 #define UPB_LINKARR_APPEND(name) \
-  __attribute__((                \
-      section("linkarr_" #name))) UPB_LINKARR_ATTR UPB_NO_SANITIZE_ADDRESS
+  __attribute__((section("linkarr_" #name))) UPB_NO_SANITIZE_ADDRESS
 #define UPB_LINKARR_DECLARE(name, type) \
   extern type __start_linkarr_##name;   \
   extern type __stop_linkarr_##name;    \
-  UPB_LINKARR_APPEND(name)              \
-  UPB_LINKARR_SENTINEL type UPB_linkarr_internal_empty_##name[1]
+  UPB_LINKARR_APPEND(name) type UPB_linkarr_internal_empty_##name[1]
 #define UPB_LINKARR_START(name) (&__start_linkarr_##name)
 #define UPB_LINKARR_STOP(name) (&__stop_linkarr_##name)
 
@@ -543,83 +531,41 @@ Error, UINTPTR_MAX is undefined
 
 /* As described in: https://stackoverflow.com/a/22366882 */
 #define UPB_LINKARR_APPEND(name) \
-  __attribute__((                \
-      section("__DATA,__la_" #name))) UPB_LINKARR_ATTR UPB_NO_SANITIZE_ADDRESS
+  __attribute__((section("__DATA,__la_" #name))) UPB_NO_SANITIZE_ADDRESS
 #define UPB_LINKARR_DECLARE(name, type)     \
   extern type __start_linkarr_##name __asm( \
       "section$start$__DATA$__la_" #name);  \
   extern type __stop_linkarr_##name __asm(  \
       "section$end$__DATA$"                 \
       "__la_" #name);                       \
-  UPB_LINKARR_APPEND(name)                  \
-  UPB_LINKARR_SENTINEL type UPB_linkarr_internal_empty_##name[1]
+  UPB_LINKARR_APPEND(name) type UPB_linkarr_internal_empty_##name[1]
 #define UPB_LINKARR_START(name) (&__start_linkarr_##name)
 #define UPB_LINKARR_STOP(name) (&__stop_linkarr_##name)
 
-#elif defined(_MSC_VER)
+#elif defined(_MSC_VER) && defined(__clang__)
 
 /* See:
  *   https://devblogs.microsoft.com/oldnewthing/20181107-00/?p=100155
  *   https://devblogs.microsoft.com/oldnewthing/20181108-00/?p=100165
  *   https://devblogs.microsoft.com/oldnewthing/20181109-00/?p=100175 */
-#define UPB_STRINGIFY_INTERNAL(x) #x
-#define UPB_STRINGIFY(x) UPB_STRINGIFY_INTERNAL(x)
-#define UPB_CONCAT(a, b, c) a##b##c
-#define UPB_LINKARR_NAME(name, index) \
-  UPB_STRINGIFY(UPB_CONCAT(la_, name, index))
-#define UPB_LINKARR_APPEND(name)                      \
-  __pragma(section(UPB_LINKARR_NAME(name, $j), read)) \
-      __declspec(allocate(UPB_LINKARR_NAME(name, $j)))
-// clang-format off
-#define UPB_LINKARR_DECLARE(name, type)                          \
-  __pragma(message(UPB_LINKARR_NAME(name, $j)))                  \
-  __pragma(section(UPB_LINKARR_NAME(name, $a), read))            \
-  __pragma(section(UPB_LINKARR_NAME(name, $z), read))            \
-  __declspec(allocate(UPB_LINKARR_NAME(name, $a)), selectany)    \
-            type __start_linkarr_##name;                         \
-  __declspec(allocate(UPB_LINKARR_NAME(name, $z)), selectany)    \
-            type __stop_linkarr_##name;                          \
-  UPB_LINKARR_APPEND(name)                                       \
-  __declspec(selectany) type UPB_linkarr_internal_empty_##name[1] = {0}
-// clang-format on
+
+// Usage of __attribute__ here probably means this is Clang-specific, and would
+// not work on MSVC.
+#define UPB_LINKARR_APPEND(name) \
+  __declspec(allocate("la_" #name "$j")) UPB_NO_SANITIZE_ADDRESS
+#define UPB_LINKARR_DECLARE(name, type)                               \
+  __declspec(allocate("la_" #name "$a")) type __start_linkarr_##name; \
+  __declspec(allocate("la_" #name "$z")) type __stop_linkarr_##name;  \
+  UPB_LINKARR_APPEND(name) type UPB_linkarr_internal_empty_##name[1] = {0}
 #define UPB_LINKARR_START(name) (&__start_linkarr_##name)
 #define UPB_LINKARR_STOP(name) (&__stop_linkarr_##name)
 
 #else
 
-// Linker arrays are not supported on this platform.  Make macros no-ops.
+// Linker arrays are not supported on this platform.  Make appends a no-op but
+// don't define the other macros.
 #define UPB_LINKARR_APPEND(name)
-#define UPB_LINKARR_DECLARE(name, type)
-#define UPB_LINKARR_START(name) (NULL)
-#define UPB_LINKARR_STOP(name) (NULL)
 
-#endif
-
-#if defined(__ELF__) || defined(__wasm__) || defined(__MACH__)
-#define UPB_CONSTRUCTOR(name)                                                \
-  __attribute__((weak, visibility("hidden"), constructor)) void UPB_PRIVATE( \
-      name)(void)
-#elif defined(_MSC_VER)
-/*
- * See: https://stackoverflow.com/questions/1113409
- *
- * The /include pragma suggested in the link above doesn't work in our case
- * because it requires globally unique names. We need a different solution
- * to prevent optimizers from removing the constructor. Our solution is to
- * create a dummy exported weak symbol that prevent this stripping.
- */
-#pragma section(".CRT$XCU", long, read)
-#define UPB_CONSTRUCTOR(name)                                                \
-  static void __cdecl UPB_PRIVATE(name)(void);                               \
-  __declspec(allocate(".CRT$XCU"), selectany) void(                          \
-      __cdecl * UPB_PRIVATE(name##_))(void) = UPB_PRIVATE(name);             \
-  __declspec(selectany, dllexport) void* UPB_PRIVATE(name##_force_linkage) = \
-      &UPB_PRIVATE(name##_);                                                 \
-  static void __cdecl UPB_PRIVATE(name)(void)
-
-#else
-// No constructor support, nothing we can do except not break builds.
-#define UPB_CONSTRUCTOR(name) static void UPB_PRIVATE(name)(void)
 #endif
 
 // Future versions of upb will include breaking changes to some APIs.
@@ -642,7 +588,6 @@ Error, UINTPTR_MAX is undefined
 // Must be last.
 
 extern const struct upb_MiniTable UPB_PRIVATE(_kUpb_MiniTable_StaticallyTreeShaken);
-extern const UPB_PRIVATE(upb_GeneratedExtensionListEntry)* UPB_PRIVATE(upb_generated_extension_list);
 static const upb_MiniTableSubInternal google_protobuf_FileDescriptorSet__submsgs[1] = {
   {.UPB_PRIVATE(submsg) = &google__protobuf__FileDescriptorProto_msg_init_ptr},
 };
@@ -1435,7 +1380,7 @@ const upb_MiniTable google__protobuf__GeneratedCodeInfo__Annotation_msg_init = {
 const upb_MiniTable* const google__protobuf__GeneratedCodeInfo__Annotation_msg_init_ptr = &google__protobuf__GeneratedCodeInfo__Annotation_msg_init;
 const upb_MiniTableEnum google__protobuf__Edition_enum_init = {
     64,
-    9,
+    10,
     {
         0x7,
         0x0,
@@ -1444,6 +1389,7 @@ const upb_MiniTableEnum google__protobuf__Edition_enum_init = {
         0x3e7,
         0x3e8,
         0x3e9,
+        0x270f,
         0x1869d,
         0x1869e,
         0x1869f,
@@ -1702,7 +1648,7 @@ const upb_MiniTableFile google_protobuf_descriptor_proto_upb_file_layout = {
 
 
 
-static const char descriptor[13232] = {
+static const char descriptor[13255] = {
     '\n', ' ', 'g', 'o', 'o', 'g', 'l', 'e', '/', 'p', 'r', 'o',
     't', 'o', 'b', 'u', 'f', '/', 'd', 'e', 's', 'c', 'r', 'i',
     'p', 't', 'o', 'r', '.', 'p', 'r', 'o', 't', 'o', '\022', '\017',
@@ -2763,7 +2709,7 @@ static const char descriptor[13232] = {
     'a', 'n', 't', 'i', 'c', '\022', '\010', '\n', '\004', 'N', 'O', 'N',
     'E', '\020', '\000', '\022', '\007', '\n', '\003', 'S', 'E', 'T', '\020', '\001',
     '\022', '\t', '\n', '\005', 'A', 'L', 'I', 'A', 'S', '\020', '\002', '*',
-    '\247', '\002', '\n', '\007', 'E', 'd', 'i', 't', 'i', 'o', 'n', '\022',
+    '\276', '\002', '\n', '\007', 'E', 'd', 'i', 't', 'i', 'o', 'n', '\022',
     '\023', '\n', '\017', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', 'U',
     'N', 'K', 'N', 'O', 'W', 'N', '\020', '\000', '\022', '\023', '\n', '\016',
     'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', 'L', 'E', 'G', 'A',
@@ -2774,38 +2720,40 @@ static const char descriptor[13232] = {
     '\021', '\n', '\014', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', '2',
     '0', '2', '3', '\020', '\350', '\007', '\022', '\021', '\n', '\014', 'E', 'D',
     'I', 'T', 'I', 'O', 'N', '_', '2', '0', '2', '4', '\020', '\351',
-    '\007', '\022', '\027', '\n', '\023', 'E', 'D', 'I', 'T', 'I', 'O', 'N',
-    '_', '1', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y',
-    '\020', '\001', '\022', '\027', '\n', '\023', 'E', 'D', 'I', 'T', 'I', 'O',
-    'N', '_', '2', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L',
-    'Y', '\020', '\002', '\022', '\035', '\n', '\027', 'E', 'D', 'I', 'T', 'I',
-    'O', 'N', '_', '9', '9', '9', '9', '7', '_', 'T', 'E', 'S',
-    'T', '_', 'O', 'N', 'L', 'Y', '\020', '\235', '\215', '\006', '\022', '\035',
-    '\n', '\027', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', '9', '9',
-    '9', '9', '8', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L',
-    'Y', '\020', '\236', '\215', '\006', '\022', '\035', '\n', '\027', 'E', 'D', 'I',
-    'T', 'I', 'O', 'N', '_', '9', '9', '9', '9', '9', '_', 'T',
-    'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y', '\020', '\237', '\215', '\006',
-    '\022', '\023', '\n', '\013', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_',
-    'M', 'A', 'X', '\020', '\377', '\377', '\377', '\377', '\007', '*', 'U', '\n',
-    '\020', 'S', 'y', 'm', 'b', 'o', 'l', 'V', 'i', 's', 'i', 'b',
-    'i', 'l', 'i', 't', 'y', '\022', '\024', '\n', '\020', 'V', 'I', 'S',
-    'I', 'B', 'I', 'L', 'I', 'T', 'Y', '_', 'U', 'N', 'S', 'E',
-    'T', '\020', '\000', '\022', '\024', '\n', '\020', 'V', 'I', 'S', 'I', 'B',
-    'I', 'L', 'I', 'T', 'Y', '_', 'L', 'O', 'C', 'A', 'L', '\020',
-    '\001', '\022', '\025', '\n', '\021', 'V', 'I', 'S', 'I', 'B', 'I', 'L',
-    'I', 'T', 'Y', '_', 'E', 'X', 'P', 'O', 'R', 'T', '\020', '\002',
-    'B', '~', '\n', '\023', 'c', 'o', 'm', '.', 'g', 'o', 'o', 'g',
-    'l', 'e', '.', 'p', 'r', 'o', 't', 'o', 'b', 'u', 'f', 'B',
-    '\020', 'D', 'e', 's', 'c', 'r', 'i', 'p', 't', 'o', 'r', 'P',
-    'r', 'o', 't', 'o', 's', 'H', '\001', 'Z', '-', 'g', 'o', 'o',
-    'g', 'l', 'e', '.', 'g', 'o', 'l', 'a', 'n', 'g', '.', 'o',
-    'r', 'g', '/', 'p', 'r', 'o', 't', 'o', 'b', 'u', 'f', '/',
-    't', 'y', 'p', 'e', 's', '/', 'd', 'e', 's', 'c', 'r', 'i',
-    'p', 't', 'o', 'r', 'p', 'b', '\370', '\001', '\001', '\242', '\002', '\003',
-    'G', 'P', 'B', '\252', '\002', '\032', 'G', 'o', 'o', 'g', 'l', 'e',
-    '.', 'P', 'r', 'o', 't', 'o', 'b', 'u', 'f', '.', 'R', 'e',
-    'f', 'l', 'e', 'c', 't', 'i', 'o', 'n',
+    '\007', '\022', '\025', '\n', '\020', 'E', 'D', 'I', 'T', 'I', 'O', 'N',
+    '_', 'U', 'N', 'S', 'T', 'A', 'B', 'L', 'E', '\020', '\217', 'N',
+    '\022', '\027', '\n', '\023', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_',
+    '1', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y', '\020',
+    '\001', '\022', '\027', '\n', '\023', 'E', 'D', 'I', 'T', 'I', 'O', 'N',
+    '_', '2', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y',
+    '\020', '\002', '\022', '\035', '\n', '\027', 'E', 'D', 'I', 'T', 'I', 'O',
+    'N', '_', '9', '9', '9', '9', '7', '_', 'T', 'E', 'S', 'T',
+    '_', 'O', 'N', 'L', 'Y', '\020', '\235', '\215', '\006', '\022', '\035', '\n',
+    '\027', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', '9', '9', '9',
+    '9', '8', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y',
+    '\020', '\236', '\215', '\006', '\022', '\035', '\n', '\027', 'E', 'D', 'I', 'T',
+    'I', 'O', 'N', '_', '9', '9', '9', '9', '9', '_', 'T', 'E',
+    'S', 'T', '_', 'O', 'N', 'L', 'Y', '\020', '\237', '\215', '\006', '\022',
+    '\023', '\n', '\013', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', 'M',
+    'A', 'X', '\020', '\377', '\377', '\377', '\377', '\007', '*', 'U', '\n', '\020',
+    'S', 'y', 'm', 'b', 'o', 'l', 'V', 'i', 's', 'i', 'b', 'i',
+    'l', 'i', 't', 'y', '\022', '\024', '\n', '\020', 'V', 'I', 'S', 'I',
+    'B', 'I', 'L', 'I', 'T', 'Y', '_', 'U', 'N', 'S', 'E', 'T',
+    '\020', '\000', '\022', '\024', '\n', '\020', 'V', 'I', 'S', 'I', 'B', 'I',
+    'L', 'I', 'T', 'Y', '_', 'L', 'O', 'C', 'A', 'L', '\020', '\001',
+    '\022', '\025', '\n', '\021', 'V', 'I', 'S', 'I', 'B', 'I', 'L', 'I',
+    'T', 'Y', '_', 'E', 'X', 'P', 'O', 'R', 'T', '\020', '\002', 'B',
+    '~', '\n', '\023', 'c', 'o', 'm', '.', 'g', 'o', 'o', 'g', 'l',
+    'e', '.', 'p', 'r', 'o', 't', 'o', 'b', 'u', 'f', 'B', '\020',
+    'D', 'e', 's', 'c', 'r', 'i', 'p', 't', 'o', 'r', 'P', 'r',
+    'o', 't', 'o', 's', 'H', '\001', 'Z', '-', 'g', 'o', 'o', 'g',
+    'l', 'e', '.', 'g', 'o', 'l', 'a', 'n', 'g', '.', 'o', 'r',
+    'g', '/', 'p', 'r', 'o', 't', 'o', 'b', 'u', 'f', '/', 't',
+    'y', 'p', 'e', 's', '/', 'd', 'e', 's', 'c', 'r', 'i', 'p',
+    't', 'o', 'r', 'p', 'b', '\370', '\001', '\001', '\242', '\002', '\003', 'G',
+    'P', 'B', '\252', '\002', '\032', 'G', 'o', 'o', 'g', 'l', 'e', '.',
+    'P', 'r', 'o', 't', 'o', 'b', 'u', 'f', '.', 'R', 'e', 'f',
+    'l', 'e', 'c', 't', 'i', 'o', 'n',
 };
 
 static _upb_DefPool_Init *deps[1] = {
@@ -10756,46 +10704,25 @@ failure:
   return status;
 }
 
-const UPB_PRIVATE(upb_GeneratedExtensionListEntry) *
-    UPB_PRIVATE(upb_generated_extension_list) = NULL;
+#ifdef UPB_LINKARR_DECLARE
+
+UPB_LINKARR_DECLARE(upb_AllExts, const upb_MiniTableExtension);
 
 bool upb_ExtensionRegistry_AddAllLinkedExtensions(upb_ExtensionRegistry* r) {
-  const UPB_PRIVATE(upb_GeneratedExtensionListEntry)* entry =
-      UPB_PRIVATE(upb_generated_extension_list);
-  while (entry != NULL) {
-    // Comparing pointers to different objects is undefined behavior, so we
-    // convert them to uintptr_t and compare their values.
-    uintptr_t begin = (uintptr_t)entry->start;
-    uintptr_t end = (uintptr_t)entry->stop;
-    uintptr_t current = begin;
-    while (current < end) {
-      const upb_MiniTableExtension* ext =
-          (const upb_MiniTableExtension*)current;
-      // Sentinels and padding introduced by the linker can result in zeroed
-      // entries, so simply skip them.
-      if (upb_MiniTableExtension_Number(ext) == 0) {
-        // MSVC introduces padding that might not be sized exactly the same as
-        // upb_MiniTableExtension, so we can't iterate by sizeof.  This is a
-        // valid thing for any linker to do, so it's safer to just always do it.
-        current += UPB_ALIGN_OF(upb_MiniTableExtension);
-        continue;
-      }
-
-      if (upb_ExtensionRegistry_Add(r, ext) !=
-          kUpb_ExtensionRegistryStatus_Ok) {
+  const upb_MiniTableExtension* start = UPB_LINKARR_START(upb_AllExts);
+  const upb_MiniTableExtension* stop = UPB_LINKARR_STOP(upb_AllExts);
+  for (const upb_MiniTableExtension* p = start; p < stop; p++) {
+    // Windows can introduce zero padding, so we have to skip zeroes.
+    if (upb_MiniTableExtension_Number(p) != 0) {
+      if (upb_ExtensionRegistry_Add(r, p) != kUpb_ExtensionRegistryStatus_Ok) {
         return false;
       }
-      current += sizeof(upb_MiniTableExtension);
     }
-    entry = entry->next;
   }
   return true;
 }
 
-const upb_ExtensionRegistry* upb_ExtensionRegistry_GetGenerated(
-    const upb_GeneratedRegistryRef* genreg) {
-  return genreg != NULL ? genreg->registry : NULL;
-}
+#endif  // UPB_LINKARR_DECLARE
 
 const upb_MiniTableExtension* upb_ExtensionRegistry_Lookup(
     const upb_ExtensionRegistry* r, const upb_MiniTable* t, uint32_t num) {
@@ -10806,133 +10733,6 @@ const upb_MiniTableExtension* upb_ExtensionRegistry_Lookup(
     return upb_value_getconstptr(v);
   } else {
     return NULL;
-  }
-}
-
-
-#include <stdint.h>
-
-
-// Must be last.
-
-#if UPB_TSAN
-#include <sched.h>
-#endif  // UPB_TSAN
-
-typedef struct upb_GeneratedRegistry {
-  UPB_ATOMIC(upb_GeneratedRegistryRef*) ref;
-  UPB_ATOMIC(int32_t) ref_count;
-} upb_GeneratedRegistry;
-
-static upb_GeneratedRegistry* _upb_generated_registry(void) {
-  static upb_GeneratedRegistry r = {NULL, 0};
-  return &r;
-}
-
-// Constructs a new GeneratedRegistryRef, adding all linked extensions to the
-// registry or returning NULL on failure.
-static upb_GeneratedRegistryRef* _upb_GeneratedRegistry_New(void) {
-  upb_Arena* arena = NULL;
-  upb_ExtensionRegistry* extreg = NULL;
-  upb_GeneratedRegistryRef* ref = upb_gmalloc(sizeof(upb_GeneratedRegistryRef));
-  if (ref == NULL) goto err;
-  arena = upb_Arena_New();
-  if (arena == NULL) goto err;
-  extreg = upb_ExtensionRegistry_New(arena);
-  if (extreg == NULL) goto err;
-
-  ref->arena = arena;
-  ref->registry = extreg;
-
-  if (!upb_ExtensionRegistry_AddAllLinkedExtensions(extreg)) goto err;
-
-  return ref;
-
-err:
-  if (arena != NULL) upb_Arena_Free(arena);
-  if (ref != NULL) upb_gfree(ref);
-  return NULL;
-}
-
-const upb_GeneratedRegistryRef* upb_GeneratedRegistry_Load(void) {
-  upb_GeneratedRegistry* registry = _upb_generated_registry();
-
-  // Loop until we successfully acquire a reference.  This loop should only
-  // kick in under extremely high contention, and it should be guaranteed to
-  // succeed.
-  while (true) {
-    int32_t count = upb_Atomic_Load(&registry->ref_count, memory_order_acquire);
-
-    // Try to increment the refcount, but only if it's not zero.
-    while (count > 0) {
-      if (upb_Atomic_CompareExchangeStrong(&registry->ref_count, &count,
-                                           count + 1, memory_order_acquire,
-                                           memory_order_relaxed)) {
-        // Successfully incremented. We can now safely load and return the
-        // pointer.
-        const upb_GeneratedRegistryRef* ref =
-            upb_Atomic_Load(&registry->ref, memory_order_acquire);
-        UPB_ASSERT(ref != NULL);
-        return ref;
-      }
-      // CAS failed, `count` was updated. Loop will retry.
-    }
-
-    // If we're here, the count was 0. Time for the slow path.
-    // Double-check that the pointer is NULL before trying to create.
-    upb_GeneratedRegistryRef* ref =
-        upb_Atomic_Load(&registry->ref, memory_order_acquire);
-    if (ref == NULL) {
-      // Pointer is NULL, try to create and publish a new registry.
-      upb_GeneratedRegistryRef* new_ref = _upb_GeneratedRegistry_New();
-      if (new_ref == NULL) return NULL;  // OOM
-
-      // Try to CAS the pointer from NULL to our new_ref.
-      if (upb_Atomic_CompareExchangeStrong(&registry->ref, &ref, new_ref,
-                                           memory_order_release,
-                                           memory_order_acquire)) {
-        // We won the race. Set the ref count to 1.
-        upb_Atomic_Store(&registry->ref_count, 1, memory_order_release);
-        return new_ref;
-      } else {
-        // We lost the race. `ref` now holds the pointer from the winning
-        // thread. Clean up our unused one and loop to try again to get a
-        // reference.
-        upb_Arena_Free(new_ref->arena);
-        upb_gfree(new_ref);
-      }
-    }
-    // If we are here, either we lost the CAS race, or the pointer was already
-    // non-NULL. In either case, we loop to the top and try to increment the
-    // refcount of the existing object.
-
-#if UPB_TSAN
-    // Yield to give other threads a chance to increment the refcount.  This is
-    // especially an issue for TSAN builds, which are prone to locking up from
-    // the thread with the upb_Atomic_Store call above getting starved.
-    sched_yield();
-#endif  // UPB_TSAN
-  }
-}
-
-void upb_GeneratedRegistry_Release(const upb_GeneratedRegistryRef* r) {
-  if (r == NULL) return;
-
-  upb_GeneratedRegistry* registry = _upb_generated_registry();
-
-  int ref_count = upb_Atomic_Sub(&registry->ref_count, 1, memory_order_acq_rel);
-  UPB_ASSERT(registry->ref_count >= 0);
-
-  // A ref_count of 1 means that we decremented the refcount to 0.
-  if (ref_count == 1) {
-    upb_GeneratedRegistryRef* ref =
-        upb_Atomic_Exchange(&registry->ref, NULL, memory_order_acq_rel);
-    if (ref != NULL) {
-      // This is the last reference and we won any potential race to store NULL,
-      // so we need to clean up.
-      upb_Arena_Free(ref->arena);
-      upb_gfree(ref);
-    }
   }
 }
 
@@ -10995,11 +10795,6 @@ const struct upb_MiniTable UPB_PRIVATE(_kUpb_MiniTable_StaticallyTreeShaken) = {
 };
 
 
-#include <stddef.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-
 
 // Must be last.
 
@@ -11009,7 +10804,6 @@ struct upb_DefPool {
   upb_strtable files;  // file_name -> (upb_FileDef*)
   upb_inttable exts;   // (upb_MiniTableExtension*) -> (upb_FieldDef*)
   upb_ExtensionRegistry* extreg;
-  const upb_GeneratedRegistryRef* generated_extreg;
   const UPB_DESC(FeatureSetDefaults) * feature_set_defaults;
   upb_MiniTablePlatform platform;
   void* scratch_data;
@@ -11018,7 +10812,6 @@ struct upb_DefPool {
 };
 
 void upb_DefPool_Free(upb_DefPool* s) {
-  upb_GeneratedRegistry_Release(s->generated_extreg);
   upb_Arena_Free(s->arena);
   upb_gfree(s->scratch_data);
   upb_gfree(s);
@@ -11043,9 +10836,6 @@ upb_DefPool* upb_DefPool_New(void) {
 
   s->extreg = upb_ExtensionRegistry_New(s->arena);
   if (!s->extreg) goto err;
-
-  s->generated_extreg = upb_GeneratedRegistry_Load();
-  if (!s->generated_extreg) goto err;
 
   s->platform = kUpb_MiniTablePlatform_Native;
 
@@ -11507,11 +11297,6 @@ const upb_FieldDef** upb_DefPool_GetAllExtensions(const upb_DefPool* s,
 
 bool _upb_DefPool_LoadDefInit(upb_DefPool* s, const _upb_DefPool_Init* init) {
   return _upb_DefPool_LoadDefInitEx(s, init, false);
-}
-
-const upb_ExtensionRegistry* _upb_DefPool_GeneratedExtensionRegistry(
-    const upb_DefPool* s) {
-  return upb_ExtensionRegistry_GetGenerated(s->generated_extreg);
 }
 
 
