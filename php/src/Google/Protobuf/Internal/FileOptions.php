@@ -43,7 +43,7 @@ class FileOptions extends \Google\Protobuf\Internal\Message
      * generated to contain the file's getDescriptor() method as well as any
      * top-level extensions defined in the file.
      *
-     * Generated from protobuf field <code>optional bool java_multiple_files = 10 [default = false];</code>
+     * Generated from protobuf field <code>optional bool java_multiple_files = 10 [default = false, feature_support = {</code>
      */
     protected $java_multiple_files = null;
     /**
@@ -384,7 +384,7 @@ class FileOptions extends \Google\Protobuf\Internal\Message
      * generated to contain the file's getDescriptor() method as well as any
      * top-level extensions defined in the file.
      *
-     * Generated from protobuf field <code>optional bool java_multiple_files = 10 [default = false];</code>
+     * Generated from protobuf field <code>optional bool java_multiple_files = 10 [default = false, feature_support = {</code>
      * @return bool
      */
     public function getJavaMultipleFiles()
@@ -410,7 +410,7 @@ class FileOptions extends \Google\Protobuf\Internal\Message
      * generated to contain the file's getDescriptor() method as well as any
      * top-level extensions defined in the file.
      *
-     * Generated from protobuf field <code>optional bool java_multiple_files = 10 [default = false];</code>
+     * Generated from protobuf field <code>optional bool java_multiple_files = 10 [default = false, feature_support = {</code>
      * @param bool $var
      * @return $this
      */
@@ -520,7 +520,7 @@ class FileOptions extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>optional .google.protobuf.FileOptions.OptimizeMode optimize_for = 9 [default = SPEED];</code>
-     * @return int
+     * @return int one of the values in {@see \Google\Protobuf\Internal\FileOptions\OptimizeMode}
      */
     public function getOptimizeFor()
     {
@@ -539,7 +539,7 @@ class FileOptions extends \Google\Protobuf\Internal\Message
 
     /**
      * Generated from protobuf field <code>optional .google.protobuf.FileOptions.OptimizeMode optimize_for = 9 [default = SPEED];</code>
-     * @param int $var
+     * @param int $var one of the values in {@see \Google\Protobuf\Internal\FileOptions\OptimizeMode}
      * @return $this
      */
     public function setOptimizeFor($var)

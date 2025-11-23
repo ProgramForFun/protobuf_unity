@@ -26,7 +26,6 @@
 #include <limits>
 #include <memory>
 #include <new>  // IWYU pragma: keep
-#include <optional>
 #include <sstream>
 #include <string>
 #include <tuple>
@@ -66,6 +65,7 @@
 #include "absl/strings/strip.h"
 #include "absl/strings/substitute.h"
 #include "absl/synchronization/mutex.h"
+#include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "google/protobuf/any.h"
 #include "google/protobuf/cpp_edition_defaults.h"
@@ -78,8 +78,10 @@
 #include "google/protobuf/feature_resolver.h"
 #include "google/protobuf/generated_message_util.h"
 #include "google/protobuf/internal_feature_helper.h"
+#include "google/protobuf/io/coded_stream.h"
 #include "google/protobuf/io/strtod.h"
 #include "google/protobuf/io/tokenizer.h"
+#include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 #include "google/protobuf/message.h"
 #include "google/protobuf/message_lite.h"
 #include "google/protobuf/parse_context.h"
@@ -448,13 +450,13 @@ class FlatAllocatorImpl {
 
   // TODO: Remove the NULL terminators to save memory and simplify
   // the code.
-  std::optional<internal::DescriptorNames> CreateDescriptorNames(
+  absl::optional<internal::DescriptorNames> CreateDescriptorNames(
       std::initializer_list<absl::string_view> bytes,
       std::initializer_list<size_t> sizes) {
     for (size_t size : sizes) {
       // Name too long.
       if (size != static_cast<uint16_t>(size)) {
-        return std::nullopt;
+        return absl::nullopt;
       }
     }
 
@@ -479,7 +481,7 @@ class FlatAllocatorImpl {
     PlanArray<char>(internal::DescriptorNames::AllocationSizeForSimpleNames(
         full_name_size));
   }
-  std::optional<internal::DescriptorNames> AllocateEntityNames(
+  absl::optional<internal::DescriptorNames> AllocateEntityNames(
       absl::string_view scope, absl::string_view name) {
     static constexpr absl::string_view kNullChar("\0", 1);
     if (scope.empty()) {
@@ -560,7 +562,7 @@ class FlatAllocatorImpl {
     PlanArray<char>(total_bytes);
   }
 
-  std::optional<internal::DescriptorNames> AllocateFieldNames(
+  absl::optional<internal::DescriptorNames> AllocateFieldNames(
       const absl::string_view name, const absl::string_view scope,
       const std::string* opt_json_name) {
     ABSL_CHECK(has_allocated());
@@ -4504,7 +4506,7 @@ class DescriptorBuilder {
   DescriptorPool::DeferredValidation& deferred_validation_;
   DescriptorPool::ErrorCollector* error_collector_;
 
-  std::optional<FeatureResolver> feature_resolver_ = std::nullopt;
+  absl::optional<FeatureResolver> feature_resolver_ = absl::nullopt;
 
   // As we build descriptors we store copies of the options messages in
   // them. We put pointers to those copies in this vector, as we build, so we
@@ -5185,21 +5187,7 @@ DescriptorBuilder::DescriptorBuilder(
       error_collector_(error_collector),
       had_errors_(false),
       possible_undeclared_dependency_(nullptr),
-      undefine_resolved_name_("") {
-  // Ensure that any lazily loaded static initializers from the generated pool
-  // (e.g. from bootstrapped protos) are run before building any descriptors. We
-  // have to avoid registering these pre-main, because we need to ensure that
-  // the linker --gc-sections step can strip out the full runtime if it is
-  // unused.
-  [[maybe_unused]] static std::true_type lazy_register =
-      (internal::ExtensionSet::RegisterMessageExtension(
-           &FeatureSet::default_instance(), pb::cpp.number(),
-           FieldDescriptor::TYPE_MESSAGE, false, false,
-           &pb::CppFeatures::default_instance(),
-           nullptr,
-           internal::LazyAnnotation::kUndefined),
-       std::true_type{});
-}
+      undefine_resolved_name_("") {}
 
 DescriptorBuilder::~DescriptorBuilder() = default;
 
@@ -6073,6 +6061,18 @@ void DescriptorBuilder::AddImportError(const FileDescriptorProto& proto,
            make_error);
 }
 
+static std::string SerializeToDeterministicString(const Message& message) {
+  std::string out;
+  {
+    // Extra block to ensure coded_stream gets closed before we return.
+    io::StringOutputStream string_stream(&out);
+    io::CodedOutputStream coded_stream(&string_stream);
+    coded_stream.SetSerializationDeterministic(true);
+    ABSL_CHECK(message.SerializeToCodedStream(&coded_stream));
+  }
+  return out;
+}
+
 PROTOBUF_NOINLINE static bool ExistingFileMatchesProto(
     Edition edition, const FileDescriptor* existing_file,
     const FileDescriptorProto& proto) {
@@ -6082,7 +6082,8 @@ PROTOBUF_NOINLINE static bool ExistingFileMatchesProto(
     existing_proto.set_syntax("proto2");
   }
 
-  return existing_proto.SerializeAsString() == proto.SerializeAsString();
+  return SerializeToDeterministicString(existing_proto) ==
+         SerializeToDeterministicString(proto);
 }
 
 // These PlanAllocationSize functions will gather into the FlatAllocator all the
@@ -8826,7 +8827,7 @@ void DescriptorBuilder::ValidateOptions(
 namespace {
 // Validates that a fully-qualified symbol for extension declaration must
 // have a leading dot and valid identifiers.
-std::optional<std::string> ValidateSymbolForDeclaration(
+absl::optional<std::string> ValidateSymbolForDeclaration(
     absl::string_view symbol) {
   if (!absl::StartsWith(symbol, ".")) {
     return absl::StrCat("\"", symbol,
@@ -8836,7 +8837,7 @@ std::optional<std::string> ValidateSymbolForDeclaration(
   if (!ValidateQualifiedName(symbol)) {
     return absl::StrCat("\"", symbol, "\" contains invalid identifiers.");
   }
-  return std::nullopt;
+  return absl::nullopt;
 }
 }  // namespace
 
@@ -8890,7 +8891,7 @@ void DescriptorBuilder::ValidateExtensionDeclaration(
             });
         return;
       }
-      std::optional<std::string> err =
+      absl::optional<std::string> err =
           ValidateSymbolForDeclaration(declaration.full_name());
       if (err.has_value()) {
         AddError(full_name, proto, DescriptorPool::ErrorCollector::NAME,
