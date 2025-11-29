@@ -665,8 +665,32 @@ inline bool IsMemoryPoisoned([[maybe_unused]] const void* p) {
 #endif
 }
 
+inline constexpr bool ShouldBatchSingularString() {
+#ifdef PROTOBUF_INTERNAL_BATCH_SINGULAR_STRING
+  return true;
+#else
+  return false;
+#endif
+}
+
+inline constexpr bool ShouldBatchRepeatedString() {
+#ifdef PROTOBUF_INTERNAL_BATCH_REPEATED_STRING
+  return true;
+#else
+  return false;
+#endif
+}
+
 inline constexpr bool ShouldBatchRepeatedNumeric() {
 #ifdef PROTOBUF_INTERNAL_BATCH_REPEATED_NUMERIC
+  return true;
+#else
+  return false;
+#endif
+}
+
+inline constexpr bool UseBatchOffset() {
+#ifdef PROTOBUF_INTERNAL_USE_BATCH_OFFSET
   return true;
 #else
   return false;
@@ -761,6 +785,9 @@ class NoopDebugCounter {
   explicit constexpr NoopDebugCounter() = default;
   constexpr void Inc() {}
 };
+
+// Pretty random large number that seems like a safe allocation on most systems.
+inline constexpr size_t kSafeStringSize = 50000000;
 
 // Default empty string object. Don't use this directly. Instead, call
 // GetEmptyString() to get the reference. This empty string is aligned with a

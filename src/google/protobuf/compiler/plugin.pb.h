@@ -281,7 +281,7 @@ class PROTOC_EXPORT Version final : public ::google::protobuf::Message
   [[nodiscard]] bool has_suffix()
       const;
   void clear_suffix() ;
-  const ::std::string& suffix() const;
+  [[nodiscard]] const ::std::string& suffix() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_suffix(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_suffix();
@@ -298,7 +298,7 @@ class PROTOC_EXPORT Version final : public ::google::protobuf::Message
   [[nodiscard]] bool has_major()
       const;
   void clear_major() ;
-  ::int32_t major() const;
+  [[nodiscard]] ::int32_t major() const;
   void set_major(::int32_t value);
 
   private:
@@ -310,7 +310,7 @@ class PROTOC_EXPORT Version final : public ::google::protobuf::Message
   [[nodiscard]] bool has_minor()
       const;
   void clear_minor() ;
-  ::int32_t minor() const;
+  [[nodiscard]] ::int32_t minor() const;
   void set_minor(::int32_t value);
 
   private:
@@ -322,7 +322,7 @@ class PROTOC_EXPORT Version final : public ::google::protobuf::Message
   [[nodiscard]] bool has_patch()
       const;
   void clear_patch() ;
-  ::int32_t patch() const;
+  [[nodiscard]] ::int32_t patch() const;
   void set_patch(::int32_t value);
 
   private:
@@ -522,7 +522,7 @@ class PROTOC_EXPORT CodeGeneratorResponse_File final : public ::google::protobuf
   [[nodiscard]] bool has_name()
       const;
   void clear_name() ;
-  const ::std::string& name() const;
+  [[nodiscard]] const ::std::string& name() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_name(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_name();
@@ -539,7 +539,7 @@ class PROTOC_EXPORT CodeGeneratorResponse_File final : public ::google::protobuf
   [[nodiscard]] bool has_insertion_point()
       const;
   void clear_insertion_point() ;
-  const ::std::string& insertion_point() const;
+  [[nodiscard]] const ::std::string& insertion_point() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_insertion_point(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_insertion_point();
@@ -556,7 +556,7 @@ class PROTOC_EXPORT CodeGeneratorResponse_File final : public ::google::protobuf
   [[nodiscard]] bool has_content()
       const;
   void clear_content() ;
-  const ::std::string& content() const;
+  [[nodiscard]] const ::std::string& content() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_content(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_content();
@@ -573,7 +573,7 @@ class PROTOC_EXPORT CodeGeneratorResponse_File final : public ::google::protobuf
   [[nodiscard]] bool has_generated_code_info()
       const;
   void clear_generated_code_info() ;
-  const ::google::protobuf::GeneratedCodeInfo& generated_code_info() const;
+  [[nodiscard]] const ::google::protobuf::GeneratedCodeInfo& generated_code_info() const;
   [[nodiscard]] ::google::protobuf::GeneratedCodeInfo* PROTOBUF_NULLABLE release_generated_code_info();
   ::google::protobuf::GeneratedCodeInfo* PROTOBUF_NONNULL mutable_generated_code_info();
   void set_allocated_generated_code_info(::google::protobuf::GeneratedCodeInfo* PROTOBUF_NULLABLE value);
@@ -811,14 +811,15 @@ class PROTOC_EXPORT CodeGeneratorResponse final : public ::google::protobuf::Mes
   const ::google::protobuf::RepeatedPtrField<::google::protobuf::compiler::CodeGeneratorResponse_File>& _internal_file() const;
   ::google::protobuf::RepeatedPtrField<::google::protobuf::compiler::CodeGeneratorResponse_File>* PROTOBUF_NONNULL _internal_mutable_file();
   public:
-  const ::google::protobuf::compiler::CodeGeneratorResponse_File& file(int index) const;
+  [[nodiscard]] const ::google::protobuf::compiler::CodeGeneratorResponse_File& file(int index) const;
   ::google::protobuf::compiler::CodeGeneratorResponse_File* PROTOBUF_NONNULL add_file();
-  const ::google::protobuf::RepeatedPtrField<::google::protobuf::compiler::CodeGeneratorResponse_File>& file() const;
+  [[nodiscard]] const ::google::protobuf::RepeatedPtrField<::google::protobuf::compiler::CodeGeneratorResponse_File>& file()
+      const;
   // optional string error = 1;
   [[nodiscard]] bool has_error()
       const;
   void clear_error() ;
-  const ::std::string& error() const;
+  [[nodiscard]] const ::std::string& error() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_error(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_error();
@@ -835,7 +836,7 @@ class PROTOC_EXPORT CodeGeneratorResponse final : public ::google::protobuf::Mes
   [[nodiscard]] bool has_supported_features()
       const;
   void clear_supported_features() ;
-  ::uint64_t supported_features() const;
+  [[nodiscard]] ::uint64_t supported_features() const;
   void set_supported_features(::uint64_t value);
 
   private:
@@ -847,7 +848,7 @@ class PROTOC_EXPORT CodeGeneratorResponse final : public ::google::protobuf::Mes
   [[nodiscard]] bool has_minimum_edition()
       const;
   void clear_minimum_edition() ;
-  ::int32_t minimum_edition() const;
+  [[nodiscard]] ::int32_t minimum_edition() const;
   void set_minimum_edition(::int32_t value);
 
   private:
@@ -859,7 +860,7 @@ class PROTOC_EXPORT CodeGeneratorResponse final : public ::google::protobuf::Mes
   [[nodiscard]] bool has_maximum_edition()
       const;
   void clear_maximum_edition() ;
-  ::int32_t maximum_edition() const;
+  [[nodiscard]] ::int32_t maximum_edition() const;
   void set_maximum_edition(::int32_t value);
 
   private:
@@ -1070,14 +1071,15 @@ class PROTOC_EXPORT CodeGeneratorRequest final : public ::google::protobuf::Mess
 
   public:
   void clear_file_to_generate() ;
-  const ::std::string& file_to_generate(int index) const;
+  [[nodiscard]] const ::std::string& file_to_generate(int index) const;
   ::std::string* PROTOBUF_NONNULL mutable_file_to_generate(int index);
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_file_to_generate(int index, Arg_&& value, Args_... args);
   ::std::string* PROTOBUF_NONNULL add_file_to_generate();
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void add_file_to_generate(Arg_&& value, Args_... args);
-  const ::google::protobuf::RepeatedPtrField<::std::string>& file_to_generate() const;
+  [[nodiscard]] const ::google::protobuf::RepeatedPtrField<::std::string>&
+  file_to_generate() const;
   ::google::protobuf::RepeatedPtrField<::std::string>* PROTOBUF_NONNULL mutable_file_to_generate();
 
   private:
@@ -1100,14 +1102,15 @@ class PROTOC_EXPORT CodeGeneratorRequest final : public ::google::protobuf::Mess
   const ::google::protobuf::RepeatedPtrField<::google::protobuf::FileDescriptorProto>& _internal_proto_file() const;
   ::google::protobuf::RepeatedPtrField<::google::protobuf::FileDescriptorProto>* PROTOBUF_NONNULL _internal_mutable_proto_file();
   public:
-  const ::google::protobuf::FileDescriptorProto& proto_file(int index) const;
+  [[nodiscard]] const ::google::protobuf::FileDescriptorProto& proto_file(int index) const;
   ::google::protobuf::FileDescriptorProto* PROTOBUF_NONNULL add_proto_file();
-  const ::google::protobuf::RepeatedPtrField<::google::protobuf::FileDescriptorProto>& proto_file() const;
+  [[nodiscard]] const ::google::protobuf::RepeatedPtrField<::google::protobuf::FileDescriptorProto>& proto_file()
+      const;
   // optional string parameter = 2;
   [[nodiscard]] bool has_parameter()
       const;
   void clear_parameter() ;
-  const ::std::string& parameter() const;
+  [[nodiscard]] const ::std::string& parameter() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_parameter(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_parameter();
@@ -1124,7 +1127,7 @@ class PROTOC_EXPORT CodeGeneratorRequest final : public ::google::protobuf::Mess
   [[nodiscard]] bool has_compiler_version()
       const;
   void clear_compiler_version() ;
-  const ::google::protobuf::compiler::Version& compiler_version() const;
+  [[nodiscard]] const ::google::protobuf::compiler::Version& compiler_version() const;
   [[nodiscard]] ::google::protobuf::compiler::Version* PROTOBUF_NULLABLE release_compiler_version();
   ::google::protobuf::compiler::Version* PROTOBUF_NONNULL mutable_compiler_version();
   void set_allocated_compiler_version(::google::protobuf::compiler::Version* PROTOBUF_NULLABLE value);
@@ -1151,9 +1154,10 @@ class PROTOC_EXPORT CodeGeneratorRequest final : public ::google::protobuf::Mess
   const ::google::protobuf::RepeatedPtrField<::google::protobuf::FileDescriptorProto>& _internal_source_file_descriptors() const;
   ::google::protobuf::RepeatedPtrField<::google::protobuf::FileDescriptorProto>* PROTOBUF_NONNULL _internal_mutable_source_file_descriptors();
   public:
-  const ::google::protobuf::FileDescriptorProto& source_file_descriptors(int index) const;
+  [[nodiscard]] const ::google::protobuf::FileDescriptorProto& source_file_descriptors(int index) const;
   ::google::protobuf::FileDescriptorProto* PROTOBUF_NONNULL add_source_file_descriptors();
-  const ::google::protobuf::RepeatedPtrField<::google::protobuf::FileDescriptorProto>& source_file_descriptors() const;
+  [[nodiscard]] const ::google::protobuf::RepeatedPtrField<::google::protobuf::FileDescriptorProto>& source_file_descriptors()
+      const;
   // @@protoc_insertion_point(class_scope:google.protobuf.compiler.CodeGeneratorRequest)
  private:
   class _Internal;

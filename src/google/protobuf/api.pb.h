@@ -226,7 +226,7 @@ class PROTOBUF_EXPORT Mixin final : public ::google::protobuf::Message
   };
   // string name = 1;
   void clear_name() ;
-  const ::std::string& name() const;
+  [[nodiscard]] const ::std::string& name() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_name(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_name();
@@ -241,7 +241,7 @@ class PROTOBUF_EXPORT Mixin final : public ::google::protobuf::Message
   public:
   // string root = 2;
   void clear_root() ;
-  const ::std::string& root() const;
+  [[nodiscard]] const ::std::string& root() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_root(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_root();
@@ -459,12 +459,13 @@ class PROTOBUF_EXPORT Method final : public ::google::protobuf::Message
   const ::google::protobuf::RepeatedPtrField<::google::protobuf::Option>& _internal_options() const;
   ::google::protobuf::RepeatedPtrField<::google::protobuf::Option>* PROTOBUF_NONNULL _internal_mutable_options();
   public:
-  const ::google::protobuf::Option& options(int index) const;
+  [[nodiscard]] const ::google::protobuf::Option& options(int index) const;
   ::google::protobuf::Option* PROTOBUF_NONNULL add_options();
-  const ::google::protobuf::RepeatedPtrField<::google::protobuf::Option>& options() const;
+  [[nodiscard]] const ::google::protobuf::RepeatedPtrField<::google::protobuf::Option>& options()
+      const;
   // string name = 1;
   void clear_name() ;
-  const ::std::string& name() const;
+  [[nodiscard]] const ::std::string& name() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_name(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_name();
@@ -479,7 +480,7 @@ class PROTOBUF_EXPORT Method final : public ::google::protobuf::Message
   public:
   // string request_type_url = 2;
   void clear_request_type_url() ;
-  const ::std::string& request_type_url() const;
+  [[nodiscard]] const ::std::string& request_type_url() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_request_type_url(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_request_type_url();
@@ -494,7 +495,7 @@ class PROTOBUF_EXPORT Method final : public ::google::protobuf::Message
   public:
   // string response_type_url = 4;
   void clear_response_type_url() ;
-  const ::std::string& response_type_url() const;
+  [[nodiscard]] const ::std::string& response_type_url() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_response_type_url(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_response_type_url();
@@ -509,7 +510,7 @@ class PROTOBUF_EXPORT Method final : public ::google::protobuf::Message
   public:
   // string edition = 8 [deprecated = true];
   [[deprecated]]  void clear_edition() ;
-  [[deprecated]] const ::std::string& edition() const;
+  [[nodiscard]] [[deprecated]] const ::std::string& edition() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   [[deprecated]] void set_edition(Arg_&& arg, Args_... args);
   [[deprecated]] ::std::string* PROTOBUF_NONNULL mutable_edition();
@@ -524,7 +525,7 @@ class PROTOBUF_EXPORT Method final : public ::google::protobuf::Message
   public:
   // bool request_streaming = 3;
   void clear_request_streaming() ;
-  bool request_streaming() const;
+  [[nodiscard]] bool request_streaming() const;
   void set_request_streaming(bool value);
 
   private:
@@ -534,7 +535,7 @@ class PROTOBUF_EXPORT Method final : public ::google::protobuf::Message
   public:
   // bool response_streaming = 5;
   void clear_response_streaming() ;
-  bool response_streaming() const;
+  [[nodiscard]] bool response_streaming() const;
   void set_response_streaming(bool value);
 
   private:
@@ -544,7 +545,7 @@ class PROTOBUF_EXPORT Method final : public ::google::protobuf::Message
   public:
   // .google.protobuf.Syntax syntax = 7 [deprecated = true];
   [[deprecated]]  void clear_syntax() ;
-  [[deprecated]] ::google::protobuf::Syntax syntax() const;
+  [[nodiscard]] [[deprecated]] ::google::protobuf::Syntax syntax() const;
   [[deprecated]] void set_syntax(::google::protobuf::Syntax value);
 
   private:
@@ -763,9 +764,10 @@ class PROTOBUF_EXPORT Api final : public ::google::protobuf::Message
   const ::google::protobuf::RepeatedPtrField<::google::protobuf::Method>& _internal_methods() const;
   ::google::protobuf::RepeatedPtrField<::google::protobuf::Method>* PROTOBUF_NONNULL _internal_mutable_methods();
   public:
-  const ::google::protobuf::Method& methods(int index) const;
+  [[nodiscard]] const ::google::protobuf::Method& methods(int index) const;
   ::google::protobuf::Method* PROTOBUF_NONNULL add_methods();
-  const ::google::protobuf::RepeatedPtrField<::google::protobuf::Method>& methods() const;
+  [[nodiscard]] const ::google::protobuf::RepeatedPtrField<::google::protobuf::Method>& methods()
+      const;
   // repeated .google.protobuf.Option options = 3;
   [[nodiscard]] int options_size()
       const;
@@ -781,9 +783,10 @@ class PROTOBUF_EXPORT Api final : public ::google::protobuf::Message
   const ::google::protobuf::RepeatedPtrField<::google::protobuf::Option>& _internal_options() const;
   ::google::protobuf::RepeatedPtrField<::google::protobuf::Option>* PROTOBUF_NONNULL _internal_mutable_options();
   public:
-  const ::google::protobuf::Option& options(int index) const;
+  [[nodiscard]] const ::google::protobuf::Option& options(int index) const;
   ::google::protobuf::Option* PROTOBUF_NONNULL add_options();
-  const ::google::protobuf::RepeatedPtrField<::google::protobuf::Option>& options() const;
+  [[nodiscard]] const ::google::protobuf::RepeatedPtrField<::google::protobuf::Option>& options()
+      const;
   // repeated .google.protobuf.Mixin mixins = 6;
   [[nodiscard]] int mixins_size()
       const;
@@ -799,12 +802,13 @@ class PROTOBUF_EXPORT Api final : public ::google::protobuf::Message
   const ::google::protobuf::RepeatedPtrField<::google::protobuf::Mixin>& _internal_mixins() const;
   ::google::protobuf::RepeatedPtrField<::google::protobuf::Mixin>* PROTOBUF_NONNULL _internal_mutable_mixins();
   public:
-  const ::google::protobuf::Mixin& mixins(int index) const;
+  [[nodiscard]] const ::google::protobuf::Mixin& mixins(int index) const;
   ::google::protobuf::Mixin* PROTOBUF_NONNULL add_mixins();
-  const ::google::protobuf::RepeatedPtrField<::google::protobuf::Mixin>& mixins() const;
+  [[nodiscard]] const ::google::protobuf::RepeatedPtrField<::google::protobuf::Mixin>& mixins()
+      const;
   // string name = 1;
   void clear_name() ;
-  const ::std::string& name() const;
+  [[nodiscard]] const ::std::string& name() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_name(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_name();
@@ -819,7 +823,7 @@ class PROTOBUF_EXPORT Api final : public ::google::protobuf::Message
   public:
   // string version = 4;
   void clear_version() ;
-  const ::std::string& version() const;
+  [[nodiscard]] const ::std::string& version() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_version(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_version();
@@ -834,7 +838,7 @@ class PROTOBUF_EXPORT Api final : public ::google::protobuf::Message
   public:
   // string edition = 8;
   void clear_edition() ;
-  const ::std::string& edition() const;
+  [[nodiscard]] const ::std::string& edition() const;
   template <typename Arg_ = const ::std::string&, typename... Args_>
   void set_edition(Arg_&& arg, Args_... args);
   ::std::string* PROTOBUF_NONNULL mutable_edition();
@@ -851,7 +855,7 @@ class PROTOBUF_EXPORT Api final : public ::google::protobuf::Message
   [[nodiscard]] bool has_source_context()
       const;
   void clear_source_context() ;
-  const ::google::protobuf::SourceContext& source_context() const;
+  [[nodiscard]] const ::google::protobuf::SourceContext& source_context() const;
   [[nodiscard]] ::google::protobuf::SourceContext* PROTOBUF_NULLABLE release_source_context();
   ::google::protobuf::SourceContext* PROTOBUF_NONNULL mutable_source_context();
   void set_allocated_source_context(::google::protobuf::SourceContext* PROTOBUF_NULLABLE value);
@@ -865,7 +869,7 @@ class PROTOBUF_EXPORT Api final : public ::google::protobuf::Message
   public:
   // .google.protobuf.Syntax syntax = 7;
   void clear_syntax() ;
-  ::google::protobuf::Syntax syntax() const;
+  [[nodiscard]] ::google::protobuf::Syntax syntax() const;
   void set_syntax(::google::protobuf::Syntax value);
 
   private:

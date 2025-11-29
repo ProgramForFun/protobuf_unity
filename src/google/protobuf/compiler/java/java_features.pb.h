@@ -77,6 +77,13 @@ internal::EnumTraitsT<::pb::JavaFeatures_NestInFileClassFeature_NestInFileClass_
 template <>
 internal::EnumTraitsT<::pb::JavaFeatures_Utf8Validation_internal_data_>
     internal::EnumTraitsImpl::value<::pb::JavaFeatures_Utf8Validation>;
+namespace internal {
+template <>
+inline ::absl::string_view GetFeatureSetDefaultsData<::pb::JavaFeatures>() {
+  static constexpr char kDefaults[] = "CicYhAciA8o+ACodCAEQAhgCIAMoATACOAJAAco+CggBEAEYACABKAMKJxjnByIDyj4AKh0IAhABGAEgAigBMAE4AkAByj4KCAAQARgAIAEoAwonGOgHIhMIARABGAEgAigBMAHKPgQIABABKg04AkAByj4GGAAgASgDCicY6QciGwgBEAEYASACKAEwATgBQALKPggIABABGAAoASoFyj4CIAAg5gco6Qc=";
+  return kDefaults;
+}
+}  // namespace internal
 }  // namespace protobuf
 }  // namespace google
 
@@ -485,7 +492,7 @@ class PROTOC_EXPORT JavaFeatures final : public ::google::protobuf::Message
   [[nodiscard]] bool has_utf8_validation()
       const;
   void clear_utf8_validation() ;
-  ::pb::JavaFeatures_Utf8Validation utf8_validation() const;
+  [[nodiscard]] ::pb::JavaFeatures_Utf8Validation utf8_validation() const;
   void set_utf8_validation(::pb::JavaFeatures_Utf8Validation value);
 
   private:
@@ -497,7 +504,7 @@ class PROTOC_EXPORT JavaFeatures final : public ::google::protobuf::Message
   [[nodiscard]] bool has_legacy_closed_enum()
       const;
   void clear_legacy_closed_enum() ;
-  bool legacy_closed_enum() const;
+  [[nodiscard]] bool legacy_closed_enum() const;
   void set_legacy_closed_enum(bool value);
 
   private:
@@ -509,7 +516,7 @@ class PROTOC_EXPORT JavaFeatures final : public ::google::protobuf::Message
   [[nodiscard]] bool has_large_enum()
       const;
   void clear_large_enum() ;
-  bool large_enum() const;
+  [[nodiscard]] bool large_enum() const;
   void set_large_enum(bool value);
 
   private:
@@ -521,7 +528,7 @@ class PROTOC_EXPORT JavaFeatures final : public ::google::protobuf::Message
   [[nodiscard]] bool has_use_old_outer_classname_default()
       const;
   void clear_use_old_outer_classname_default() ;
-  bool use_old_outer_classname_default() const;
+  [[nodiscard]] bool use_old_outer_classname_default() const;
   void set_use_old_outer_classname_default(bool value);
 
   private:
@@ -533,7 +540,7 @@ class PROTOC_EXPORT JavaFeatures final : public ::google::protobuf::Message
   [[nodiscard]] bool has_nest_in_file_class()
       const;
   void clear_nest_in_file_class() ;
-  ::pb::JavaFeatures_NestInFileClassFeature_NestInFileClass nest_in_file_class() const;
+  [[nodiscard]] ::pb::JavaFeatures_NestInFileClassFeature_NestInFileClass nest_in_file_class() const;
   void set_nest_in_file_class(::pb::JavaFeatures_NestInFileClassFeature_NestInFileClass value);
 
   private:
@@ -590,13 +597,6 @@ inline constexpr int kJavaFieldNumber = 1001;
 PROTOC_EXPORT extern ::google::protobuf::internal::ExtensionIdentifier<
     ::google::protobuf::FeatureSet, ::google::protobuf::internal::MessageTypeTraits< ::pb::JavaFeatures >, 11, false>
     java;
-namespace internal {
-template <>
-inline ::absl::string_view GetFeatureSetDefaultsData<::pb::JavaFeatures>() {
-  static constexpr char kDefaults[] = "CicYhAciA8o+ACodCAEQAhgCIAMoATACOAJAAco+CggBEAEYACABKAMKJxjnByIDyj4AKh0IAhABGAEgAigBMAE4AkAByj4KCAAQARgAIAEoAwonGOgHIhMIARABGAEgAigBMAHKPgQIABABKg04AkAByj4GGAAgASgDCicY6QciGwgBEAEYASACKAEwATgBQALKPggIABABGAAoASoFyj4CIAAg5gco6Qc=";
-  return kDefaults;
-}
-}  // namespace internal
 
 // ===================================================================
 
