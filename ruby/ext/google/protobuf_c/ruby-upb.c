@@ -10178,10 +10178,43 @@ failure:
   return status;
 }
 
+const upb_MiniTableExtension* upb_ExtensionRegistry_Lookup(
+    const upb_ExtensionRegistry* r, const upb_MiniTable* t, uint32_t num) {
+  char buf[EXTREG_KEY_SIZE];
+  upb_value v;
+  extreg_key(buf, t, num);
+  if (upb_strtable_lookup2(&r->exts, buf, EXTREG_KEY_SIZE, &v)) {
+    return upb_value_getconstptr(v);
+  } else {
+    return NULL;
+  }
+}
+
+
+#include <stdint.h>
+
+
+// Must be last.
+
+#if UPB_TSAN
+#include <sched.h>
+#endif  // UPB_TSAN
+
 const UPB_PRIVATE(upb_GeneratedExtensionListEntry) *
     UPB_PRIVATE(upb_generated_extension_list) = NULL;
 
-bool upb_ExtensionRegistry_AddAllLinkedExtensions(upb_ExtensionRegistry* r) {
+typedef struct upb_GeneratedRegistry {
+  UPB_ATOMIC(upb_GeneratedRegistryRef*) ref;
+  UPB_ATOMIC(int32_t) ref_count;
+} upb_GeneratedRegistry;
+
+static upb_GeneratedRegistry* _upb_generated_registry(void) {
+  static upb_GeneratedRegistry r = {NULL, 0};
+  return &r;
+}
+
+static bool _upb_GeneratedRegistry_AddAllLinkedExtensions(
+    upb_ExtensionRegistry* r) {
   const UPB_PRIVATE(upb_GeneratedExtensionListEntry)* entry =
       UPB_PRIVATE(upb_generated_extension_list);
   while (entry != NULL) {
@@ -10214,43 +10247,6 @@ bool upb_ExtensionRegistry_AddAllLinkedExtensions(upb_ExtensionRegistry* r) {
   return true;
 }
 
-const upb_ExtensionRegistry* upb_ExtensionRegistry_GetGenerated(
-    const upb_GeneratedRegistryRef* genreg) {
-  return genreg != NULL ? genreg->UPB_PRIVATE(registry) : NULL;
-}
-
-const upb_MiniTableExtension* upb_ExtensionRegistry_Lookup(
-    const upb_ExtensionRegistry* r, const upb_MiniTable* t, uint32_t num) {
-  char buf[EXTREG_KEY_SIZE];
-  upb_value v;
-  extreg_key(buf, t, num);
-  if (upb_strtable_lookup2(&r->exts, buf, EXTREG_KEY_SIZE, &v)) {
-    return upb_value_getconstptr(v);
-  } else {
-    return NULL;
-  }
-}
-
-
-#include <stdint.h>
-
-
-// Must be last.
-
-#if UPB_TSAN
-#include <sched.h>
-#endif  // UPB_TSAN
-
-typedef struct upb_GeneratedRegistry {
-  UPB_ATOMIC(upb_GeneratedRegistryRef*) ref;
-  UPB_ATOMIC(int32_t) ref_count;
-} upb_GeneratedRegistry;
-
-static upb_GeneratedRegistry* _upb_generated_registry(void) {
-  static upb_GeneratedRegistry r = {NULL, 0};
-  return &r;
-}
-
 // Constructs a new GeneratedRegistryRef, adding all linked extensions to the
 // registry or returning NULL on failure.
 static upb_GeneratedRegistryRef* _upb_GeneratedRegistry_New(void) {
@@ -10266,7 +10262,7 @@ static upb_GeneratedRegistryRef* _upb_GeneratedRegistry_New(void) {
   ref->UPB_PRIVATE(arena) = arena;
   ref->UPB_PRIVATE(registry) = extreg;
 
-  if (!upb_ExtensionRegistry_AddAllLinkedExtensions(extreg)) goto err;
+  if (!_upb_GeneratedRegistry_AddAllLinkedExtensions(extreg)) goto err;
 
   return ref;
 
@@ -10356,6 +10352,12 @@ void upb_GeneratedRegistry_Release(const upb_GeneratedRegistryRef* r) {
       upb_gfree(ref);
     }
   }
+}
+
+const upb_ExtensionRegistry* upb_GeneratedRegistry_Get(
+    const upb_GeneratedRegistryRef* r) {
+  if (r == NULL) return NULL;
+  return r->UPB_PRIVATE(registry);
 }
 
 
@@ -10933,7 +10935,7 @@ bool _upb_DefPool_LoadDefInit(upb_DefPool* s, const _upb_DefPool_Init* init) {
 
 const upb_ExtensionRegistry* _upb_DefPool_GeneratedExtensionRegistry(
     const upb_DefPool* s) {
-  return upb_ExtensionRegistry_GetGenerated(s->generated_extreg);
+  return upb_GeneratedRegistry_Get(s->generated_extreg);
 }
 
 
@@ -15767,11 +15769,14 @@ const char* _upb_Decoder_DecodeSubMessage(upb_Decoder* d, const char* ptr,
                                           upb_Message* submsg,
                                           const upb_MiniTableField* field,
                                           int size) {
-  int saved_delta = upb_EpsCopyInputStream_PushLimit(&d->input, ptr, size);
+  ptrdiff_t delta = upb_EpsCopyInputStream_PushLimit(&d->input, ptr, size);
+  if (UPB_UNLIKELY(delta < 0)) {
+    _upb_Decoder_ErrorJmp(d, kUpb_DecodeStatus_Malformed);
+  }
   const upb_MiniTable* subl = upb_MiniTable_GetSubMessageTable(field);
   UPB_ASSERT(subl);
   ptr = _upb_Decoder_RecurseSubMessage(d, ptr, submsg, subl, DECODE_NOGROUP);
-  upb_EpsCopyInputStream_PopLimit(&d->input, ptr, saved_delta);
+  upb_EpsCopyInputStream_PopLimit(&d->input, ptr, delta);
   return ptr;
 }
 
@@ -15853,7 +15858,11 @@ const char* _upb_Decoder_DecodeFixedPacked(upb_Decoder* d, const char* ptr,
     ptr = UPB_PRIVATE(upb_EpsCopyInputStream_Copy)(&d->input, ptr, mem,
                                                    val->size);
   } else {
-    int delta = upb_EpsCopyInputStream_PushLimit(&d->input, ptr, val->size);
+    ptrdiff_t delta =
+        upb_EpsCopyInputStream_PushLimit(&d->input, ptr, val->size);
+    if (UPB_UNLIKELY(delta < 0)) {
+      _upb_Decoder_ErrorJmp(d, kUpb_DecodeStatus_Malformed);
+    }
     char* dst = mem;
     while (!_upb_Decoder_IsDone(d, &ptr)) {
       if (lg2 == 2) {
@@ -15877,7 +15886,10 @@ const char* _upb_Decoder_DecodeVarintPacked(upb_Decoder* d, const char* ptr,
                                             const upb_MiniTableField* field,
                                             int lg2) {
   int scale = 1 << lg2;
-  int saved_limit = upb_EpsCopyInputStream_PushLimit(&d->input, ptr, val->size);
+  ptrdiff_t delta = upb_EpsCopyInputStream_PushLimit(&d->input, ptr, val->size);
+  if (UPB_UNLIKELY(delta < 0)) {
+    _upb_Decoder_ErrorJmp(d, kUpb_DecodeStatus_Malformed);
+  }
   char* out = UPB_PTR_AT(upb_Array_MutableDataPtr(arr),
                          arr->UPB_PRIVATE(size) << lg2, void);
   while (!_upb_Decoder_IsDone(d, &ptr)) {
@@ -15892,7 +15904,7 @@ const char* _upb_Decoder_DecodeVarintPacked(upb_Decoder* d, const char* ptr,
     memcpy(out, &elem, scale);
     out += scale;
   }
-  upb_EpsCopyInputStream_PopLimit(&d->input, ptr, saved_limit);
+  upb_EpsCopyInputStream_PopLimit(&d->input, ptr, delta);
   return ptr;
 }
 
@@ -15901,7 +15913,10 @@ static const char* _upb_Decoder_DecodeEnumPacked(
     upb_Decoder* d, const char* ptr, upb_Message* msg, upb_Array* arr,
     const upb_MiniTableField* field, wireval* val) {
   const upb_MiniTableEnum* e = upb_MiniTable_GetSubEnumTable(field);
-  int saved_limit = upb_EpsCopyInputStream_PushLimit(&d->input, ptr, val->size);
+  ptrdiff_t delta = upb_EpsCopyInputStream_PushLimit(&d->input, ptr, val->size);
+  if (UPB_UNLIKELY(delta < 0)) {
+    _upb_Decoder_ErrorJmp(d, kUpb_DecodeStatus_Malformed);
+  }
   char* out = UPB_PTR_AT(upb_Array_MutableDataPtr(arr),
                          arr->UPB_PRIVATE(size) * 4, void);
   while (!_upb_Decoder_IsDone(d, &ptr)) {
@@ -15919,7 +15934,7 @@ static const char* _upb_Decoder_DecodeEnumPacked(
     memcpy(out, &elem, 4);
     out += 4;
   }
-  upb_EpsCopyInputStream_PopLimit(&d->input, ptr, saved_limit);
+  upb_EpsCopyInputStream_PopLimit(&d->input, ptr, delta);
   return ptr;
 }
 
@@ -17860,7 +17875,7 @@ UPB_NOINLINE UPB_PRIVATE(_upb_WireReader_LongVarint)
 const char* UPB_PRIVATE(_upb_WireReader_SkipGroup)(
     const char* ptr, uint32_t tag, int depth_limit,
     upb_EpsCopyInputStream* stream) {
-  if (--depth_limit == 0) return NULL;
+  if (--depth_limit < 0) return NULL;
   uint32_t end_group_tag = (tag & ~7ULL) | kUpb_WireType_EndGroup;
   while (!upb_EpsCopyInputStream_IsDone(stream, &ptr)) {
     uint32_t tag;
