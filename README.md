@@ -2,6 +2,7 @@
 
 Forked from Google Protobuf, optimized and compiled for Unity.
 
+Copyright 2008 Google LLC
 ### Compiling Steps
 1. Open with VS2022: `csharp/src/Google.Protobuf.sln`
 2. Ensure there is NO `net50` in `TargetFrameworks` in `csharp/src/Google.Protobuf/Google.Protobuf.csproj`

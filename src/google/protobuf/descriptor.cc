@@ -1638,7 +1638,9 @@ class DescriptorPool::DeferredValidation {
   }
 
   bool Validate() {
-    if (lifetimes_info_map_.empty()) return true;
+    if (lifetimes_info_map_.empty()) {
+      return true;
+    }
 
     static absl::string_view feature_set_name = "google.protobuf.FeatureSet";
     bool has_errors = false;
@@ -3961,7 +3963,8 @@ void FieldDescriptor::DebugString(
 
   // Label is omitted for maps, oneof, and plain proto3 fields.
   if (is_map() || real_containing_oneof() ||
-      (!is_required() && !is_repeated() && !has_optional_keyword())) {
+      (!is_required() && !is_repeated() && !proto3_optional_ &&
+       file()->edition() == Edition::EDITION_PROTO3)) {
     label.clear();
   }
   // Label is omitted for optional and required fields under editions.
@@ -4281,12 +4284,6 @@ bool FieldDescriptor::legacy_enum_field_treated_as_closed() const {
   return type() == TYPE_ENUM &&
          (features().GetExtension(pb::cpp).legacy_closed_enum() ||
           enum_type()->is_closed());
-}
-
-bool FieldDescriptor::has_optional_keyword() const {
-  return proto3_optional_ ||
-         (file()->edition() == Edition::EDITION_PROTO2 && !is_required() &&
-          !is_repeated() && !containing_oneof());
 }
 
 FieldDescriptor::CppStringType FieldDescriptor::CalculateCppStringType() const {
@@ -5018,6 +5015,9 @@ class DescriptorBuilder {
                        const DescriptorProto::ExtensionRange& proto) {}
   void ValidateExtensionRangeOptions(const DescriptorProto& proto,
                                      const Descriptor& message);
+  void MaybeAddFeatureSupportError(const absl::Status& feature_support_status,
+                                   const Message& proto,
+                                   absl::string_view full_name);
   void ValidateExtensionDeclaration(
       absl::string_view full_name,
       const RepeatedPtrField<ExtensionRangeOptions_Declaration>& declarations,
@@ -6281,8 +6281,7 @@ const FileDescriptor* DescriptorBuilder::BuildFile(
     }
   }
 
-  static const int kMaximumPackageLength = 511;
-  if (proto.package().size() > kMaximumPackageLength) {
+  if (proto.package().size() > internal::NameLimits::kPackageName) {
     AddError(proto.package(), proto, DescriptorPool::ErrorCollector::NAME,
              "Package name is too long");
     return nullptr;
@@ -6840,6 +6839,10 @@ void DescriptorBuilder::BuildMessage(const DescriptorProto& proto,
   result->reserved_names_ =
       alloc.AllocateArray<const std::string*>(reserved_name_count);
   for (int i = 0; i < reserved_name_count; ++i) {
+    if (proto.reserved_name(i).size() > internal::NameLimits::kReservedName) {
+      AddError(result->full_name(), proto, DescriptorPool::ErrorCollector::NAME,
+               "Reserved name too long.");
+    }
     result->reserved_names_[i] = alloc.AllocateStrings(proto.reserved_name(i));
   }
 
@@ -7545,6 +7548,10 @@ void DescriptorBuilder::BuildEnum(const EnumDescriptorProto& proto,
   result->reserved_names_ =
       alloc.AllocateArray<const std::string*>(reserved_name_count);
   for (int i = 0; i < reserved_name_count; ++i) {
+    if (proto.reserved_name(i).size() > internal::NameLimits::kReservedName) {
+      AddError(result->full_name(), proto, DescriptorPool::ErrorCollector::NAME,
+               "Reserved name too long.");
+    }
     result->reserved_names_[i] = alloc.AllocateStrings(proto.reserved_name(i));
   }
 
@@ -7617,6 +7624,11 @@ void DescriptorBuilder::BuildEnumValue(const EnumValueDescriptorProto& proto,
   full_name.reserve(scope_len + proto.name().size());
   full_name.append(parent->full_name().data(), scope_len);
   full_name.append(proto.name());
+
+  if (full_name.size() > std::numeric_limits<uint16_t>::max()) {
+    AddError(full_name, proto, DescriptorPool::ErrorCollector::NAME,
+             "Name too long.");
+  }
 
   result->all_names_ =
       alloc.AllocateStrings(proto.name(), std::move(full_name));
@@ -8496,10 +8508,27 @@ void DescriptorBuilder::ValidateOptions(const OneofDescriptor* /*oneof*/,
 }
 
 
+void DescriptorBuilder::MaybeAddFeatureSupportError(
+    const absl::Status& feature_support_status, const Message& proto,
+    absl::string_view full_name) {
+  if (feature_support_status.ok()) {
+    return;
+  }
+  std::string feature_support_error(feature_support_status.message());
+  AddError(full_name, proto, DescriptorPool::ErrorCollector::OPTION_NAME,
+           feature_support_error.c_str());
+}
+
 void DescriptorBuilder::ValidateOptions(const FieldDescriptor* field,
                                         const FieldDescriptorProto& proto) {
   if (pool_->lazily_build_dependencies_ && (!field || !field->message_type())) {
     return;
+  }
+  if (pool_->enforce_feature_support_validation_) {
+    absl::Status feature_support_status =
+        FeatureResolver::ValidateFieldFeatureSupport(*field);
+    MaybeAddFeatureSupportError(feature_support_status, proto,
+                                field->full_name());
   }
 
   ValidateFieldFeatures(field, proto);
@@ -8831,10 +8860,15 @@ void DescriptorBuilder::ValidateOptions(const EnumDescriptor* enm,
   }
 }
 
-void DescriptorBuilder::ValidateOptions(
-    const EnumValueDescriptor* /* enum_value */,
-    const EnumValueDescriptorProto& /* proto */) {
-  // Nothing to do so far.
+void DescriptorBuilder::ValidateOptions(const EnumValueDescriptor* enum_value,
+                                        const EnumValueDescriptorProto& proto) {
+  if (pool_->enforce_feature_support_validation_) {
+    absl::Status feature_support_result =
+        FeatureResolver::ValidateFeatureSupport(
+            enum_value->options().feature_support(), enum_value->full_name());
+    MaybeAddFeatureSupportError(feature_support_result, proto,
+                                enum_value->full_name());
+  }
 }
 
 namespace {
@@ -9245,7 +9279,7 @@ bool IsValidUpperSnakeCaseName(absl::string_view name, std::string* error) {
 }
 
 constexpr absl::string_view kNamingStyleOptOutMessage =
-    " (feature.enforce_naming_style = STYLE_LEGACY can be used to opt out of "
+    " (features.enforce_naming_style = STYLE_LEGACY can be used to opt out of "
     "this check)";
 
 }  // namespace
