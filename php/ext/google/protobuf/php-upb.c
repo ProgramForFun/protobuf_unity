@@ -388,6 +388,27 @@ Error, UINTPTR_MAX is undefined
 #define UPB_PRESERVE_NONE
 #endif
 
+#if defined(__aarch64__) && (defined(__GNUC__) || defined(__clang__))
+#define UPB_ARM64_ASM 1
+#else
+#define UPB_ARM64_ASM 0
+#endif
+
+/* When compiling with branch protection, we need to ensure that all branch
+ * targets in assembly use the appropriate landing pad instruction. These
+ * instructions are backwards compatible with processors that don't have
+ * FEAT_BTI and are treated as nops.
+ */
+#if UPB_ARM64_ASM && defined(__ARM_FEATURE_BTI_DEFAULT)
+#if __ARM_FEATURE_BTI_DEFAULT == 1
+#define UPB_ARM64_BTI_DEFAULT 1
+#else
+#define UPB_ARM64_BTI_DEFAULT 0
+#endif
+#else
+#define UPB_ARM64_BTI_DEFAULT 0
+#endif
+
 /* This check is not fully robust: it does not require that we have "musttail"
  * support available. We need tail calls to avoid consuming arbitrary amounts
  * of stack space.
@@ -1367,7 +1388,7 @@ const upb_MiniTable google__protobuf__GeneratedCodeInfo__Annotation_msg_init = {
 const upb_MiniTable* google__protobuf__GeneratedCodeInfo__Annotation_msg_init_ptr = &google__protobuf__GeneratedCodeInfo__Annotation_msg_init;
 const upb_MiniTableEnum google__protobuf__Edition_enum_init = {
     64,
-    9,
+    10,
     {
         0x7,
         0x0,
@@ -1376,6 +1397,7 @@ const upb_MiniTableEnum google__protobuf__Edition_enum_init = {
         0x3e7,
         0x3e8,
         0x3e9,
+        0x270f,
         0x1869d,
         0x1869e,
         0x1869f,
@@ -1634,7 +1656,7 @@ const upb_MiniTableFile google_protobuf_descriptor_proto_upb_file_layout = {
 
 
 
-static const char descriptor[13195] = {
+static const char descriptor[13218] = {
     '\n', ' ', 'g', 'o', 'o', 'g', 'l', 'e', '/', 'p', 'r', 'o',
     't', 'o', 'b', 'u', 'f', '/', 'd', 'e', 's', 'c', 'r', 'i',
     'p', 't', 'o', 'r', '.', 'p', 'r', 'o', 't', 'o', '\022', '\017',
@@ -2691,7 +2713,7 @@ static const char descriptor[13195] = {
     'n', 't', 'i', 'c', '\"', '(', '\n', '\010', 'S', 'e', 'm', 'a',
     'n', 't', 'i', 'c', '\022', '\010', '\n', '\004', 'N', 'O', 'N', 'E',
     '\020', '\000', '\022', '\007', '\n', '\003', 'S', 'E', 'T', '\020', '\001', '\022',
-    '\t', '\n', '\005', 'A', 'L', 'I', 'A', 'S', '\020', '\002', '*', '\247',
+    '\t', '\n', '\005', 'A', 'L', 'I', 'A', 'S', '\020', '\002', '*', '\276',
     '\002', '\n', '\007', 'E', 'd', 'i', 't', 'i', 'o', 'n', '\022', '\023',
     '\n', '\017', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', 'U', 'N',
     'K', 'N', 'O', 'W', 'N', '\020', '\000', '\022', '\023', '\n', '\016', 'E',
@@ -2703,38 +2725,40 @@ static const char descriptor[13195] = {
     '\n', '\014', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', '2', '0',
     '2', '3', '\020', '\350', '\007', '\022', '\021', '\n', '\014', 'E', 'D', 'I',
     'T', 'I', 'O', 'N', '_', '2', '0', '2', '4', '\020', '\351', '\007',
+    '\022', '\025', '\n', '\020', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_',
+    'U', 'N', 'S', 'T', 'A', 'B', 'L', 'E', '\020', '\217', 'N', '\022',
+    '\027', '\n', '\023', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', '1',
+    '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y', '\020', '\001',
     '\022', '\027', '\n', '\023', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_',
-    '1', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y', '\020',
-    '\001', '\022', '\027', '\n', '\023', 'E', 'D', 'I', 'T', 'I', 'O', 'N',
-    '_', '2', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y',
-    '\020', '\002', '\022', '\035', '\n', '\027', 'E', 'D', 'I', 'T', 'I', 'O',
-    'N', '_', '9', '9', '9', '9', '7', '_', 'T', 'E', 'S', 'T',
-    '_', 'O', 'N', 'L', 'Y', '\020', '\235', '\215', '\006', '\022', '\035', '\n',
-    '\027', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', '9', '9', '9',
-    '9', '8', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y',
-    '\020', '\236', '\215', '\006', '\022', '\035', '\n', '\027', 'E', 'D', 'I', 'T',
-    'I', 'O', 'N', '_', '9', '9', '9', '9', '9', '_', 'T', 'E',
-    'S', 'T', '_', 'O', 'N', 'L', 'Y', '\020', '\237', '\215', '\006', '\022',
-    '\023', '\n', '\013', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', 'M',
-    'A', 'X', '\020', '\377', '\377', '\377', '\377', '\007', '*', 'U', '\n', '\020',
-    'S', 'y', 'm', 'b', 'o', 'l', 'V', 'i', 's', 'i', 'b', 'i',
-    'l', 'i', 't', 'y', '\022', '\024', '\n', '\020', 'V', 'I', 'S', 'I',
-    'B', 'I', 'L', 'I', 'T', 'Y', '_', 'U', 'N', 'S', 'E', 'T',
-    '\020', '\000', '\022', '\024', '\n', '\020', 'V', 'I', 'S', 'I', 'B', 'I',
-    'L', 'I', 'T', 'Y', '_', 'L', 'O', 'C', 'A', 'L', '\020', '\001',
-    '\022', '\025', '\n', '\021', 'V', 'I', 'S', 'I', 'B', 'I', 'L', 'I',
-    'T', 'Y', '_', 'E', 'X', 'P', 'O', 'R', 'T', '\020', '\002', 'B',
-    '~', '\n', '\023', 'c', 'o', 'm', '.', 'g', 'o', 'o', 'g', 'l',
-    'e', '.', 'p', 'r', 'o', 't', 'o', 'b', 'u', 'f', 'B', '\020',
-    'D', 'e', 's', 'c', 'r', 'i', 'p', 't', 'o', 'r', 'P', 'r',
-    'o', 't', 'o', 's', 'H', '\001', 'Z', '-', 'g', 'o', 'o', 'g',
-    'l', 'e', '.', 'g', 'o', 'l', 'a', 'n', 'g', '.', 'o', 'r',
-    'g', '/', 'p', 'r', 'o', 't', 'o', 'b', 'u', 'f', '/', 't',
-    'y', 'p', 'e', 's', '/', 'd', 'e', 's', 'c', 'r', 'i', 'p',
-    't', 'o', 'r', 'p', 'b', '\370', '\001', '\001', '\242', '\002', '\003', 'G',
-    'P', 'B', '\252', '\002', '\032', 'G', 'o', 'o', 'g', 'l', 'e', '.',
-    'P', 'r', 'o', 't', 'o', 'b', 'u', 'f', '.', 'R', 'e', 'f',
-    'l', 'e', 'c', 't', 'i', 'o', 'n',
+    '2', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y', '\020',
+    '\002', '\022', '\035', '\n', '\027', 'E', 'D', 'I', 'T', 'I', 'O', 'N',
+    '_', '9', '9', '9', '9', '7', '_', 'T', 'E', 'S', 'T', '_',
+    'O', 'N', 'L', 'Y', '\020', '\235', '\215', '\006', '\022', '\035', '\n', '\027',
+    'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', '9', '9', '9', '9',
+    '8', '_', 'T', 'E', 'S', 'T', '_', 'O', 'N', 'L', 'Y', '\020',
+    '\236', '\215', '\006', '\022', '\035', '\n', '\027', 'E', 'D', 'I', 'T', 'I',
+    'O', 'N', '_', '9', '9', '9', '9', '9', '_', 'T', 'E', 'S',
+    'T', '_', 'O', 'N', 'L', 'Y', '\020', '\237', '\215', '\006', '\022', '\023',
+    '\n', '\013', 'E', 'D', 'I', 'T', 'I', 'O', 'N', '_', 'M', 'A',
+    'X', '\020', '\377', '\377', '\377', '\377', '\007', '*', 'U', '\n', '\020', 'S',
+    'y', 'm', 'b', 'o', 'l', 'V', 'i', 's', 'i', 'b', 'i', 'l',
+    'i', 't', 'y', '\022', '\024', '\n', '\020', 'V', 'I', 'S', 'I', 'B',
+    'I', 'L', 'I', 'T', 'Y', '_', 'U', 'N', 'S', 'E', 'T', '\020',
+    '\000', '\022', '\024', '\n', '\020', 'V', 'I', 'S', 'I', 'B', 'I', 'L',
+    'I', 'T', 'Y', '_', 'L', 'O', 'C', 'A', 'L', '\020', '\001', '\022',
+    '\025', '\n', '\021', 'V', 'I', 'S', 'I', 'B', 'I', 'L', 'I', 'T',
+    'Y', '_', 'E', 'X', 'P', 'O', 'R', 'T', '\020', '\002', 'B', '~',
+    '\n', '\023', 'c', 'o', 'm', '.', 'g', 'o', 'o', 'g', 'l', 'e',
+    '.', 'p', 'r', 'o', 't', 'o', 'b', 'u', 'f', 'B', '\020', 'D',
+    'e', 's', 'c', 'r', 'i', 'p', 't', 'o', 'r', 'P', 'r', 'o',
+    't', 'o', 's', 'H', '\001', 'Z', '-', 'g', 'o', 'o', 'g', 'l',
+    'e', '.', 'g', 'o', 'l', 'a', 'n', 'g', '.', 'o', 'r', 'g',
+    '/', 'p', 'r', 'o', 't', 'o', 'b', 'u', 'f', '/', 't', 'y',
+    'p', 'e', 's', '/', 'd', 'e', 's', 'c', 'r', 'i', 'p', 't',
+    'o', 'r', 'p', 'b', '\370', '\001', '\001', '\242', '\002', '\003', 'G', 'P',
+    'B', '\252', '\002', '\032', 'G', 'o', 'o', 'g', 'l', 'e', '.', 'P',
+    'r', 'o', 't', 'o', 'b', 'u', 'f', '.', 'R', 'e', 'f', 'l',
+    'e', 'c', 't', 'i', 'o', 'n',
 };
 
 static _upb_DefPool_Init *deps[1] = {
@@ -16748,15 +16772,27 @@ static char* encode_fixed32(char* ptr, upb_encstate* e, uint32_t val) {
 
 #define UPB_PB_VARINT_MAX_LEN 10
 
-// Need gnu extended inline asm; msan can't instrument stores in inline assembly
-#if defined(__aarch64__) && (defined(__GNUC__) || defined(__clang__)) && \
-    !UPB_HAS_FEATURE(memory_sanitizer)
-#define UPB_ARM64_ASM
+#if UPB_ARM64_ASM
+// Each arm64 instruction encodes to 4 bytes, and it takes two intructions
+// to process each byte of output, so we branch ahead by (4 + 4) * skip to
+// avoid the remaining bytes. When BTI is on, we need to use specific
+// "landing pad" instructions, so we pad those with nop to make it a power
+// of 2, skipping 16 bytes at each stage instead of 8. This carries some
+// overhead especially on in-order cores so they're not included unless
+// building with branch protection.
+#if UPB_ARM64_BTI_DEFAULT
+// BTI is used with jc targets here because we don't control which register will
+// be used for addr; if it's x16 or x17 a `br` is treated like a call.
+#define UPB_BTI_JC "bti jc\n"
+#define UPB_BTI_NOP "nop\n"
+#define UPB_BTI_SHIFT_IMM "4\n"
+#else
+#define UPB_BTI_JC
+#define UPB_BTI_NOP
+#define UPB_BTI_SHIFT_IMM "3\n"
 #endif
-
-#ifdef UPB_ARM64_ASM
-UPB_NOINLINE static char* encode_longvarint_arm64(char* ptr, upb_encstate* e,
-                                                  uint64_t val) {
+UPB_NOINLINE static char* encode_longvarint(char* ptr, upb_encstate* e,
+                                            uint64_t val) {
   ptr = encode_reserve(ptr, e, UPB_PB_VARINT_MAX_LEN);
   uint64_t clz;
   __asm__("clz %[cnt], %[val]\n" : [cnt] "=r"(clz) : [val] "r"(val));
@@ -16767,37 +16803,66 @@ UPB_NOINLINE static char* encode_longvarint_arm64(char* ptr, upb_encstate* e,
   ptr += skip;
   uint64_t addr, mask;
   __asm__ volatile(
+      // Formatter keeps merging short lines
+      // clang-format off
       "adr %[addr], 0f\n"
-      // Each arm64 instruction encodes to 4 bytes, and it takes two
-      // intructions to process each byte of output, so we branch ahead by
-      //  (4 + 4) * skip to avoid the remaining bytes.
-      "add %[addr], %[addr], %[cnt], lsl #3\n"
+      "add %[addr], %[addr], %[cnt], lsl #" UPB_BTI_SHIFT_IMM
       "mov %w[mask], #0x80\n"
       "br %[addr]\n"
+      ".p2align " UPB_BTI_SHIFT_IMM
       "0:\n"
       // We don't need addr any more, but we've got the register for our whole
       // assembly block so we'll use it as scratch to store the shift+masked
       // values before storing them.
       // The following stores are unsigned offset stores:
       // strb Wt, [Xn, #imm]
+      UPB_BTI_JC
       "orr %[addr], %[mask], %[val], lsr #56\n"
       "strb %w[addr], [%[ptr], #8]\n"
+      UPB_BTI_NOP
+
+      UPB_BTI_JC
       "orr %[addr], %[mask], %[val], lsr #49\n"
       "strb %w[addr], [%[ptr], #7]\n"
+      UPB_BTI_NOP
+
+      UPB_BTI_JC
       "orr %[addr], %[mask], %[val], lsr #42\n"
       "strb %w[addr], [%[ptr], #6]\n"
+      UPB_BTI_NOP
+
+      UPB_BTI_JC
       "orr %[addr], %[mask], %[val], lsr #35\n"
       "strb %w[addr], [%[ptr], #5]\n"
+      UPB_BTI_NOP
+
+      UPB_BTI_JC
       "orr %[addr], %[mask], %[val], lsr #28\n"
       "strb %w[addr], [%[ptr], #4]\n"
+      UPB_BTI_NOP
+
+      UPB_BTI_JC
       "orr %w[addr], %w[mask], %w[val], lsr #21\n"
       "strb %w[addr], [%[ptr], #3]\n"
+      UPB_BTI_NOP
+
+      UPB_BTI_JC
       "orr %w[addr], %w[mask], %w[val], lsr #14\n"
       "strb %w[addr], [%[ptr], #2]\n"
+      UPB_BTI_NOP
+
+      UPB_BTI_JC
       "orr %w[addr], %w[mask], %w[val], lsr #7\n"
       "strb %w[addr], [%[ptr], #1]\n"
+      UPB_BTI_NOP
+
+      UPB_BTI_JC
       "orr %w[addr], %w[val], #0x80\n"
       "strb %w[addr], [%[ptr]]\n"
+      UPB_BTI_NOP
+
+      UPB_BTI_JC
+      // clang-format on
       : [addr] "=&r"(addr), [mask] "=&r"(mask)
       : [val] "r"(val), [ptr] "r"(ptr), [cnt] "r"((uint64_t)skip)
       : "memory");
@@ -16806,6 +16871,9 @@ UPB_NOINLINE static char* encode_longvarint_arm64(char* ptr, upb_encstate* e,
   ptr[continuations] = val >> (7 * continuations);
   return ptr;
 }
+#undef UPB_BTI_JC
+#undef UPB_BTI_NOP
+#undef UPB_BTI_SHIFT_IMM
 #else
 UPB_NOINLINE
 static char* encode_longvarint(char* ptr, upb_encstate* e, uint64_t val) {
@@ -16830,11 +16898,7 @@ char* encode_varint(char* ptr, upb_encstate* e, uint64_t val) {
     *ptr = val;
     return ptr;
   } else {
-#ifdef UPB_ARM64_ASM
-    return encode_longvarint_arm64(ptr, e, val);
-#else
     return encode_longvarint(ptr, e, val);
-#endif
   }
 }
 
@@ -17623,3 +17687,5 @@ const char* UPB_PRIVATE(_upb_WireReader_SkipGroup)(
 #undef UPB_XSAN
 #undef UPB_XSAN_STRUCT_SIZE
 #undef UPB_ENABLE_REF_CYCLE_CHECKS
+#undef UPB_ARM64_ASM
+#undef UPB_ARM64_BTI_DEFAULT
