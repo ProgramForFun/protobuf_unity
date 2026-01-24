@@ -369,9 +369,9 @@ extend TestAllExtensions {
     lazy = true
   ];
 
-  TestAllTypes.NestedMessage optional_unverified_lazy_message_extension = 28 [
-    unverified_lazy = true
-  ];
+  // "unverified_lazy" is copied from the counterpart field in TestAllTypes.
+  // An extension can't be labeled as "unverified_lazy".
+  TestAllTypes.NestedMessage optional_unverified_lazy_message_extension = 28;
 
   // Repeated
   repeated int32 repeated_int32_extension = 31;
@@ -938,6 +938,11 @@ message TestLazyMessage {
   TestAllTypes sub_message = 1 [
     lazy = true
   ];
+
+  oneof one {
+    TestAllTypes oneof1 = 10 [ lazy = true ];
+    TestAllTypes oneof2 = 20 [ lazy = true ];
+  }
 }
 
 message TestLazyRequiredEnum {
