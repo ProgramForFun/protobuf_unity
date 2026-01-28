@@ -32,6 +32,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/log/absl_check.h"
 #include "absl/log/absl_log.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
@@ -199,6 +200,14 @@ bool AbslParseFlagImpl(absl::string_view text, int& e,
   if (const auto* value = desc.FindValueByName(text)) {
     e = value->number();
     return true;
+  }
+
+  // Try as lower case
+  if (absl::AsciiStrToLower(text) == text) {
+    if (const auto* value = desc.FindValueByName(absl::AsciiStrToUpper(text))) {
+      e = value->number();
+      return true;
+    }
   }
 
   // Try as a number
@@ -2502,12 +2511,12 @@ const Message* Reflection::GetDefaultMessageInstance(
   // instances to allow for this. But only do this for real fields.
   // This is an optimization to avoid going to GetPrototype() below, as that
   // requires a lock and a map lookup.
-  if (!field->is_extension() && !field->options().weak() &&
-      !IsLazyField(field) && !schema_.InRealOneof(field)) {
+  if (!field->is_extension() && !field->is_repeated() &&
+      !field->options().weak() && !IsLazyField(field) &&
+      !schema_.InRealOneof(field)) {
     auto* res = DefaultRaw<const Message*>(field);
-    if (res != nullptr) {
-      return res;
-    }
+    ABSL_DCHECK_NE(res, nullptr);
+    return res;
   }
   // Otherwise, just go to the factory.
   return message_factory_->GetPrototype(field->message_type());
