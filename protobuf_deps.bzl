@@ -30,7 +30,7 @@ py_repositories()
 """
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("//bazel/private:proto_bazel_features.bzl", "proto_bazel_features")  # buildifier: disable=bzl-visibility
+load("//bazel/private/oss:proto_bazel_features.bzl", "proto_bazel_features")  # buildifier: disable=bzl-visibility
 load("//python/dist:python_downloads.bzl", "python_nuget_package", "python_source_archive")
 load("//python/dist:system_python.bzl", "system_python")
 
@@ -171,11 +171,21 @@ def protobuf_deps():
             sha256 = "d20c951960ed77cb7b341c2a59488534e494d5ad1d30c4818c736d57772a9fef",
         )
 
+    # Workaround rules_apple having a default dependency on rules_swift 2.4.0, which in turn has a
+    # hard dependency on the presence of swiftc.exe on Windows.
+    if not native.existing_rule("build_bazel_rules_swift"):
+        http_archive(
+            name = "build_bazel_rules_swift",
+            sha256 = "b17bdad10f3996cffc1ae3634e426d5280848cdb25ae5351f39357599938f5c6",
+            url = "https://github.com/bazelbuild/rules_swift/releases/download/3.0.2/rules_swift.3.0.2.tar.gz",
+        )
+
+    # TODO: Can rules_apple be removed, and thus allow rules_swift to be removed?
     if not native.existing_rule("build_bazel_rules_apple"):
         http_archive(
             name = "build_bazel_rules_apple",
-            sha256 = "86ff9c3a2c7bc308fef339bcd5b3819aa735215033886cc281eb63f10cd17976",
-            url = "https://github.com/bazelbuild/rules_apple/releases/download/3.16.0/rules_apple.3.16.0.tar.gz",
+            sha256 = "70b0fb2aec1055c978109199bf58ccb5008aba8e242f3305194045c271ca3cae",
+            url = "https://github.com/bazelbuild/rules_apple/releases/download/4.0.0/rules_apple.4.0.0.tar.gz",
         )
 
     if not native.existing_rule("build_bazel_apple_support"):
@@ -217,4 +227,4 @@ def protobuf_deps():
         cpu = "x86-64",
         sha256 = "4474c83c25625d93e772e926f95f4cd398a0abbb52793625fa30f39af3d2cc00",
     )
-    native.register_toolchains("//bazel/private/toolchains:all")
+    native.register_toolchains("//bazel/private/oss/toolchains:all")
