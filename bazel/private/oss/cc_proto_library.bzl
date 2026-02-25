@@ -59,14 +59,8 @@ def _aspect_impl(target, ctx):
 
     if should_generate_code:
         if len(proto_info.direct_sources) != 0:
-            # Bazel 7 didn't expose cc_proto_library_source_suffixes used by Kythe
-            # gradually falling back to .pb.cc
-            if type(get_flag_value(ctx, "cc_proto_library_source_suffixes")) == "builtin_function_or_method":
-                source_suffixes = [".pb.cc"]
-                header_suffixes = [".pb.h"]
-            else:
-                source_suffixes = get_flag_value(ctx, "cc_proto_library_source_suffixes")
-                header_suffixes = get_flag_value(ctx, "cc_proto_library_header_suffixes")
+            source_suffixes = get_flag_value(ctx, "cc_proto_library_source_suffixes")
+            header_suffixes = get_flag_value(ctx, "cc_proto_library_header_suffixes")
             sources = _get_output_files(ctx.actions, proto_info, source_suffixes)
             headers = _get_output_files(ctx.actions, proto_info, header_suffixes)
             header_provider = _ProtoCcHeaderInfo(headers = depset(headers))
@@ -131,9 +125,6 @@ cc_proto_aspect = aspect(
                 ),
             } |
             toolchains.if_legacy_toolchain({
-                "_aspect_cc_proto_toolchain": attr.label(
-                    default = configuration_field(fragment = "proto", name = "proto_toolchain_for_cc"),
-                ),
                 "_proto_toolchain_for_cc": attr.label(
                     default = Label("//bazel/flags/cc:proto_toolchain_for_cc"),
                 ),
@@ -202,9 +193,6 @@ The list of <a href="protocol-buffer.html#proto_library"><code>proto_library</co
 rules to generate C++ code for.""",
         ),
     } | toolchains.if_legacy_toolchain({
-        "_aspect_cc_proto_toolchain": attr.label(
-            default = configuration_field(fragment = "proto", name = "proto_toolchain_for_cc"),
-        ),
         "_proto_toolchain_for_cc": attr.label(
             default = "//bazel/flags/cc:proto_toolchain_for_cc",
         ),
