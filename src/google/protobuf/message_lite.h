@@ -248,13 +248,6 @@ struct ClassData;
 template <typename Type>
 const ClassData* GetClassData(const Type& msg);
 
-template <const auto* kDefault, const auto* kClassData>
-struct GeneratedMessageTraitsT {
-  static constexpr const void* default_instance() { return kDefault; }
-  static constexpr const auto* class_data() { return kClassData->base(); }
-  static constexpr auto StrongPointer() { return default_instance(); }
-};
-
 template <typename T>
 struct FallbackMessageTraits {
   static const void* default_instance() { return &T::default_instance(); }
@@ -612,21 +605,61 @@ inline const ClassDataFull& ClassData::full() const {
   return *static_cast<const ClassDataFull*>(this);
 }
 
+#ifndef PROTOBUF_MESSAGE_GLOBALS
 struct MessageGlobalsBase {
-  template <typename T>
-  const T* default_instance() const {
-    return reinterpret_cast<const T*>(this);
-  }
-
-  static const MessageGlobalsBase* ToMessageGlobalsBase(const void* globals) {
-    return reinterpret_cast<const MessageGlobalsBase*>(globals);
-  }
-
-  template <typename T>
+  template <typename T = MessageLite>
   static const T* default_instance(const void* globals) {
-    return ToMessageGlobalsBase(globals)->default_instance<T>();
+    return reinterpret_cast<const T*>(globals);
+  }
+
+  static const MessageGlobalsBase* FromDefaultInstance(
+      const void* default_instance) {
+    return reinterpret_cast<const MessageGlobalsBase*>(default_instance);
   }
 };
+
+template <const auto* kDefault, const auto* kClassData>
+struct GeneratedMessageTraitsT {
+  static constexpr const void* default_instance() { return kDefault; }
+  static constexpr const auto* class_data() { return kClassData->base(); }
+  static constexpr auto StrongPointer() { return default_instance(); }
+};
+#else
+struct MessageGlobalsBase {
+  template <size_t R>
+  static constexpr size_t RoundUpTo(size_t n) {
+    static_assert(absl::has_single_bit(R), "Must be power of two");
+    return (n + (R - 1)) & ~(R - 1);
+  }
+
+  static constexpr size_t OffsetToDefault() {
+    return RoundUpTo<kMaxMessageAlignment>(sizeof(MessageGlobalsBase));
+  }
+  template <typename T = MessageLite>
+  static const T* default_instance(const void* globals) {
+    return reinterpret_cast<const T*>(reinterpret_cast<const char*>(globals) +
+                                      OffsetToDefault());
+  }
+
+  static const MessageGlobalsBase* FromDefaultInstance(
+      const void* default_instance) {
+    return reinterpret_cast<const MessageGlobalsBase*>(
+        reinterpret_cast<const char*>(default_instance) - OffsetToDefault());
+  }
+
+  uintptr_t dummy = 0xDEADBEEF;
+};
+
+template <const auto* kGlobals, const auto* kClassData>
+struct GeneratedMessageTraitsT {
+  static const void* default_instance() {
+    return internal::MessageGlobalsBase::default_instance<MessageLite>(
+        kGlobals);
+  }
+  static constexpr const auto* class_data() { return kClassData->base(); }
+  static constexpr auto StrongPointer() { return kGlobals; }
+};
+#endif  // PROTOBUF_MESSAGE_GLOBALS
 }  // namespace internal
 
 // Interface to light weight protocol messages.
