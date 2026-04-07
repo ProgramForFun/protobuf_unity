@@ -33,9 +33,8 @@
 #include <utility>
 
 #include "absl/base/attributes.h"
-#include "absl/base/config.h"
+#include "absl/base/macros.h"
 #include "absl/log/absl_check.h"
-#include "absl/numeric/bits.h"
 #include "absl/strings/cord.h"
 #include "absl/strings/string_view.h"
 #include "google/protobuf/arena.h"
@@ -472,6 +471,7 @@ struct PROTOBUF_EXPORT DescriptorMethods {
   const internal::TcParseTableBase* (*get_tc_table)(const MessageLite&);
   size_t (*space_used_long)(const MessageLite&);
   std::string (*debug_string)(const MessageLite&);
+  void (*verify_lazy_field_consistency)(const LazyField&);
 };
 
 // ClassData* can and should be placed on read-only section to maximize sharing.
@@ -670,11 +670,19 @@ struct MessageGlobalsBase {
   }
   constexpr const ClassData* GetClassData() const { return class_data.base(); }
 
-  explicit constexpr MessageGlobalsBase(ClassDataFull class_data)
-      : class_data(class_data) {}
+  explicit constexpr MessageGlobalsBase(ClassDataFull class_data,
+                                        const TcParseTableBase* table)
+      : class_data(class_data), table(table) {}
+
+  static const TcParseTableBase* ToParseTableBase(const void* g) {
+    const auto* globals = static_cast<const MessageGlobalsBase*>(g);
+    ABSL_DCHECK_NE(globals, nullptr);
+    return globals->table;
+  }
 
   // It also aliases to ClassDataLite.
   ClassDataFull class_data;
+  const TcParseTableBase* table;
 };
 
 template <const auto* kGlobals>
@@ -685,6 +693,7 @@ struct GeneratedMessageTraitsT {
   static const auto* class_data() {
     return MessageGlobalsBase::GetClassData(kGlobals);
   }
+  static constexpr const auto* globals() { return kGlobals; }
   static constexpr auto StrongPointer() { return kGlobals; }
 };
 #endif  // PROTOBUF_MESSAGE_GLOBALS
@@ -1208,6 +1217,7 @@ class PROTOBUF_EXPORT MessageLite {
   virtual const internal::ClassData* GetClassData() const = 0;
 #endif  // PROTOBUF_CUSTOM_VTABLE
 
+  // NOLINTNEXTLINE(google3-readability-class-member-naming)
   internal::InternalMetadata _internal_metadata_;
 #if defined(PROTOBUF_CUSTOM_VTABLE)
   const internal::ClassData* _class_data_;
