@@ -3041,11 +3041,8 @@ typedef struct _upb_tabent {
   upb_value val;
   upb_key key;
 
-  /* Internal chaining.  This is const so we can create static initializers for
-   * tables.  We cast away const sometimes, but *only* when the containing
-   * upb_table is known to be non-const.  This requires a bit of care, but
-   * the subtlety is confined to table.c. */
-  const struct _upb_tabent* next;
+  /* Internal chaining */
+  struct _upb_tabent* next;
 } upb_tabent;
 
 typedef struct {
@@ -3077,6 +3074,30 @@ UPB_INLINE bool upb_tabent_isempty(const upb_tabent* e) {
   // compact table and never as a upb_tabent* so we can always use the 0
   // key value to identify an empty tabent.
   return val == 0;
+}
+
+UPB_INLINE bool upb_tabent_hasnext(const upb_tabent* e) {
+  return e->next != NULL;
+}
+
+UPB_INLINE void upb_tabent_clearnext(upb_tabent* e) { e->next = NULL; }
+
+UPB_INLINE void upb_tabent_clear(upb_tabent* e) {
+  memset(&e->key, 0, sizeof(e->key));
+  e->next = NULL;
+  UPB_ASSERT(upb_tabent_isempty(e));
+}
+
+UPB_INLINE upb_tabent* upb_tabent_next(const upb_tabent* e) {
+  UPB_ASSERT(upb_tabent_hasnext(e));
+  return e->next;
+}
+
+UPB_INLINE void upb_tabent_setnext(upb_tabent* e, upb_tabent* next) {
+  UPB_ASSERT(next != NULL);
+  UPB_ASSERT(next != e);
+  e->next = next;
+  UPB_ASSERT(upb_tabent_hasnext(e));
 }
 
 uint32_t _upb_Hash(const void* p, size_t n, uint64_t seed);
@@ -17421,7 +17442,7 @@ upb_MessageDef* _upb_MessageDefs_New(
 // features. This is used for feature resolution under Editions.
 // NOLINTBEGIN
 // clang-format off
-#define UPB_INTERNAL_UPB_EDITION_DEFAULTS "\n\027\030\204\007\"\000*\020\010\001\020\002\030\002 \003(\0010\0028\002@\001\n\027\030\347\007\"\000*\020\010\002\020\001\030\001 \002(\0010\0018\002@\001\n\027\030\350\007\"\014\010\001\020\001\030\001 \002(\0010\001*\0048\002@\001\n\027\030\351\007\"\020\010\001\020\001\030\001 \002(\0010\0018\001@\002*\000\n\027\030\217N\"\020\010\001\020\001\030\001 \002(\0010\0018\003@\002*\000 \346\007(\351\007"
+#define UPB_INTERNAL_UPB_EDITION_DEFAULTS "\n\027\030\204\007\"\000*\020\010\001\020\002\030\002 \003(\0010\0028\002@\001\n\027\030\347\007\"\000*\020\010\002\020\001\030\001 \002(\0010\0018\002@\001\n\027\030\350\007\"\014\010\001\020\001\030\001 \002(\0010\001*\0048\002@\001\n\027\030\351\007\"\020\010\001\020\001\030\001 \002(\0010\0018\001@\002*\000 \346\007(\351\007"
 // clang-format on
 // NOLINTEND
 

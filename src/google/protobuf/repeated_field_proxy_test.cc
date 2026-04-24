@@ -1159,6 +1159,56 @@ TYPED_TEST(RepeatedNumericFieldProxyTest, IteratorsDoNotLeakReferences) {
   static_assert(std::is_same_v<decltype(*proxy.begin()), ElementType>);
   static_assert(std::is_same_v<decltype(*proxy.cbegin()), ElementType>);
   static_assert(std::is_same_v<decltype(*proxy.rbegin()), ElementType>);
+
+  // Indexing should also dereference to element values, not references.
+  static_assert(std::is_same_v<decltype(proxy.begin()[0]), ElementType>);
+  static_assert(std::is_same_v<decltype(proxy.cbegin()[0]), ElementType>);
+  static_assert(std::is_same_v<decltype(proxy.rbegin()[0]), ElementType>);
+}
+
+TYPED_TEST(RepeatedFieldProxyTest, EnumIterators) {
+  auto field =
+      this->template MakeRepeatedFieldContainer<TestRepeatedEnumProxy::Enum>();
+  auto proxy = field.MakeProxy();
+  proxy.push_back(TestRepeatedEnumProxy::FOO);
+  proxy.push_back(TestRepeatedEnumProxy::BAR);
+  proxy.push_back(TestRepeatedEnumProxy::BAZ);
+
+  auto it = proxy.begin();
+  EXPECT_EQ(*it, TestRepeatedEnumProxy::FOO);
+  EXPECT_EQ(it[1], TestRepeatedEnumProxy::BAR);
+
+  auto rit = proxy.rbegin();
+  EXPECT_EQ(*rit, TestRepeatedEnumProxy::BAZ);
+  EXPECT_EQ(rit[1], TestRepeatedEnumProxy::BAR);
+}
+
+TYPED_TEST(RepeatedFieldProxyTest, EnumIteratorsDoNotLeakReferences) {
+  auto field =
+      this->template MakeRepeatedFieldContainer<TestRepeatedEnumProxy::Enum>();
+  auto proxy = field.MakeProxy();
+  auto const_proxy = field.MakeConstProxy();
+
+  // `cbegin()` on mutable proxies should return the same type as `begin()` on
+  // const proxies.
+  static_assert(
+      std::is_same_v<decltype(proxy.cbegin()), decltype(const_proxy.begin())>);
+
+  // All iterator types should dereference to element values, not references.
+  static_assert(
+      std::is_same_v<decltype(*proxy.begin()), TestRepeatedEnumProxy::Enum>);
+  static_assert(
+      std::is_same_v<decltype(*proxy.cbegin()), TestRepeatedEnumProxy::Enum>);
+  static_assert(
+      std::is_same_v<decltype(*proxy.rbegin()), TestRepeatedEnumProxy::Enum>);
+
+  // Indexing should also dereference to element values, not references.
+  static_assert(
+      std::is_same_v<decltype(proxy.begin()[0]), TestRepeatedEnumProxy::Enum>);
+  static_assert(
+      std::is_same_v<decltype(proxy.cbegin()[0]), TestRepeatedEnumProxy::Enum>);
+  static_assert(
+      std::is_same_v<decltype(proxy.rbegin()[0]), TestRepeatedEnumProxy::Enum>);
 }
 
 TYPED_TEST(RepeatedStringFieldProxyTest, Iterators) {
@@ -1318,28 +1368,95 @@ TYPED_TEST(RepeatedFieldProxyTest, StringViewIteratorsNoStdStringLeak) {
   auto field = this->template MakeRepeatedFieldContainer<absl::string_view>();
   auto proxy = field.MakeProxy();
 
+  static constexpr bool kOrProxy = TypeParam::kUseRepeatedFieldOrProxy;
+
   // Check that we don't leak an `std::string` through the iterator.
-  static_assert(std::is_same_v<decltype(proxy.begin()),
-                               RepeatedFieldProxyIterator<absl::string_view>>);
-  static_assert(std::is_same_v<decltype(proxy.end()),
-                               RepeatedFieldProxyIterator<absl::string_view>>);
   static_assert(
-      std::is_same_v<decltype(proxy.cbegin()),
-                     RepeatedFieldProxyIterator<const absl::string_view>>);
+      std::is_same_v<decltype(proxy.begin()),
+                     RepeatedFieldProxyIteratorImpl<
+                         absl::string_view, /*kReverse=*/false, kOrProxy>>);
   static_assert(
-      std::is_same_v<decltype(proxy.cend()),
-                     RepeatedFieldProxyIterator<const absl::string_view>>);
+      std::is_same_v<decltype(proxy.end()),
+                     RepeatedFieldProxyIteratorImpl<
+                         absl::string_view, /*kReverse=*/false, kOrProxy>>);
+  static_assert(std::is_same_v<
+                decltype(proxy.cbegin()),
+                RepeatedFieldProxyIteratorImpl<const absl::string_view,
+                                               /*kReverse=*/false, kOrProxy>>);
+  static_assert(std::is_same_v<
+                decltype(proxy.cend()),
+                RepeatedFieldProxyIteratorImpl<const absl::string_view,
+                                               /*kReverse=*/false, kOrProxy>>);
   static_assert(
       std::is_same_v<decltype(proxy.rbegin()),
-                     RepeatedFieldProxyReverseIterator<absl::string_view>>);
+                     RepeatedFieldProxyIteratorImpl<
+                         absl::string_view, /*kReverse=*/true, kOrProxy>>);
   static_assert(
       std::is_same_v<decltype(proxy.rend()),
-                     RepeatedFieldProxyReverseIterator<absl::string_view>>);
+                     RepeatedFieldProxyIteratorImpl<
+                         absl::string_view, /*kReverse=*/true, kOrProxy>>);
 
   auto it = proxy.begin();
 
   static_assert(
       std::is_same_v<absl::remove_cvref_t<decltype(*it)>, absl::string_view>);
+}
+
+// Helper type trait to check if `T1` and `T2` can be compared with `==`.
+//
+// This essentially does a "does this compile" check for the equality operator.
+// In C++, a template specialization is ignored if, when substituting the
+// template parameters, any of the specialization does not compile.
+//
+// If operator==(T1, T2) is not defined, `equality_comparable` will fall back to
+// the default implementation, which is false.
+template <typename T1, typename T2, typename = void>
+static constexpr bool is_equality_comparable = false;
+template <typename T1, typename T2>
+static constexpr bool is_equality_comparable<
+    T1, T2, std::void_t<decltype(std::declval<T1>() == std::declval<T2>())>> =
+    true;
+
+// Verify that equality_comparable works as expected for a few types:
+static_assert(is_equality_comparable<int32_t, int32_t>);
+static_assert(is_equality_comparable<int32_t, size_t>);
+static_assert(!is_equality_comparable<int32_t, std::string>);
+
+template <typename T1, typename T2>
+constexpr bool TypesIncompatible() {
+  return !std::is_assignable_v<T1, T2> && !std::is_assignable_v<T2, T1> &&
+         !std::is_constructible_v<T1, T2> && !std::is_constructible_v<T2, T1> &&
+         !is_equality_comparable<T1, T2> && !is_equality_comparable<T2, T1>;
+}
+
+template <typename ElementType>
+constexpr bool IteratorsIncompatible() {
+  return TypesIncompatible<
+             decltype(std::declval<RepeatedFieldProxy<ElementType>>().begin()),
+             decltype(std::declval<RepeatedFieldOrProxy<ElementType>>()
+                          .begin())>() &&
+         TypesIncompatible<
+             decltype(std::declval<RepeatedFieldProxy<ElementType>>().cbegin()),
+             decltype(std::declval<RepeatedFieldOrProxy<ElementType>>()
+                          .cbegin())>() &&
+         TypesIncompatible<
+             decltype(std::declval<RepeatedFieldProxy<ElementType>>().rbegin()),
+             decltype(std::declval<RepeatedFieldOrProxy<ElementType>>()
+                          .rbegin())>();
+}
+
+TEST(RepeatedFieldProxyIteratorTest, ProxyAndOrProxyIteratorsIncompatible) {
+  EXPECT_TRUE(IteratorsIncompatible<bool>());
+  EXPECT_TRUE(IteratorsIncompatible<int32_t>());
+  EXPECT_TRUE(IteratorsIncompatible<int64_t>());
+  EXPECT_TRUE(IteratorsIncompatible<uint32_t>());
+  EXPECT_TRUE(IteratorsIncompatible<uint32_t>());
+  EXPECT_TRUE(IteratorsIncompatible<float>());
+  EXPECT_TRUE(IteratorsIncompatible<double>());
+  EXPECT_TRUE(IteratorsIncompatible<absl::string_view>());
+  EXPECT_TRUE(IteratorsIncompatible<std::string>());
+  EXPECT_TRUE(IteratorsIncompatible<absl::Cord>());
+  EXPECT_TRUE(IteratorsIncompatible<RepeatedFieldProxyTestSimpleMessage>());
 }
 
 TYPED_TEST(RepeatedNumericFieldProxyTest, PopBack) {
@@ -2876,10 +2993,10 @@ static_assert(std::is_same_v<
 
 static_assert(std::is_same_v<
               decltype(std::declval<TestRepeatedEnumProxy>().enums_proxy()),
-              RepeatedFieldProxy<const int>>);
+              RepeatedFieldProxy<const TestRepeatedEnumProxy::Enum>>);
 static_assert(std::is_same_v<decltype(std::declval<TestRepeatedEnumProxy>()
                                           .mutable_enums_proxy()),
-                             RepeatedFieldProxy<int>>);
+                             RepeatedFieldProxy<TestRepeatedEnumProxy::Enum>>);
 
 // Repeated std::string:
 static_assert(std::is_same_v<
