@@ -2286,8 +2286,6 @@ void MessageGenerator::GenerateClassDefinition(io::Printer* p) {
           // @@protoc_insertion_point(class_scope:$full_name$)
           //~ Generate private members.
          private:
-          //~ TODO: Remove hack to track field access and remove
-          //~ this class.
           class _Internal;
           $decl_set_has$;
           $decl_oneof_has$;
@@ -5635,8 +5633,12 @@ void MessageGenerator::GenerateSourceDefaultInstance(io::Printer* p) {
                  // File descriptor proto is mutable.
                  if (is_file_descriptor_proto) return;
 
-                 p->Emit(
-                     R"cc(PROTOBUF_MESSAGE_GLOBALS_SECTION(.data.rel.ro))cc");
+                 p->Emit({{"section_name",
+                           !IsProfileDriven(options_) ||
+                                   IsPresentMessage(descriptor_, options_)
+                               ? ".data.rel.ro"
+                               : ".data.rel.ro.unlikely"}},
+                         "PROTOBUF_MESSAGE_GLOBALS_SECTION($section_name$)");
                }})
               .WithSuffix(""),
           {

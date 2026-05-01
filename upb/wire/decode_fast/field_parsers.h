@@ -43,6 +43,12 @@ const char* _upb_FastDecoder_FallbackToMiniTable(PARSE_PARAMS);
 UPB_PRESERVE_NONE
 const char* _upb_FastDecoder_DecodeGeneric(PARSE_PARAMS);
 
+UPB_PRESERVE_NONE
+const char* _upb_FastDecoder_DecodeMismatchedSlot(PARSE_PARAMS);
+
+UPB_PRESERVE_NONE
+const char* _upb_FastDecoder_DecodeUnknown(PARSE_PARAMS);
+
 #undef F
 #undef PARSE_PARAMS
 
