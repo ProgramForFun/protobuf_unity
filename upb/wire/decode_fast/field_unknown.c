@@ -38,8 +38,10 @@
 // unknown region.
 UPB_PRESERVE_NONE UPB_NOINLINE upb_FastDecoder_Return
 _upb_FastDecoder_DecodeUnknownSlowPath(struct upb_Decoder* d, const char* ptr,
-                                       upb_Message* msg, intptr_t table,
-                                       uint64_t hasbits, uint64_t data) {
+                                       upb_Message* msg,
+                                       const upb_MiniTable* table,
+                                       uint64_t hasbits, uint64_t data,
+                                       uint64_t data2) {
   bool alias = (d->options & kUpb_DecodeOption_AliasString) != 0;
   const char* end =
       UPB_PRIVATE(upb_EpsCopyInputStream_GetInputPtr)(&d->input, ptr);
@@ -54,8 +56,9 @@ _upb_FastDecoder_DecodeUnknownSlowPath(struct upb_Decoder* d, const char* ptr,
 }
 
 UPB_FORCEINLINE bool _upb_FastDecoder_DoDecodeUnknown(
-    struct upb_Decoder* d, const char** ptr, upb_Message* msg, intptr_t table,
-    uint64_t hasbits, uint64_t* data, upb_DecodeFastNext* ret) {
+    struct upb_Decoder* d, const char** ptr, upb_Message* msg,
+    const upb_MiniTable* table, uint64_t hasbits, uint64_t* data,
+    upb_DecodeFastNext* ret) {
   const char* start = *ptr;
   uint64_t d_val = *data;
 
@@ -95,9 +98,8 @@ UPB_FORCEINLINE bool _upb_FastDecoder_DoDecodeUnknown(
   } else {
     field_num = _upb_DecodeFast_Tag2FieldNumber(d_val);
   }
-  const upb_MiniTable* mt = decode_totablep(table);
   const upb_MiniTableField* field =
-      upb_MiniTable_FindFieldByNumber(mt, field_num);
+      upb_MiniTable_FindFieldByNumber(table, field_num);
   UPB_ASSERT(field == NULL ||
              _upb_MiniTableField_GetWireType(field) != wire_type);
 #endif
@@ -168,8 +170,9 @@ UPB_FORCEINLINE bool _upb_FastDecoder_DoDecodeUnknown(
 }
 
 UPB_PRESERVE_NONE upb_FastDecoder_Return _upb_FastDecoder_DecodeUnknown(
-    struct upb_Decoder* d, const char* ptr, upb_Message* msg, intptr_t table,
-    uint64_t hasbits, uint64_t data) {
+    struct upb_Decoder* d, const char* ptr, upb_Message* msg,
+    const upb_MiniTable* table, uint64_t hasbits, uint64_t data,
+    uint64_t data2) {
   upb_DecodeFastNext next = kUpb_DecodeFastNext_Dispatch;
   _upb_FastDecoder_DoDecodeUnknown(d, &ptr, msg, table, hasbits, &data, &next);
   UPB_DECODEFAST_NEXTMAYBECOPY(next);
