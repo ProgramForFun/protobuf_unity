@@ -762,11 +762,17 @@ Error, UINTPTR_MAX is undefined
 // Owner: runze@
 #define UPB_FUTURE_CONTAINER_EQ_RETURNS_NOTIMPLEMENTED 1
 
+// Make GetOptions() return immutable options.
+// Owner: runze@
+#define UPB_FUTURE_FREEZE_OPTIONS 1
+
 #else
 
 #define UPB_FUTURE_REMOVE_POP_CLAMP 0
 
 #define UPB_FUTURE_CONTAINER_EQ_RETURNS_NOTIMPLEMENTED 0
+
+#define UPB_FUTURE_FREEZE_OPTIONS 0
 
 #endif
 
@@ -9988,8 +9994,15 @@ upb_MiniTable* _upb_MiniTable_Build(const char* data, size_t len,
 #include <string.h>
 
 
-#ifdef UPB_ENABLE_FASTTABLE
+// Our awkward dance for including fasttable only when it is enabled.
+#if UPB_FASTTABLE
+#define UPB_INCLUDE_FAST_DECODE
 #endif
+
+#ifdef UPB_INCLUDE_FAST_DECODE
+#endif
+
+#undef UPB_INCLUDE_FAST_DECODE
 
 // Must be last.
 
@@ -10014,7 +10027,7 @@ bool upb_MiniTable_SetSubMessage(upb_MiniTable* table,
             (field->UPB_PRIVATE(mode) & ~kUpb_FieldMode_Mask) |
             kUpb_FieldMode_Map;
 
-#ifdef UPB_ENABLE_FASTTABLE
+#if UPB_FASTTABLE
         // The fasttable decoder cannot decode maps. Unfortunately we do not
         // know until this moment that the field is a map, so we have to
         // overwrite the fasttable entry (if any) that we built for this field
@@ -16996,7 +17009,7 @@ bool _upb_Decoder_TryDecodeMessageFast(upb_Decoder* d, const char** ptr,
                                        const upb_MiniTable* mt,
                                        uint64_t last_field_index,
                                        uint64_t data) {
-#ifdef UPB_ENABLE_FASTTABLE
+#if UPB_FASTTABLE
   if (mt->UPB_PRIVATE(table_mask) == (unsigned char)-1 ||
       (d->options & kUpb_DecodeOption_DisableFastTable)) {
     // Fast table is unavailable or disabled.
@@ -18406,6 +18419,7 @@ const char* UPB_PRIVATE(_upb_WireReader_SkipGroup)(
 #undef UPB_FUTURE_BREAKING_CHANGES
 #undef UPB_FUTURE_REMOVE_POP_CLAMP
 #undef UPB_FUTURE_CONTAINER_EQ_RETURNS_NOTIMPLEMENTED
+#undef UPB_FUTURE_FREEZE_OPTIONS
 #undef UPB_HAS_ATTRIBUTE
 #undef UPB_HAS_CPP_ATTRIBUTE
 #undef UPB_HAS_BUILTIN
