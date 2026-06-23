@@ -204,7 +204,7 @@ const char descriptor_table_protodef_google_2fprotobuf_2fcompiler_2fcsharp_2fc_5
     "p_features.proto\022\002pb\032 google/protobuf/de"
     "scriptor.proto\"S\n\016CSharpFeatures\022A\n\030null"
     "able_reference_types\030\001 \001(\010B\037\210\001\001\230\001\004\230\001\003\230\001\001"
-    "\242\001\n\022\005false\030\204\007\262\001\003\010\217N:@\n\006csharp\022\033.google.p"
+    "\242\001\n\022\005false\030\204\007\262\001\003\010\352\007:@\n\006csharp\022\033.google.p"
     "rotobuf.FeatureSet\030\354\007 \001(\0132\022.pb.CSharpFea"
     "turesB9B\030CSharpFeaturesOuterClassP\001\252\002\032Go"
     "ogle.Protobuf.Reflection"
@@ -303,13 +303,12 @@ PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const CSharpFeatures::ParseTableT_
         CSharpFeatures::InternalGenerateParseTable_(CSharpFeatures_class_data_.base());
 #endif  // !PROTOBUF_MESSAGE_GLOBALS
 PROTOBUF_NOINLINE void CSharpFeatures::Clear() {
+  auto& this_ [[maybe_unused]] = *this;
   // @@protoc_insertion_point(message_clear_start:pb.CSharpFeatures)
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void)cached_has_bits;
+  ::uint32_t cached_has_bits [[maybe_unused]] = 0;
 
-  _impl_.nullable_reference_types_ = false;
+  this_._impl_.nullable_reference_types_ = false;
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -359,9 +358,7 @@ PROTOBUF_NOINLINE void CSharpFeatures::Clear() {
   // @@protoc_insertion_point(message_byte_size_start:pb.CSharpFeatures)
   ::size_t total_size = 0;
 
-  ::uint32_t cached_has_bits = 0;
-  // Prevent compiler warnings about cached_has_bits being unused
-  (void)cached_has_bits;
+  ::uint32_t cached_has_bits [[maybe_unused]] = 0;
 
   cached_has_bits = this_._impl_._has_bits_[0];
   total_size += static_cast<bool>(0x00000001U & cached_has_bits) * 2;

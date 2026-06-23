@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/cord.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/string_view.h"
 #include "google/protobuf/descriptor_database.h"
@@ -29,6 +30,7 @@
 #include "google/protobuf/io/zero_copy_stream_impl_lite.h"
 #include "google/protobuf/util/json_format.pb.h"
 #include "google/protobuf/util/json_format_proto3.pb.h"
+#include "google/protobuf/test_textproto.h"
 #include "google/protobuf/unittest.pb.h"
 #include "google/protobuf/util/type_resolver.h"
 #include "google/protobuf/util/type_resolver_util.h"
@@ -1632,6 +1634,95 @@ TEST(JsonErrorTest, FieldNameAndSyntaxErrorInSeparateChunks) {
       s.message(),
       ContainsRegex("invalid *JSON *in *type.googleapis.com/proto3.TestMessage "
                     "*@ *bool_value"));
+}
+
+TEST_P(JsonTest, OversizedStringRejected) {
+#ifndef NDEBUG
+  GTEST_SKIP() << "Test is too slow in non-opt builds.";
+#else
+
+  if (sizeof(void*) < 8) {
+    GTEST_SKIP() << "Test requires 64-bit environment.";
+  }
+
+  absl::Cord chunk(std::string(1024 * 1024, 'a'));
+  absl::Cord cord;
+  cord.Append(R"({"stringValue": ")");
+  for (int i = 0; i < 2048; ++i) {
+    cord.Append(chunk);
+  }
+  cord.Append(R"("})");
+
+  io::CordInputStream input_stream(&cord);
+  TestMessage m;
+  absl::Status s;
+
+  if (GetParam() == Codec::kReflective) {
+    s = JsonStreamToMessage(&input_stream, &m, ParseOptions());
+  } else {
+    std::string result;
+    io::StringOutputStream out(&result);
+    s = JsonToBinaryStream(
+        resolver_.get(), absl::StrCat("type.googleapis.com/", m.GetTypeName()),
+        &input_stream, &out, ParseOptions());
+  }
+
+  EXPECT_THAT(s, StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(s.message(), ContainsRegex("string *value *too *large"));
+
+#endif  // NDEBUG
+}
+
+absl::StatusOr<google::protobuf::Struct> MessageToJsonAndBack(
+    const google::protobuf::Struct& msg) {
+  std::string str;
+  auto status = MessageToJsonString(msg, &str);
+  if (!status.ok()) return status;
+
+  google::protobuf::Struct out;
+  status = JsonStringToMessage(str, &out);
+  if (!status.ok()) return status;
+  return out;
+}
+
+TEST(JsonTest, MapsThroughCodegenWorksProperly) {
+  google::protobuf::Struct s;
+  auto& fields = *s.mutable_fields();
+
+  fields["first"].set_string_value("str1");
+
+  EXPECT_THAT(MessageToJsonAndBack(s), IsOkAndHolds(EqualsProto(R"pb(
+                fields {
+                  key: "first"
+                  value { string_value: "str1" }
+                }
+              )pb")));
+
+  fields["second"].set_string_value("str2");
+
+  EXPECT_THAT(MessageToJsonAndBack(s), IsOkAndHolds(EqualsProto(R"pb(
+                fields {
+                  key: "first"
+                  value { string_value: "str1" }
+                }
+                fields {
+                  key: "second"
+                  value { string_value: "str2" }
+                }
+              )pb")));
+
+  fields["first"].set_bool_value(true);
+
+  EXPECT_THAT(MessageToJsonAndBack(s), IsOkAndHolds(EqualsProto(R"pb(
+                fields {
+                  key: "first"
+                  value { bool_value: true }
+                }
+                fields {
+                  key: "second"
+                  value { string_value: "str2" }
+                }
+              )pb")));
 }
 
 }  // namespace
