@@ -167,7 +167,7 @@ const char* ExtensionSet::ParseFieldWithExtensionInfo(
         MessageLite* value =
             info.is_repeated
                 ? AddMessage(arena, number, WireFormatLite::TYPE_GROUP,
-                             *info.message_info.GetPrototype(), info.descriptor)
+                             info.message_info.GetClassData(), info.descriptor)
                 : MutableMessage(arena, number, WireFormatLite::TYPE_GROUP,
                                  *info.message_info.GetPrototype(),
                                  info.descriptor);
@@ -179,7 +179,7 @@ const char* ExtensionSet::ParseFieldWithExtensionInfo(
         MessageLite* value =
             info.is_repeated
                 ? AddMessage(arena, number, WireFormatLite::TYPE_MESSAGE,
-                             *info.message_info.GetPrototype(), info.descriptor)
+                             info.message_info.GetClassData(), info.descriptor)
                 : MutableMessage(arena, number, WireFormatLite::TYPE_MESSAGE,
                                  *info.message_info.GetPrototype(),
                                  info.descriptor);
@@ -223,17 +223,18 @@ const char* ExtensionSet::ParseMessageSetItemTmpl(
           MessageLite* value =
               extension.is_repeated
                   ? AddMessage(arena, type_id, WireFormatLite::TYPE_MESSAGE,
-                               *extension.message_info.GetPrototype(),
+                               extension.message_info.GetClassData(),
                                extension.descriptor)
                   : MutableMessage(arena, type_id, WireFormatLite::TYPE_MESSAGE,
                                    *extension.message_info.GetPrototype(),
                                    extension.descriptor);
 
           const char* p;
-          // We can't use regular parse from string as we have to track
-          // proper recursion depth and descriptor pools. Spawn a new
-          // ParseContext inheriting those attributes.
-          ParseContext tmp_ctx(ParseContext::kSpawn, *ctx, &p, payload);
+          // Use Spawn to transfer all attributes for recursion.
+          // However, use Spawn<1> to decrease depth an extra time to take into
+          // account that `payload` came from a subfield.
+          ParseContext tmp_ctx(ParseContext::Spawn<1>{}, *ctx, &p, payload);
+          GOOGLE_PROTOBUF_PARSER_ASSERT(p);
           GOOGLE_PROTOBUF_PARSER_ASSERT(value->_InternalParse(p, &tmp_ctx) &&
                                          tmp_ctx.EndedAtLimit());
         }

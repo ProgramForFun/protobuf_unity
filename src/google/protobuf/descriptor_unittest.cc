@@ -92,12 +92,14 @@ using ::google::protobuf::internal::cpp::HasbitMode;
 using ::google::protobuf::internal::cpp::HasHasbitWithoutProfile;
 using ::google::protobuf::internal::cpp::HasPreservingUnknownEnumSemantics;
 using ::google::protobuf::internal::cpp::Utf8CheckMode;
+using ::testing::_;
 using ::testing::AnyOf;
 using ::testing::AtLeast;
 using ::testing::ElementsAre;
 using ::testing::HasSubstr;
 using ::testing::NotNull;
 using ::testing::Return;
+using ::testing::SizeIs;
 
 absl::Status GetStatus(const absl::Status& s) { return s; }
 template <typename T>
@@ -3159,24 +3161,28 @@ TEST_F(MiscTest, StaticTypeNames) {
 
   typedef FieldDescriptor FD;  // avoid ugly line wrapping
 
-  EXPECT_EQ(absl::string_view("double"), FD::TypeName(FD::TYPE_DOUBLE));
-  EXPECT_EQ(absl::string_view("float"), FD::TypeName(FD::TYPE_FLOAT));
-  EXPECT_EQ(absl::string_view("int64"), FD::TypeName(FD::TYPE_INT64));
-  EXPECT_EQ(absl::string_view("uint64"), FD::TypeName(FD::TYPE_UINT64));
-  EXPECT_EQ(absl::string_view("int32"), FD::TypeName(FD::TYPE_INT32));
-  EXPECT_EQ(absl::string_view("fixed64"), FD::TypeName(FD::TYPE_FIXED64));
-  EXPECT_EQ(absl::string_view("fixed32"), FD::TypeName(FD::TYPE_FIXED32));
-  EXPECT_EQ(absl::string_view("bool"), FD::TypeName(FD::TYPE_BOOL));
-  EXPECT_EQ(absl::string_view("string"), FD::TypeName(FD::TYPE_STRING));
-  EXPECT_EQ(absl::string_view("group"), FD::TypeName(FD::TYPE_GROUP));
-  EXPECT_EQ(absl::string_view("message"), FD::TypeName(FD::TYPE_MESSAGE));
-  EXPECT_EQ(absl::string_view("bytes"), FD::TypeName(FD::TYPE_BYTES));
-  EXPECT_EQ(absl::string_view("uint32"), FD::TypeName(FD::TYPE_UINT32));
-  EXPECT_EQ(absl::string_view("enum"), FD::TypeName(FD::TYPE_ENUM));
-  EXPECT_EQ(absl::string_view("sfixed32"), FD::TypeName(FD::TYPE_SFIXED32));
-  EXPECT_EQ(absl::string_view("sfixed64"), FD::TypeName(FD::TYPE_SFIXED64));
-  EXPECT_EQ(absl::string_view("sint32"), FD::TypeName(FD::TYPE_SINT32));
-  EXPECT_EQ(absl::string_view("sint64"), FD::TypeName(FD::TYPE_SINT64));
+  EXPECT_EQ("ERROR", FD::TypeName(FD::Type{}));
+  EXPECT_EQ("double", FD::TypeName(FD::TYPE_DOUBLE));
+  EXPECT_EQ("float", FD::TypeName(FD::TYPE_FLOAT));
+  EXPECT_EQ("int64", FD::TypeName(FD::TYPE_INT64));
+  EXPECT_EQ("uint64", FD::TypeName(FD::TYPE_UINT64));
+  EXPECT_EQ("int32", FD::TypeName(FD::TYPE_INT32));
+  EXPECT_EQ("fixed64", FD::TypeName(FD::TYPE_FIXED64));
+  EXPECT_EQ("fixed32", FD::TypeName(FD::TYPE_FIXED32));
+  EXPECT_EQ("bool", FD::TypeName(FD::TYPE_BOOL));
+  EXPECT_EQ("string", FD::TypeName(FD::TYPE_STRING));
+  EXPECT_EQ("group", FD::TypeName(FD::TYPE_GROUP));
+  EXPECT_EQ("message", FD::TypeName(FD::TYPE_MESSAGE));
+  EXPECT_EQ("bytes", FD::TypeName(FD::TYPE_BYTES));
+  EXPECT_EQ("uint32", FD::TypeName(FD::TYPE_UINT32));
+  EXPECT_EQ("enum", FD::TypeName(FD::TYPE_ENUM));
+  EXPECT_EQ("sfixed32", FD::TypeName(FD::TYPE_SFIXED32));
+  EXPECT_EQ("sfixed64", FD::TypeName(FD::TYPE_SFIXED64));
+  EXPECT_EQ("sint32", FD::TypeName(FD::TYPE_SINT32));
+  EXPECT_EQ("sint64", FD::TypeName(FD::TYPE_SINT64));
+
+  EXPECT_DEATH((void)FD::TypeName(static_cast<FD::Type>(FD::MAX_TYPE + 1)),
+               "Invalid input value");
 }
 
 TEST_F(MiscTest, CppTypes) {
@@ -3252,16 +3258,48 @@ TEST_F(MiscTest, StaticCppTypeNames) {
 
   typedef FieldDescriptor FD;  // avoid ugly line wrapping
 
-  EXPECT_EQ(absl::string_view("int32"), FD::CppTypeName(FD::CPPTYPE_INT32));
-  EXPECT_EQ(absl::string_view("int64"), FD::CppTypeName(FD::CPPTYPE_INT64));
-  EXPECT_EQ(absl::string_view("uint32"), FD::CppTypeName(FD::CPPTYPE_UINT32));
-  EXPECT_EQ(absl::string_view("uint64"), FD::CppTypeName(FD::CPPTYPE_UINT64));
-  EXPECT_EQ(absl::string_view("double"), FD::CppTypeName(FD::CPPTYPE_DOUBLE));
-  EXPECT_EQ(absl::string_view("float"), FD::CppTypeName(FD::CPPTYPE_FLOAT));
-  EXPECT_EQ(absl::string_view("bool"), FD::CppTypeName(FD::CPPTYPE_BOOL));
-  EXPECT_EQ(absl::string_view("enum"), FD::CppTypeName(FD::CPPTYPE_ENUM));
-  EXPECT_EQ(absl::string_view("string"), FD::CppTypeName(FD::CPPTYPE_STRING));
-  EXPECT_EQ(absl::string_view("message"), FD::CppTypeName(FD::CPPTYPE_MESSAGE));
+  EXPECT_EQ("ERROR", FD::CppTypeName(FD::CppType{}));
+  EXPECT_EQ("int32", FD::CppTypeName(FD::CPPTYPE_INT32));
+  EXPECT_EQ("int64", FD::CppTypeName(FD::CPPTYPE_INT64));
+  EXPECT_EQ("uint32", FD::CppTypeName(FD::CPPTYPE_UINT32));
+  EXPECT_EQ("uint64", FD::CppTypeName(FD::CPPTYPE_UINT64));
+  EXPECT_EQ("double", FD::CppTypeName(FD::CPPTYPE_DOUBLE));
+  EXPECT_EQ("float", FD::CppTypeName(FD::CPPTYPE_FLOAT));
+  EXPECT_EQ("bool", FD::CppTypeName(FD::CPPTYPE_BOOL));
+  EXPECT_EQ("enum", FD::CppTypeName(FD::CPPTYPE_ENUM));
+  EXPECT_EQ("string", FD::CppTypeName(FD::CPPTYPE_STRING));
+  EXPECT_EQ("message", FD::CppTypeName(FD::CPPTYPE_MESSAGE));
+
+  EXPECT_DEATH(
+      (void)FD::CppTypeName(static_cast<FD::CppType>(FD::MAX_CPPTYPE + 1)),
+      "Invalid input value");
+}
+
+TEST_F(MiscTest, StaticTypeToCppType) {
+  typedef FieldDescriptor FD;  // avoid ugly line wrapping
+                               //
+  EXPECT_EQ(FD::CppType{}, FD::TypeToCppType(FD::Type{}));
+  EXPECT_EQ(FD::CPPTYPE_DOUBLE, FD::TypeToCppType(FD::TYPE_DOUBLE));
+  EXPECT_EQ(FD::CPPTYPE_FLOAT, FD::TypeToCppType(FD::TYPE_FLOAT));
+  EXPECT_EQ(FD::CPPTYPE_INT64, FD::TypeToCppType(FD::TYPE_INT64));
+  EXPECT_EQ(FD::CPPTYPE_UINT64, FD::TypeToCppType(FD::TYPE_UINT64));
+  EXPECT_EQ(FD::CPPTYPE_INT32, FD::TypeToCppType(FD::TYPE_INT32));
+  EXPECT_EQ(FD::CPPTYPE_UINT64, FD::TypeToCppType(FD::TYPE_FIXED64));
+  EXPECT_EQ(FD::CPPTYPE_UINT32, FD::TypeToCppType(FD::TYPE_FIXED32));
+  EXPECT_EQ(FD::CPPTYPE_BOOL, FD::TypeToCppType(FD::TYPE_BOOL));
+  EXPECT_EQ(FD::CPPTYPE_STRING, FD::TypeToCppType(FD::TYPE_STRING));
+  EXPECT_EQ(FD::CPPTYPE_MESSAGE, FD::TypeToCppType(FD::TYPE_GROUP));
+  EXPECT_EQ(FD::CPPTYPE_MESSAGE, FD::TypeToCppType(FD::TYPE_MESSAGE));
+  EXPECT_EQ(FD::CPPTYPE_STRING, FD::TypeToCppType(FD::TYPE_BYTES));
+  EXPECT_EQ(FD::CPPTYPE_UINT32, FD::TypeToCppType(FD::TYPE_UINT32));
+  EXPECT_EQ(FD::CPPTYPE_ENUM, FD::TypeToCppType(FD::TYPE_ENUM));
+  EXPECT_EQ(FD::CPPTYPE_INT32, FD::TypeToCppType(FD::TYPE_SFIXED32));
+  EXPECT_EQ(FD::CPPTYPE_INT64, FD::TypeToCppType(FD::TYPE_SFIXED64));
+  EXPECT_EQ(FD::CPPTYPE_INT32, FD::TypeToCppType(FD::TYPE_SINT32));
+  EXPECT_EQ(FD::CPPTYPE_INT64, FD::TypeToCppType(FD::TYPE_SINT64));
+
+  EXPECT_DEATH((void)FD::TypeToCppType(static_cast<FD::Type>(FD::MAX_TYPE + 1)),
+               "Invalid input value");
 }
 
 TEST_F(MiscTest, MessageType) {
@@ -5542,6 +5580,43 @@ TEST_F(ValidationErrorTest, ReservedRangeOverlap) {
 
       "foo.proto: Foo: NUMBER: Reserved range 5 to 14"
       " overlaps with already-defined range 10 to 19.\n");
+}
+
+TEST_F(ValidationErrorTest, LimitNumberOfErrors) {
+  FileDescriptorProto file;
+  file.set_name("foo.proto");
+  auto* m = file.add_message_type();
+  m->set_name("Foo");
+  // This would generate O(N^2) errors
+  for (int i = 0; i < 100; ++i) {
+    auto* r = m->add_reserved_range();
+    r->set_start(100);
+    r->set_end(200);
+  }
+  // DescriptorBuilder::kMaxNumErrors
+  BuildFileWithErrorList(file, SizeIs(1000));
+}
+
+TEST_F(ValidationErrorTest, LimitNumberOfWarnings) {
+  constexpr int N = 1100;
+  // Create N deps.
+  for (int i = 0; i < N; ++i) {
+    FileDescriptorProto file;
+    file.set_name(absl::StrCat("dep", i, ".proto"));
+    ASSERT_TRUE(pool_.BuildFile(file));
+  }
+
+  FileDescriptorProto file;
+  file.set_name("foo.proto");
+
+  // This generates one warning per dep.
+  for (int i = 0; i < N; ++i) {
+    file.add_dependency(absl::StrCat("dep", i, ".proto"));
+  }
+
+  pool_.AddDirectInputFile(file.name());
+  // DescriptorBuilder::kMaxNumErrors
+  BuildFileWithErrorList(file, _, SizeIs(1000));
 }
 
 TEST_F(ValidationErrorTest, ReservedNameError) {
