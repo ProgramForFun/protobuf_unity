@@ -4849,7 +4849,7 @@ static upb_StringView jsondec_mask(jsondec* d, const char* buf,
   }
 
   out = upb_Arena_Malloc(d->arena, ret.size);
-  jsondec_checkoom(d, out || ret.size == 0);
+  jsondec_checkoom(d, out);
   ptr = buf;
   ret.data = out;
 
@@ -5166,6 +5166,9 @@ static upb_Arena* jsonenc_arena(jsonenc* e) {
   /* Create lazily, since it's only needed for Any */
   if (!e->arena) {
     e->arena = upb_Arena_New();
+    if (!e->arena) {
+      jsonenc_err(e, "Out of memory");
+    }
   }
   return e->arena;
 }
@@ -5483,6 +5486,10 @@ static void jsonenc_any(jsonenc* e, const upb_Message* msg,
   const upb_MiniTable* any_layout = upb_MessageDef_MiniTable(any_m);
   upb_Arena* arena = jsonenc_arena(e);
   upb_Message* any = upb_Message_New(any_layout, arena);
+  if (!any) {
+    jsonenc_err(e, "Out of memory");
+    return;
+  }
 
   if (upb_Decode(value.data, value.size, any, any_layout, NULL, 0, arena) !=
       kUpb_DecodeStatus_Ok) {
@@ -7865,26 +7872,6 @@ void _upb_Message_DiscardUnknown_shallow(upb_Message* msg) {
   in->size = size;
 }
 
-upb_Message_DeleteUnknownStatus upb_Message_DeleteUnknown(upb_Message* msg,
-                                                          upb_StringView* data,
-                                                          uintptr_t* iter,
-                                                          upb_Arena* arena) {
-  upb_MessageUnknown unknown;
-  unknown.type = kUpb_MessageUnknownType_StringView;
-  unknown.value.bytes = *data;
-
-  upb_Message_DeleteUnknownStatus res =
-      upb_Message_DeleteUnknown2(msg, &unknown, iter, arena);
-  UPB_ASSERT(unknown.type == kUpb_MessageUnknownType_StringView);
-  if (res == kUpb_DeleteUnknown_IterUpdated ||
-      res == kUpb_DeleteUnknown_DeletedLast) {
-    // the unknown data remains the same on the result of
-    // kUpb_DeleteUnknown_AllocFail.
-    *data = unknown.value.bytes;
-  }
-  return res;
-}
-
 size_t upb_Message_ExtensionCount(const upb_Message* msg) {
   upb_Message_Internal* in = UPB_PRIVATE(_upb_Message_GetInternal)(msg);
   if (!in) return 0;
@@ -8105,6 +8092,25 @@ upb_Message_DeleteUnknownStatus upb_Message_DeleteUnknown2(
              : kUpb_DeleteUnknown_DeletedLast;
 }
 
+upb_Message_DeleteUnknownStatus upb_Message_DeleteUnknown(
+    struct upb_Message* msg, upb_StringView* data, uintptr_t* iter,
+    struct upb_Arena* arena) {
+  upb_MessageUnknown unknown;
+  unknown.type = kUpb_MessageUnknownType_StringView;
+  unknown.value.bytes = *data;
+
+  upb_Message_DeleteUnknownStatus res =
+      upb_Message_DeleteUnknown2(msg, &unknown, iter, arena);
+  UPB_ASSERT(unknown.type == kUpb_MessageUnknownType_StringView);
+  if (res == kUpb_DeleteUnknown_IterUpdated ||
+      res == kUpb_DeleteUnknown_DeletedLast) {
+    // the unknown data remains the same on the result of
+    // kUpb_DeleteUnknown_AllocFail.
+    *data = unknown.value.bytes;
+  }
+  return res;
+}
+
 
 #include <stddef.h>
 #include <stdint.h>
@@ -8152,10 +8158,15 @@ static bool _upb_Map_IsEqual(const upb_Map* map1, const upb_Map* map2,
   // Check for trivial equality.
   if (map1 == map2) return true;
 
-  // Must have identical element counts.
+  // Must have identical element counts, unless we are doing a partial
+  // comparison.
   size_t size1 = map1 ? upb_Map_Size(map1) : 0;
   size_t size2 = map2 ? upb_Map_Size(map2) : 0;
-  if (size1 != size2) return false;
+  if (options & kUpb_CompareOption_Partial) {
+    if (size1 < size2) return false;
+  } else {
+    if (size1 != size2) return false;
+  }
 
   const upb_MiniTableField* f = upb_MiniTable_MapValue(m);
   const upb_MiniTable* m2_value = upb_MiniTable_SubMessage(f);
@@ -8163,8 +8174,8 @@ static bool _upb_Map_IsEqual(const upb_Map* map1, const upb_Map* map2,
 
   upb_MessageValue key, val1, val2;
   size_t iter = kUpb_Map_Begin;
-  while (upb_Map_Next(map1, &key, &val1, &iter)) {
-    if (!upb_Map_Get(map2, key, &val2)) return false;
+  while (upb_Map_Next(map2, &key, &val2, &iter)) {
+    if (!upb_Map_Get(map1, key, &val1)) return false;
     if (!upb_MessageValue_IsEqual(val1, val2, ctype, m2_value, options))
       return false;
   }
@@ -8172,10 +8183,65 @@ static bool _upb_Map_IsEqual(const upb_Map* map1, const upb_Map* map2,
   return true;
 }
 
+static bool _upb_Message_BaseFieldsArePartiallyEqual(const upb_Message* msg1,
+                                                     const upb_Message* msg2,
+                                                     const upb_MiniTable* m,
+                                                     int options) {
+  size_t iter2 = kUpb_BaseField_Begin;
+  const upb_MiniTableField* f2;
+  upb_MessageValue val2;
+
+  // Iterate through all base fields present/set in msg2 (expected).
+  while (UPB_PRIVATE(_upb_Message_NextBaseField)(msg2, m, &f2, &val2, &iter2)) {
+    // Get the corresponding field data from msg1 (actual).
+    const void* src1 = UPB_PRIVATE(_upb_Message_DataPtr)(msg1, f2);
+    upb_MessageValue val1;
+    UPB_PRIVATE(_upb_MiniTableField_DataCopy)(f2, &val1, src1);
+
+    // Verify presence in msg1 (actual):
+    // - For fields with explicit presence, msg1 must also have the field set.
+    // - For non-presence fields (proto3 scalars), msg1's field must not be
+    //   zero/default.
+    if (upb_MiniTableField_HasPresence(f2)) {
+      if (!upb_Message_HasBaseField(msg1, f2)) return false;
+    } else {
+      if (UPB_PRIVATE(_upb_MiniTableField_DataIsZero)(f2, src1)) return false;
+    }
+
+    const upb_MiniTable* subm = upb_MiniTable_SubMessage(f2);
+    const upb_CType ctype = upb_MiniTableField_CType(f2);
+
+    // Compare field values according to the field mode (array, map, or
+    // scalar), passing comparison options recursively for submessages.
+    bool eq;
+    switch (UPB_PRIVATE(_upb_MiniTableField_Mode)(f2)) {
+      case kUpb_FieldMode_Array:
+        eq = _upb_Array_IsEqual(val1.array_val, val2.array_val, ctype, subm,
+                                options);
+        break;
+      case kUpb_FieldMode_Map:
+        eq = _upb_Map_IsEqual(val1.map_val, val2.map_val, subm, options);
+        break;
+      case kUpb_FieldMode_Scalar:
+        eq = upb_MessageValue_IsEqual(val1, val2, ctype, subm, options);
+        break;
+    }
+    if (!eq) return false;
+  }
+  return true;
+}
+
 static bool _upb_Message_BaseFieldsAreEqual(const upb_Message* msg1,
                                             const upb_Message* msg2,
                                             const upb_MiniTable* m,
                                             int options) {
+  // In partial comparison mode, we only check fields that are present in msg2
+  // (the expected message). Any extra fields present in msg1 (the actual
+  // message) are ignored.
+  if (options & kUpb_CompareOption_Partial) {
+    return _upb_Message_BaseFieldsArePartiallyEqual(msg1, msg2, m, options);
+  }
+
   // Iterate over all base fields for each message.
   // The order will always match if the messages are equal.
   size_t iter1 = kUpb_BaseField_Begin;
@@ -8219,18 +8285,18 @@ static bool _upb_Message_ExtensionsAreEqual(const upb_Message* msg1,
                                             const upb_MiniTable* m,
                                             int options) {
   const upb_MiniTableExtension* e;
-  upb_MessageValue val1;
+  upb_MessageValue val2;
 
-  // Iterate over all extensions for msg1, and search msg2 for each extension.
+  // Iterate over all extensions for msg2, and search msg1 for each extension.
   size_t count1 = 0;
-  size_t iter1 = kUpb_Message_ExtensionBegin;
-  while (upb_Message_NextExtension(msg1, &e, &val1, &iter1)) {
-    const upb_Extension* ext2 = UPB_PRIVATE(_upb_Message_Getext)(msg2, e);
-    if (!ext2) return false;
+  size_t iter2 = kUpb_Message_ExtensionBegin;
+  while (upb_Message_NextExtension(msg2, &e, &val2, &iter2)) {
+    const upb_Extension* ext1 = UPB_PRIVATE(_upb_Message_Getext)(msg1, e);
+    if (!ext1) return false;
 
     count1++;
 
-    const upb_MessageValue val2 = ext2->data;
+    const upb_MessageValue val1 = ext1->data;
     const upb_MiniTableField* f = &e->UPB_PRIVATE(field);
     const upb_MiniTable* subm = upb_MiniTableField_IsSubMessage(f)
                                     ? upb_MiniTableExtension_GetSubMessage(e)
@@ -8254,9 +8320,11 @@ static bool _upb_Message_ExtensionsAreEqual(const upb_Message* msg1,
     if (!eq) return false;
   }
 
-  // Must have identical extension counts (this catches the case where msg2
-  // has extensions that msg1 doesn't).
-  if (count1 != upb_Message_ExtensionCount(msg2)) return false;
+  if (!(options & kUpb_CompareOption_Partial)) {
+    // Must have identical extension counts (this catches the case where msg1
+    // has extensions that msg2 doesn't).
+    if (count1 != upb_Message_ExtensionCount(msg1)) return false;
+  }
 
   return true;
 }
@@ -9040,12 +9108,21 @@ upb_Extension* UPB_PRIVATE(_upb_Message_GetOrCreateExtensionWithTag)(
     struct upb_Message* msg, const upb_MiniTableExtension* e, upb_Arena* a,
     upb_TaggedAuxType tag) {
   UPB_ASSERT(!upb_Message_IsFrozen(msg));
-  upb_Extension* ext = (upb_Extension*)UPB_PRIVATE(_upb_Message_Getext)(msg, e);
-  if (ext) return ext;
-
+  // For Canonical Extensions, we check whether the extension has already been
+  // set. If we find an extension with the same pointer and tag, we reuse it to
+  // prevent duplicate entries for the same extension.
+  //
+  // For Non-Canonical Extensions, we do NOT reuse them, matching the behavior
+  // of adding a unknown StringView (through `_upb_Message_AddUnknown`) which
+  // accumulates.
+  if (tag == kUpb_TaggedAuxType_CanonicalExtension) {
+    upb_Extension* ext =
+        (upb_Extension*)UPB_PRIVATE(_upb_Message_Getext)(msg, e);
+    if (ext) return ext;
+  }
   if (!UPB_PRIVATE(_upb_Message_ReserveSlot)(msg, a)) return NULL;
   upb_Message_Internal* in = UPB_PRIVATE(_upb_Message_GetInternal)(msg);
-  ext = upb_Arena_Malloc(a, sizeof(upb_Extension));
+  upb_Extension* ext = upb_Arena_Malloc(a, sizeof(upb_Extension));
   if (!ext) return NULL;
   memset(ext, 0, sizeof(upb_Extension));
   ext->ext = e;
@@ -10135,6 +10212,7 @@ done:
 #endif
 
   upb_MiniTable* ret = upb_Arena_Malloc(decoder->arena, mt_size);
+  upb_MdDecoder_CheckOutOfMemory(&decoder->base, ret);
   memcpy(ret, &decoder->table, sizeof(*ret));
 
 #if UPB_FASTTABLE
@@ -10454,8 +10532,8 @@ bool upb_MiniTable_Link(upb_MiniTable* m, const upb_MiniTable** sub_tables,
     upb_MiniTableField* f =
         (upb_MiniTableField*)upb_MiniTable_GetFieldByIndex(m, i);
     if (upb_MiniTableField_CType(f) == kUpb_CType_Message) {
+      if (msg_count >= sub_table_count) return false;
       const upb_MiniTable* sub = sub_tables[msg_count++];
-      if (msg_count > sub_table_count) return false;
       if (sub && !upb_MiniTable_SetSubMessage(m, f, sub)) return false;
     }
   }
@@ -10464,8 +10542,8 @@ bool upb_MiniTable_Link(upb_MiniTable* m, const upb_MiniTable** sub_tables,
     upb_MiniTableField* f =
         (upb_MiniTableField*)upb_MiniTable_GetFieldByIndex(m, i);
     if (upb_MiniTableField_IsClosedEnum(f)) {
+      if (enum_count >= sub_enum_count) return false;
       const upb_MiniTableEnum* sub = sub_enums[enum_count++];
-      if (enum_count > sub_enum_count) return false;
       if (sub && !upb_MiniTable_SetSubEnum(m, f, sub)) return false;
     }
   }
@@ -11449,6 +11527,16 @@ const upb_FileDef* upb_DefPool_FindFileContainingSymbol(const upb_DefPool* s,
 }
 
 static void remove_filedef(upb_DefPool* s, upb_FileDef* file) {
+  intptr_t ext_iter = UPB_INTTABLE_BEGIN;
+  uintptr_t ext_key;
+  upb_value ext_val;
+  while (upb_inttable_next(&s->exts, &ext_key, &ext_val, &ext_iter)) {
+    const upb_FieldDef* ext = upb_value_getconstptr(ext_val);
+    if (upb_FieldDef_File(ext) == file) {
+      upb_inttable_removeiter(&s->exts, &ext_iter);
+    }
+  }
+
   intptr_t iter = UPB_INTTABLE_BEGIN;
   upb_StringView key;
   upb_value val;
@@ -17803,6 +17891,49 @@ const char* upb_EncodeStatus_String(upb_EncodeStatus status) {
 }
 
 
+#include <setjmp.h>
+#include <stddef.h>
+
+
+// Must be last.
+
+static upb_EncodeStatus upb_DoEncodeExtension(upb_encstate* encoder, char* ptr,
+                                              const struct upb_Extension* ext,
+                                              bool is_message_set,
+                                              upb_StringView* view,
+                                              int encode_options) {
+  if (UPB_SETJMP(*encoder->err) == 0) {
+    char* buf = ptr;
+    size_t size = 0;
+    UPB_PRIVATE(_upb_Encode_Extension)(encoder, ext->ext, ext->data,
+                                       is_message_set, &buf, &size,
+                                       encode_options);
+    view->data = buf;
+    view->size = size;
+  } else {
+    UPB_ASSERT(encoder->status != kUpb_EncodeStatus_Ok);
+    upb_BackAlloc_Abort(&encoder->alloc);
+    view->data = NULL;
+    view->size = 0;
+  }
+  UPB_PRIVATE(_upb_encstate_destroy)(encoder);
+  return encoder->status;
+}
+
+upb_EncodeStatus upb_EncodeExtension(const struct upb_Extension* ext,
+                                     struct upb_Arena* arena,
+                                     upb_StringView* view, int encode_options) {
+  const upb_MiniTable* extendee = upb_MiniTableExtension_Extendee(ext->ext);
+  bool is_message_set =
+      extendee != NULL && upb_MiniTable_IsMessageSet(extendee);
+  upb_encstate e;
+  jmp_buf err;
+  char* ptr = UPB_PRIVATE(_upb_encstate_init)(&e, &err, arena);
+  return upb_DoEncodeExtension(&e, ptr, ext, is_message_set, view,
+                               encode_options);
+}
+
+
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
@@ -18489,9 +18620,12 @@ static char* encode_map(char* ptr, upb_encstate* e, const upb_Message* msg,
 
   if (e->options & kUpb_EncodeOption_Deterministic) {
     _upb_sortedmap sorted;
-    _upb_mapsorter_pushmap(
-        &e->sorter, layout->UPB_PRIVATE(fields)[0].UPB_PRIVATE(descriptortype),
-        map, &sorted);
+    if (!_upb_mapsorter_pushmap(
+            &e->sorter,
+            layout->UPB_PRIVATE(fields)[0].UPB_PRIVATE(descriptortype), map,
+            &sorted)) {
+      encode_err(e, kUpb_EncodeStatus_OutOfMemory);
+    }
     upb_MapEntry ent;
     while (_upb_sortedmap_next(&e->sorter, map, &sorted, &ent)) {
       ptr = encode_mapentry(ptr, e, upb_MiniTableField_Number(f), layout, &ent);
@@ -18627,7 +18761,7 @@ static char* encode_exts(char* ptr, upb_encstate* e, const upb_MiniTable* m,
   if (e->options & kUpb_EncodeOption_Deterministic) {
     _upb_sortedmap sorted;
     if (!_upb_mapsorter_pushexts(&e->sorter, in, &sorted)) {
-      // TODO: b/378744096 - handle alloc failure
+      encode_err(e, kUpb_EncodeStatus_OutOfMemory);
     }
     const upb_Extension* ext;
     while (_upb_sortedmap_nextext(&e->sorter, &sorted, &ext)) {

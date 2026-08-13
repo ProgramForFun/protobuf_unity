@@ -46,7 +46,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":internal",
-        ":message_unknowns",
         ":types",
         "//upb/base",
         "//upb/base:internal",
@@ -70,12 +69,15 @@ cc_library(
     features = UPB_DEFAULT_FEATURES,
     visibility = [
         "//hpb/internal:__pkg__",
+        "//multiplatform/elements/engine/imports/eml_operators:__pkg__",
         "//pkg:__pkg__",
         "//python:__pkg__",
         "//third_party/cel/c/internal:__pkg__",
         "//third_party/upb/wasm_abi/upb:__pkg__",
         "//upb:__pkg__",
+        "//upb/test:__pkg__",
         "//upb/wire:__pkg__",
+        "//upb/wire/decode_fast:__pkg__",
         "//video/youtube/utils/elements/client/component_type:__pkg__",
         "//video/youtube/utils/elements/client/component_type/subscription_processors:__pkg__",
         "//video/youtube/utils/elements/data_layer:__pkg__",
@@ -527,6 +529,8 @@ cc_test(
     deps = [
         ":internal",
         ":message",
+        ":message_test_upb_minitable_proto",
+        ":message_test_upb_proto",
         ":message_unknowns",
         "//upb/base",
         "//upb/mem",
@@ -535,6 +539,7 @@ cc_test(
         "//upb/test:test_proto_upb_minitable",
         "//upb/test:test_upb_proto",
         "//upb/wire",
+        "//upb/wire:encode_extension",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
@@ -673,6 +678,7 @@ filegroup(
         exclude = [
             "promote_test.cc",
             "convert_fuzz_test.cc",
+            "compare_fuzz_test.cc",
         ],
     ),
     visibility = ["//upb:__pkg__"],
