@@ -25,7 +25,6 @@ PROTOBUF_PRAGMA_INIT_SEG
 namespace _pb = ::google::protobuf;
 namespace _pbi = ::google::protobuf::internal;
 namespace _fl = ::google::protobuf::internal::field_layout;
-#ifdef PROTOBUF_MESSAGE_GLOBALS
 namespace {
 PROTOBUF_CONSTINIT ::google::protobuf::internal::ReflectionData
     file_reflection_data[] = {
@@ -33,7 +32,6 @@ PROTOBUF_CONSTINIT ::google::protobuf::internal::ReflectionData
         {&::_pbi::kDescriptorMethods, &::descriptor_table_google_2fprotobuf_2fjson_5fenumvalue_5foptions_2eproto, /* tracker*/ nullptr,},
 };
 }  // namespace
-#endif
 namespace pb {
 namespace enumvalue {
 class JsonEnumValueOptions::_Internal {
@@ -41,9 +39,12 @@ class JsonEnumValueOptions::_Internal {
   using HasBits = decltype(::std::declval<JsonEnumValueOptions>()._impl_._has_bits_);
   static constexpr ::int32_t kHasBitsOffset =
       8 * PROTOBUF_FIELD_OFFSET(JsonEnumValueOptions, _impl_._has_bits_);
+
+  static constexpr JsonEnumValueOptions::ParseTableT_ GenerateParseTable(
+      const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
 };
 
-constexpr JsonEnumValueOptions::ParseTableT_ JsonEnumValueOptions::InternalGenerateParseTable_(const ::_pbi::ClassData* class_data) {
+constexpr JsonEnumValueOptions::ParseTableT_ JsonEnumValueOptions::_Internal::GenerateParseTable(const ::_pbi::ClassData* class_data) {
   return ParseTableT_{
     {
       PROTOBUF_FIELD_OFFSET(JsonEnumValueOptions, _impl_._has_bits_),
@@ -90,8 +91,9 @@ inline constexpr JsonEnumValueOptions::Impl_::Impl_(
             ::_pbi::ConstantInitialized()) {}
 
 template <typename>
-constexpr JsonEnumValueOptions::JsonEnumValueOptions(::_pbi::ConstantInitialized,
-                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr JsonEnumValueOptions::JsonEnumValueOptions(
+    ::_pbi::ConstantInitialized,
+    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -107,79 +109,39 @@ inline void* PROTOBUF_NONNULL JsonEnumValueOptions::PlacementNew_(
 constexpr auto JsonEnumValueOptions::InternalNewImpl_() {
   return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(JsonEnumValueOptions), alignof(JsonEnumValueOptions));
 }
-constexpr auto JsonEnumValueOptions::InternalGenerateClassData_(
-    const MessageLite& prototype,
-    const ::google::protobuf::internal::TcParseTableBase* tc_table) {
-  return ::google::protobuf::internal::ClassDataFull{
-      ::google::protobuf::internal::ClassData{
-          &prototype,
-#ifndef PROTOBUF_MESSAGE_GLOBALS
-          &_table_.header,
-#else
-          tc_table,
-#endif
-          nullptr,  // IsInitialized
-          &JsonEnumValueOptions::MergeImpl,
-          Super_::GetNewImpl<JsonEnumValueOptions>(),
+constexpr auto JsonEnumValueOptions::InternalGenerateClassData_() {
+  return ::google::protobuf::internal::ClassData{
+      nullptr,  // IsInitialized
+      &JsonEnumValueOptions::MergeImpl,
+      Super_::GetNewImpl<JsonEnumValueOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-          &JsonEnumValueOptions::SharedDtor,
-          &JsonEnumValueOptions::Clear, &JsonEnumValueOptions::ByteSizeLong, &JsonEnumValueOptions::_InternalSerialize,
+      &JsonEnumValueOptions::SharedDtor,
+      &Helpers_::Clear, &Helpers_::ByteSizeLong,
+          &Helpers_::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
-          PROTOBUF_FIELD_OFFSET(JsonEnumValueOptions, _impl_._cached_size_),
-          false,
-      },
-#ifdef PROTOBUF_MESSAGE_GLOBALS
+      PROTOBUF_FIELD_OFFSET(JsonEnumValueOptions, _impl_._cached_size_),
       &file_reflection_data[0],
-#else   // !PROTOBUF_MESSAGE_GLOBALS
-      &::_pbi::kDescriptorMethods,
-      &descriptor_table_google_2fprotobuf_2fjson_5fenumvalue_5foptions_2eproto,
-      nullptr,  // tracker
-#endif  // PROTOBUF_MESSAGE_GLOBALS
   };
 }
 struct JsonEnumValueOptionsGlobalsTypeInternal : ::_pbi::MessageGlobalsBase {
   constexpr JsonEnumValueOptionsGlobalsTypeInternal()
-      :
-#ifndef PROTOBUF_MESSAGE_GLOBALS
-        _default(::_pbi::ConstantInitialized{},
-                 JsonEnumValueOptions_class_data_.base())
-#else   // !PROTOBUF_MESSAGE_GLOBALS
-        MessageGlobalsBase(JsonEnumValueOptions::InternalGenerateClassData_(
-            _default, &JsonEnumValueOptions_globals_._table.header)),
+      : MessageGlobalsBase(JsonEnumValueOptions::InternalGenerateClassData_()),
         _default(::_pbi::ConstantInitialized{}, GetClassData()),
         _table(::_pbi::PrivateAccess::GenerateParseTable<JsonEnumValueOptions>(
-            GetClassData()))
-#endif  // PROTOBUF_MESSAGE_GLOBALS
-  {
-  }
+            GetClassData())) {}
   ~JsonEnumValueOptionsGlobalsTypeInternal() {}
   union {
     alignas(::_pbi::kMaxMessageAlignment) JsonEnumValueOptions _default;
   };
-#ifdef PROTOBUF_MESSAGE_GLOBALS
   decltype(::_pbi::PrivateAccess::GenerateParseTable<JsonEnumValueOptions>(
       ::std::declval<const ::_pbi::ClassData*>())) _table;
-#endif
 };
-#ifdef PROTOBUF_MESSAGE_GLOBALS
 static_assert(PROTOBUF_FIELD_OFFSET(JsonEnumValueOptionsGlobalsTypeInternal, _default) ==
               ::_pbi::MessageGlobalsBase::OffsetToDefault());
-#endif  // PROTOBUF_MESSAGE_GLOBALS
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PROTOBUF_EXPORT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PROTOBUF_MESSAGE_GLOBALS_CONST JsonEnumValueOptionsGlobalsTypeInternal JsonEnumValueOptions_globals_
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const JsonEnumValueOptionsGlobalsTypeInternal JsonEnumValueOptions_globals_
         PROTOBUF_MESSAGE_GLOBALS_SECTION(.data.rel.ro);
-#if defined(PROTOBUF_CUSTOM_VTABLE)
-namespace {
-const ::_pbi::ClassData* JsonEnumValueOptions_get_class_data() {
-#ifdef PROTOBUF_MESSAGE_GLOBALS
-  return JsonEnumValueOptions_globals_.GetClassData();
-#else
-  return JsonEnumValueOptions_class_data_.base();
-#endif  // PROTOBUF_MESSAGE_GLOBALS
-}
-}  // namespace
-#endif  // PROTOBUF_CUSTOM_VTABLE
 }  // namespace enumvalue
 }  // namespace pb
 static constexpr const ::_pb::EnumDescriptor* PROTOBUF_NONNULL* PROTOBUF_NULLABLE
@@ -241,7 +203,7 @@ namespace enumvalue {
 
 JsonEnumValueOptions::JsonEnumValueOptions(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : Super_(arena, JsonEnumValueOptions_get_class_data()) {
+    : Super_(arena, &JsonEnumValueOptions_globals_.class_data) {
 #else   // PROTOBUF_CUSTOM_VTABLE
     : Super_(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
@@ -259,7 +221,7 @@ JsonEnumValueOptions::JsonEnumValueOptions(
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena,
     const JsonEnumValueOptions& from)
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-    : Super_(arena, JsonEnumValueOptions_get_class_data()) {
+    : Super_(arena, &JsonEnumValueOptions_globals_.class_data) {
 
 #else   // PROTOBUF_CUSTOM_VTABLE
     : Super_(arena) {
@@ -295,34 +257,15 @@ inline void JsonEnumValueOptions::SharedDtor(MessageLite& self) {
   this_._impl_.~Impl_();
 }
 
-#ifndef PROTOBUF_MESSAGE_GLOBALS
-PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const
-    ::google::protobuf::internal::ClassDataFull JsonEnumValueOptions_class_data_ =
-        JsonEnumValueOptions::InternalGenerateClassData_(JsonEnumValueOptions_globals_._default);
-
-PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
-JsonEnumValueOptions::GetClassData() const {
-  ::google::protobuf::internal::PrefetchToLocalCache(&JsonEnumValueOptions_class_data_);
-  ::google::protobuf::internal::PrefetchToLocalCache(JsonEnumValueOptions_class_data_.tc_table);
-  return JsonEnumValueOptions_class_data_.base();
-}
-#else
 PROTOBUF_ATTRIBUTE_WEAK const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL
 JsonEnumValueOptions::GetClassData() const {
   ::google::protobuf::internal::PrefetchToLocalCache(&JsonEnumValueOptions_globals_);
   ::google::protobuf::internal::PrefetchToLocalCache(
       ::google::protobuf::internal::MessageGlobalsBase::ToParseTableBase(&JsonEnumValueOptions_globals_));
-  return JsonEnumValueOptions_globals_.GetClassData();
+  return &JsonEnumValueOptions_globals_.class_data;
 }
-#endif  // !PROTOBUF_MESSAGE_GLOBALS
-#ifndef PROTOBUF_MESSAGE_GLOBALS
-PROTOBUF_CONSTINIT
-PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 const JsonEnumValueOptions::ParseTableT_
-    JsonEnumValueOptions::_table_ =
-        JsonEnumValueOptions::InternalGenerateParseTable_(JsonEnumValueOptions_class_data_.base());
-#endif  // !PROTOBUF_MESSAGE_GLOBALS
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void JsonEnumValueOptions::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void JsonEnumValueOptions::Helpers_::Clear(MessageLite& base) {
   JsonEnumValueOptions& this_ = static_cast<JsonEnumValueOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void JsonEnumValueOptions::Clear() {
@@ -342,7 +285,7 @@ PROTOBUF_NOINLINE void JsonEnumValueOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL JsonEnumValueOptions::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL JsonEnumValueOptions::Helpers_::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const JsonEnumValueOptions& this_ = static_cast<const JsonEnumValueOptions&>(base);
@@ -378,7 +321,7 @@ PROTOBUF_NOINLINE void JsonEnumValueOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t JsonEnumValueOptions::ByteSizeLong(const MessageLite& base) {
+::size_t JsonEnumValueOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
   const JsonEnumValueOptions& this_ = static_cast<const JsonEnumValueOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t JsonEnumValueOptions::ByteSizeLong() const {
@@ -440,7 +383,7 @@ void JsonEnumValueOptions::InternalSwap(JsonEnumValueOptions* PROTOBUF_RESTRICT 
 }
 
 ::google::protobuf::Metadata JsonEnumValueOptions::GetMetadata() const {
-  return Super_::GetMetadataImpl(GetClassData()->full());
+  return Super_::GetMetadataImpl(JsonEnumValueOptions_globals_.class_data);
 }
 PROTOBUF_CONSTINIT PROTOBUF_EXPORT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY2 ::_pbi::ExtensionIdentifier<
