@@ -42,6 +42,12 @@ class CppFileOptions::_Internal {
 
   static constexpr CppFileOptions::ParseTableT_ GenerateParseTable(
       const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
+  static constexpr auto GenerateClassData();
+
+  static void* PROTOBUF_NONNULL PlacementNew(const void* PROTOBUF_NONNULL,
+                                      void* PROTOBUF_NONNULL mem,
+                                      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto NewImpl();
 };
 
 constexpr CppFileOptions::ParseTableT_ CppFileOptions::_Internal::GenerateParseTable(const ::_pbi::ClassData* class_data) {
@@ -59,9 +65,6 @@ constexpr CppFileOptions::ParseTableT_ CppFileOptions::_Internal::GenerateParseT
       class_data,
       nullptr,  // post_loop_handler
       ::_pbi::TcParser::MpUnknownFields,  // fallback
-      #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-      ::_pbi::TcParser::GetTable<::pb::file::CppFileOptions>(),  // to_prefetch
-      #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
     }, {{
       // string namespace = 1;
       {::_pbi::TcParser::FastUS1,
@@ -101,21 +104,21 @@ PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr CppFileOptions::CppFileOptions(
           ),
       _impl_(internal_visibility(), ::_pbi::ConstantInitialized()) {
 }
-inline void* PROTOBUF_NONNULL CppFileOptions::PlacementNew_(
+inline void* PROTOBUF_NONNULL CppFileOptions::_Internal::PlacementNew(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
   return ::new (mem) CppFileOptions(arena);
 }
-constexpr auto CppFileOptions::InternalNewImpl_() {
+constexpr auto CppFileOptions::_Internal::NewImpl() {
   return ::google::protobuf::internal::MessageCreator::CopyInit(sizeof(CppFileOptions), alignof(CppFileOptions));
 }
-constexpr auto CppFileOptions::InternalGenerateClassData_() {
+constexpr auto CppFileOptions::_Internal::GenerateClassData() {
   return ::google::protobuf::internal::ClassData{
       nullptr,  // IsInitialized
       &CppFileOptions::MergeImpl,
       Super_::GetNewImpl<CppFileOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-      &CppFileOptions::SharedDtor,
+      &CppFileOptions::Helpers_::SharedDtor,
       &Helpers_::Clear, &Helpers_::ByteSizeLong,
           &Helpers_::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
@@ -125,7 +128,8 @@ constexpr auto CppFileOptions::InternalGenerateClassData_() {
 }
 struct CppFileOptionsGlobalsTypeInternal : ::_pbi::MessageGlobalsBase {
   constexpr CppFileOptionsGlobalsTypeInternal()
-      : MessageGlobalsBase(CppFileOptions::InternalGenerateClassData_()),
+      : MessageGlobalsBase(
+            ::_pbi::PrivateAccess::GenerateClassData<CppFileOptions>()),
         _default(::_pbi::ConstantInitialized{}, GetClassData()),
         _table(::_pbi::PrivateAccess::GenerateParseTable<CppFileOptions>(
             GetClassData())) {}
@@ -206,7 +210,7 @@ CppFileOptions::CppFileOptions(::google::protobuf::Arena* PROTOBUF_NULLABLE aren
 #else   // PROTOBUF_CUSTOM_VTABLE
     : Super_(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  SharedCtor(arena);
+  Helpers_::SharedCtor(*this, arena);
   // @@protoc_insertion_point(arena_constructor:pb.file.CppFileOptions)
 }
 PROTOBUF_NDEBUG_INLINE CppFileOptions::Impl_::Impl_(
@@ -238,14 +242,16 @@ PROTOBUF_NDEBUG_INLINE CppFileOptions::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
       : namespace__(arena) {}
 
-inline void CppFileOptions::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
+inline void CppFileOptions::Helpers_::SharedCtor(
+    ::_pb::MessageLite& self, ::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  CppFileOptions& this_ = static_cast<CppFileOptions&>(self);
+  new (&this_._impl_) Impl_(this_.internal_visibility(), arena);
 }
 CppFileOptions::~CppFileOptions() {
   // @@protoc_insertion_point(destructor:pb.file.CppFileOptions)
-  SharedDtor(*this);
+  Helpers_::SharedDtor(*this);
 }
-inline void CppFileOptions::SharedDtor(MessageLite& self) {
+inline void CppFileOptions::Helpers_::SharedDtor(MessageLite& self) {
   CppFileOptions& this_ = static_cast<CppFileOptions&>(self);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
@@ -372,13 +378,16 @@ void CppFileOptions::CopyFrom(const CppFileOptions& from) {
 }
 
 
-void CppFileOptions::InternalSwap(CppFileOptions* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+void CppFileOptions::Helpers_::InternalSwap(
+    ::_pb::MessageLite& PROTOBUF_RESTRICT self,
+    CppFileOptions* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   using ::std::swap;
-  auto* arena = GetArena();
+  CppFileOptions& this_ = static_cast<CppFileOptions&>(self);
+  auto* arena = this_.GetArena();
   ABSL_DCHECK_EQ(arena, other->GetArena());
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  _impl_.namespace__.InternalSwap(&_impl_.namespace__, &other->_impl_.namespace__, arena);
+  this_._internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(this_._impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  this_._impl_.namespace__.InternalSwap(&this_._impl_.namespace__, &other->_impl_.namespace__, arena);
 }
 
 ::google::protobuf::Metadata CppFileOptions::GetMetadata() const {

@@ -40,6 +40,12 @@ class JavaFeatures_NestInFileClassFeature::_Internal {
 
   static constexpr JavaFeatures_NestInFileClassFeature::ParseTableT_ GenerateParseTable(
       const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
+  static constexpr auto GenerateClassData();
+
+  static void* PROTOBUF_NONNULL PlacementNew(const void* PROTOBUF_NONNULL,
+                                      void* PROTOBUF_NONNULL mem,
+                                      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto NewImpl();
 };
 
 constexpr JavaFeatures_NestInFileClassFeature::ParseTableT_ JavaFeatures_NestInFileClassFeature::_Internal::GenerateParseTable(const ::_pbi::ClassData* class_data) {
@@ -58,9 +64,6 @@ constexpr JavaFeatures_NestInFileClassFeature::ParseTableT_ JavaFeatures_NestInF
       class_data,
       nullptr,  // post_loop_handler
       ::_pbi::TcParser::MpUnknownFields,  // fallback
-      #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-      ::_pbi::TcParser::GetTable<::pb::JavaFeatures_NestInFileClassFeature>(),  // to_prefetch
-      #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
     }, {{
       {::_pbi::TcParser::MiniParse, {}},
     }}, {{
@@ -81,21 +84,21 @@ PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr JavaFeatures_NestInFileClassFeature::Ja
 #endif  // PROTOBUF_CUSTOM_VTABLE
       ) {
 }
-inline void* PROTOBUF_NONNULL JavaFeatures_NestInFileClassFeature::PlacementNew_(
+inline void* PROTOBUF_NONNULL JavaFeatures_NestInFileClassFeature::_Internal::PlacementNew(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
   return ::new (mem) JavaFeatures_NestInFileClassFeature(arena);
 }
-constexpr auto JavaFeatures_NestInFileClassFeature::InternalNewImpl_() {
+constexpr auto JavaFeatures_NestInFileClassFeature::_Internal::NewImpl() {
   return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(JavaFeatures_NestInFileClassFeature), alignof(JavaFeatures_NestInFileClassFeature));
 }
-constexpr auto JavaFeatures_NestInFileClassFeature::InternalGenerateClassData_() {
+constexpr auto JavaFeatures_NestInFileClassFeature::_Internal::GenerateClassData() {
   return ::google::protobuf::internal::ClassData{
       nullptr,  // IsInitialized
       &JavaFeatures_NestInFileClassFeature::MergeImpl,
       Super_::GetNewImpl<JavaFeatures_NestInFileClassFeature>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-      &JavaFeatures_NestInFileClassFeature::SharedDtor,
+      &JavaFeatures_NestInFileClassFeature::Helpers_::SharedDtor,
       &JavaFeatures_NestInFileClassFeature::Clear, &JavaFeatures_NestInFileClassFeature::ByteSizeLong, &JavaFeatures_NestInFileClassFeature::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(JavaFeatures_NestInFileClassFeature, _impl_._cached_size_),
@@ -104,7 +107,8 @@ constexpr auto JavaFeatures_NestInFileClassFeature::InternalGenerateClassData_()
 }
 struct JavaFeatures_NestInFileClassFeatureGlobalsTypeInternal : ::_pbi::MessageGlobalsBase {
   constexpr JavaFeatures_NestInFileClassFeatureGlobalsTypeInternal()
-      : MessageGlobalsBase(JavaFeatures_NestInFileClassFeature::InternalGenerateClassData_()),
+      : MessageGlobalsBase(
+            ::_pbi::PrivateAccess::GenerateClassData<JavaFeatures_NestInFileClassFeature>()),
         _default(::_pbi::ConstantInitialized{}, GetClassData()),
         _table(::_pbi::PrivateAccess::GenerateParseTable<JavaFeatures_NestInFileClassFeature>(
             GetClassData())) {}
@@ -129,6 +133,12 @@ class JavaFeatures::_Internal {
 
   static constexpr JavaFeatures::ParseTableT_ GenerateParseTable(
       const ::google::protobuf::internal::ClassData* PROTOBUF_NONNULL class_data);
+  static constexpr auto GenerateClassData();
+
+  static void* PROTOBUF_NONNULL PlacementNew(const void* PROTOBUF_NONNULL,
+                                      void* PROTOBUF_NONNULL mem,
+                                      ::google::protobuf::Arena* PROTOBUF_NULLABLE arena);
+  static constexpr auto NewImpl();
 };
 
 constexpr JavaFeatures::ParseTableT_ JavaFeatures::_Internal::GenerateParseTable(const ::_pbi::ClassData* class_data) {
@@ -146,9 +156,6 @@ constexpr JavaFeatures::ParseTableT_ JavaFeatures::_Internal::GenerateParseTable
       class_data,
       nullptr,  // post_loop_handler
       ::_pbi::TcParser::MpUnknownFields,  // fallback
-      #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-      ::_pbi::TcParser::GetTable<::pb::JavaFeatures>(),  // to_prefetch
-      #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
     }, {{
       {::_pbi::TcParser::MiniParse, {}},
       // optional bool legacy_closed_enum = 1 [retention = RETENTION_RUNTIME, targets = TARGET_TYPE_FIELD, targets = TARGET_TYPE_FILE, edition_defaults = {
@@ -217,21 +224,21 @@ PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr JavaFeatures::JavaFeatures(
           ),
       _impl_(internal_visibility(), ::_pbi::ConstantInitialized()) {
 }
-inline void* PROTOBUF_NONNULL JavaFeatures::PlacementNew_(
+inline void* PROTOBUF_NONNULL JavaFeatures::_Internal::PlacementNew(
     const void* PROTOBUF_NONNULL, void* PROTOBUF_NONNULL mem,
     ::google::protobuf::Arena* PROTOBUF_NULLABLE arena) {
   return ::new (mem) JavaFeatures(arena);
 }
-constexpr auto JavaFeatures::InternalNewImpl_() {
+constexpr auto JavaFeatures::_Internal::NewImpl() {
   return ::google::protobuf::internal::MessageCreator::ZeroInit(sizeof(JavaFeatures), alignof(JavaFeatures));
 }
-constexpr auto JavaFeatures::InternalGenerateClassData_() {
+constexpr auto JavaFeatures::_Internal::GenerateClassData() {
   return ::google::protobuf::internal::ClassData{
       nullptr,  // IsInitialized
       &JavaFeatures::MergeImpl,
       Super_::GetNewImpl<JavaFeatures>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-      &JavaFeatures::SharedDtor,
+      &JavaFeatures::Helpers_::SharedDtor,
       &Helpers_::Clear, &Helpers_::ByteSizeLong,
           &Helpers_::_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
@@ -241,7 +248,8 @@ constexpr auto JavaFeatures::InternalGenerateClassData_() {
 }
 struct JavaFeaturesGlobalsTypeInternal : ::_pbi::MessageGlobalsBase {
   constexpr JavaFeaturesGlobalsTypeInternal()
-      : MessageGlobalsBase(JavaFeatures::InternalGenerateClassData_()),
+      : MessageGlobalsBase(
+            ::_pbi::PrivateAccess::GenerateClassData<JavaFeatures>()),
         _default(::_pbi::ConstantInitialized{}, GetClassData()),
         _table(::_pbi::PrivateAccess::GenerateParseTable<JavaFeatures>(
             GetClassData())) {}
@@ -414,7 +422,7 @@ JavaFeatures::JavaFeatures(::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
 #else   // PROTOBUF_CUSTOM_VTABLE
     : Super_(arena) {
 #endif  // PROTOBUF_CUSTOM_VTABLE
-  SharedCtor(arena);
+  Helpers_::SharedCtor(*this, arena);
   // @@protoc_insertion_point(arena_constructor:pb.JavaFeatures)
 }
 JavaFeatures::JavaFeatures(
@@ -433,9 +441,11 @@ PROTOBUF_NDEBUG_INLINE JavaFeatures::Impl_::Impl_(
     [[maybe_unused]] ::google::protobuf::Arena* PROTOBUF_NULLABLE arena)
      {}
 
-inline void JavaFeatures::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
-  new (&_impl_) Impl_(internal_visibility(), arena);
-  ::memset(reinterpret_cast<char*>(&_impl_) +
+inline void JavaFeatures::Helpers_::SharedCtor(
+    ::_pb::MessageLite& self, ::_pb::Arena* PROTOBUF_NULLABLE arena) {
+  JavaFeatures& this_ = static_cast<JavaFeatures&>(self);
+  new (&this_._impl_) Impl_(this_.internal_visibility(), arena);
+  ::memset(reinterpret_cast<char*>(&this_._impl_) +
                offsetof(Impl_, utf8_validation_),
            0,
            offsetof(Impl_, nest_in_file_class_) -
@@ -444,9 +454,9 @@ inline void JavaFeatures::SharedCtor(::_pb::Arena* PROTOBUF_NULLABLE arena) {
 }
 JavaFeatures::~JavaFeatures() {
   // @@protoc_insertion_point(destructor:pb.JavaFeatures)
-  SharedDtor(*this);
+  Helpers_::SharedDtor(*this);
 }
-inline void JavaFeatures::SharedDtor(MessageLite& self) {
+inline void JavaFeatures::Helpers_::SharedDtor(MessageLite& self) {
   JavaFeatures& this_ = static_cast<JavaFeatures&>(self);
   if constexpr (::_pbi::DebugHardenCheckHasBitConsistency()) {
     this_.CheckHasBitConsistency();
@@ -624,16 +634,18 @@ void JavaFeatures::CopyFrom(const JavaFeatures& from) {
 }
 
 
-void JavaFeatures::InternalSwap(JavaFeatures* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
+void JavaFeatures::Helpers_::InternalSwap(
+    ::_pb::MessageLite& PROTOBUF_RESTRICT self,
+    JavaFeatures* PROTOBUF_RESTRICT PROTOBUF_NONNULL other) {
   using ::std::swap;
-  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
-  ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(JavaFeatures, _impl_.nest_in_file_class_)
-      + sizeof(JavaFeatures::_impl_.nest_in_file_class_)
-      - PROTOBUF_FIELD_OFFSET(JavaFeatures, _impl_.utf8_validation_)>(
-          reinterpret_cast<char*>(&_impl_.utf8_validation_),
-          reinterpret_cast<char*>(&other->_impl_.utf8_validation_));
+  JavaFeatures& this_ = static_cast<JavaFeatures&>(self);
+  this_._internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(this_._impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::google::protobuf::internal::memswap<PROTOBUF_FIELD_OFFSET(JavaFeatures, _impl_.nest_in_file_class_) +
+                 sizeof(JavaFeatures::_impl_.nest_in_file_class_) -
+                 PROTOBUF_FIELD_OFFSET(JavaFeatures, _impl_.utf8_validation_)>(
+      reinterpret_cast<char*>(&this_._impl_.utf8_validation_),
+      reinterpret_cast<char*>(&other->_impl_.utf8_validation_));
 }
 
 ::google::protobuf::Metadata JavaFeatures::GetMetadata() const {
