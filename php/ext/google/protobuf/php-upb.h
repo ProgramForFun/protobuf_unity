@@ -128,6 +128,14 @@ Error, UINTPTR_MAX is undefined
   (((SIZE_MAX - offsetof(type, member[0])) /                \
     (offsetof(type, member[1]) - offsetof(type, member[0]))) < (size_t)count)
 
+// Inverse of UPB_SIZEOF_FLEX; given the size in memory, how many elements can
+// the flexible array member store?
+#define UPB_FLEX_CAPACITY(type, member, size)   \
+  ((size) < sizeof(type)                        \
+       ? (size_t)0                              \
+       : ((size) - offsetof(type, member[0])) / \
+             (offsetof(type, member[1]) - offsetof(type, member[0])))
+
 #define UPB_ARRAY_SIZE(arr) (sizeof(arr) / sizeof(arr[0]))
 
 #define UPB_MAPTYPE_STRING 0
@@ -1667,6 +1675,22 @@ UPB_API_INLINE void upb_Arena_FreePool(struct upb_Arena* a, void* ptr,
           UPB_XSAN(a), ptr, sizeof(UPB_PRIVATE(_upb_ArenaFreeBlock)));
   block->UPB_PRIVATE(next) = pool->UPB_PRIVATE(bins)[bin];
   pool->UPB_PRIVATE(bins)[bin] = block;
+}
+
+// Harvests power-of-2 sized blocks from the given memory region into the arena
+// pool. The region must be aligned to UPB_MALLOC_ALIGN. To limit fragmentation,
+// we harvest the largest blocks first. This uses a single CLZ instruction per
+// block, making it nearly as fast as checking contiguous bounds when
+// harvesting a single perfectly sized power-of-2 block.
+UPB_INLINE void UPB_PRIVATE(_upb_Arena_Harvest)(struct upb_Arena* a, void* ptr,
+                                                size_t size) {
+  size_t remaining = size & ~((size_t)_UPB_ARENA_MIN_POOL_BLOCK_SIZE - 1);
+  while (remaining != 0) {
+    size_t harvest_size = (size_t)1 << upb_Log2Floor(remaining);
+    upb_Arena_FreePool(a, ptr, harvest_size);
+    ptr = (char*)ptr + harvest_size;
+    remaining ^= harvest_size;
+  }
 }
 
 // Returns the next block size to allocate for the arena based on exponential
@@ -3955,9 +3979,24 @@ UPB_INLINE upb_StringView _upb_map_tokey(const void* key, size_t size) {
   }
 }
 
+// Avoid emitting an out-of-line memcpy call when the size is not a compile-time
+// constant
+UPB_FORCEINLINE void* _upb_map_memcpy(void* dst, const void* src, size_t size) {
+  switch (size) {
+    case 1:
+      return memcpy(dst, src, 1);
+    case 4:
+      return memcpy(dst, src, 4);
+    case 8:
+      return memcpy(dst, src, 8);
+    default:
+      UPB_UNREACHABLE();
+  }
+}
+
 UPB_INLINE uintptr_t _upb_map_tointkey(const void* key, size_t key_size) {
   uintptr_t intkey = 0;
-  memcpy(&intkey, key, key_size);
+  _upb_map_memcpy(&intkey, key, key_size);
   return intkey;
 }
 
@@ -3965,7 +4004,7 @@ UPB_INLINE void _upb_map_fromkey(upb_StringView key, void* out, size_t size) {
   if (size == UPB_MAPTYPE_STRING) {
     memcpy(out, &key, sizeof(key));
   } else {
-    memcpy(out, key.data, size);
+    _upb_map_memcpy(out, key.data, size);
   }
 }
 
@@ -3977,7 +4016,7 @@ UPB_INLINE bool _upb_map_tovalue(const void* val, size_t size,
     *strp = *(upb_StringView*)val;
     *msgval = upb_value_ptr(strp);
   } else {
-    memcpy(msgval, val, size);
+    _upb_map_memcpy(msgval, val, size);
   }
   return true;
 }
@@ -3987,7 +4026,7 @@ UPB_INLINE void _upb_map_fromvalue(upb_value val, void* out, size_t size) {
     const upb_StringView* strp = (const upb_StringView*)upb_value_getptr(val);
     memcpy(out, strp, sizeof(upb_StringView));
   } else {
-    memcpy(out, &val, size);
+    _upb_map_memcpy(out, &val, size);
   }
 }
 
@@ -4050,10 +4089,11 @@ UPB_INLINE bool _upb_Map_Get(const struct upb_Map* map, const void* key,
   return ret;
 }
 
-UPB_INLINE upb_MapInsertStatus _upb_Map_Insert(struct upb_Map* map,
-                                               const void* key, size_t key_size,
-                                               void* val, size_t val_size,
-                                               upb_Arena* a) {
+UPB_FORCEINLINE upb_MapInsertStatus _upb_Map_Insert(struct upb_Map* map,
+                                                    const void* key,
+                                                    size_t key_size, void* val,
+                                                    size_t val_size,
+                                                    upb_Arena* a) {
   UPB_ASSERT(!upb_Map_IsFrozen(map));
 
   // Prep the value.
@@ -4534,6 +4574,10 @@ typedef struct upb_Message_Internal {
   // Tagged pointers to upb_StringView or upb_Extension
   upb_TaggedAuxPtr aux_data[];
 } upb_Message_Internal;
+
+bool UPB_PRIVATE(_upb_Message_CopyInternal)(struct upb_Message* dst,
+                                            const struct upb_Message* src,
+                                            upb_Arena* arena);
 
 #ifdef UPB_TRACING_ENABLED
 UPB_API void upb_Message_LogNewMessage(const upb_MiniTable* m,
@@ -18677,14 +18721,12 @@ static char* upb_Encoder_EncodeVarint64(uint64_t val, char* ptr) {
 }
 
 UPB_INLINE
-bool _upb_Encoder_AddEnumValueToUnknown(upb_Message* msg,
-                                        const upb_MiniTableField* field,
+bool _upb_Encoder_AddEnumValueToUnknown(upb_Message* msg, uint32_t field_num,
                                         uint64_t val, upb_Arena* arena) {
   // Unrecognized enum goes into unknown fields.
   // For packed fields the tag could be arbitrarily far in the past,
   // so we just re-encode the tag and value here.
-  const uint32_t tag =
-      ((uint32_t)field->UPB_PRIVATE(number) << 3) | kUpb_WireType_Varint;
+  const uint32_t tag = (field_num << 3) | kUpb_WireType_Varint;
   char buf[kUpb_Encoder_EncodeVarint32MaxSize +
            kUpb_Encoder_EncodeVarint64MaxSize];
   char* end = buf;
@@ -19940,7 +19982,6 @@ upb_MethodDef* _upb_MethodDefs_New(
 // Must be last.
 
 #define DECODE_NOGROUP (uint32_t)-1
-#define kUpb_Decoder_EncodeVarint32MaxSize 5
 
 typedef union {
   bool bool_val;
@@ -20164,39 +20205,6 @@ UPB_INLINE bool _upb_Decoder_ReadString(upb_Decoder* d, const char** ptr,
   return true;
 }
 
-UPB_INLINE char* upb_Decoder_EncodeVarint32(uint32_t val, char* ptr) {
-  do {
-    uint8_t byte = val & 0x7fU;
-    val >>= 7;
-    if (val) byte |= 0x80U;
-    *(ptr++) = byte;
-  } while (val);
-  return ptr;
-}
-
-UPB_FORCEINLINE
-void _upb_Decoder_AddEnumValueToUnknown(upb_Decoder* d, upb_Message* msg,
-                                        const upb_MiniTableField* field,
-                                        uint64_t val) {
-  // Unrecognized enum goes into unknown fields.
-  // For packed fields the tag could be arbitrarily far in the past,
-  // so we just re-encode the tag and value here.
-  const uint32_t tag =
-      ((uint32_t)field->UPB_PRIVATE(number) << 3) | kUpb_WireType_Varint;
-  upb_Message* unknown_msg =
-      field->UPB_PRIVATE(mode) & kUpb_LabelFlags_IsExtension ? d->original_msg
-                                                             : msg;
-  char buf[2 * kUpb_Decoder_EncodeVarint32MaxSize];
-  char* end = buf;
-  end = upb_Decoder_EncodeVarint32(tag, end);
-  end = upb_Decoder_EncodeVarint32(val, end);
-
-  if (!UPB_PRIVATE(_upb_Message_AddUnknown)(unknown_msg, buf, end - buf,
-                                            &d->arena, kUpb_AddUnknown_Copy)) {
-    upb_ErrorHandler_ThrowError(d->err, kUpb_DecodeStatus_OutOfMemory);
-  }
-}
-
 
 #endif /* UPB_WIRE_INTERNAL_DECODER_H_ */
 #ifndef GOOGLE_UPB_UPB_WIRE_WRITER_H__
@@ -20223,6 +20231,7 @@ UPB_PRIVATE(upb_WireWriter_VarintUnusedSizeFromLeadingZeros64)(uint64_t clz) {
 #undef UPB_SIZE
 #undef UPB_PTR_AT
 #undef UPB_SIZEOF_FLEX
+#undef UPB_FLEX_CAPACITY
 #undef UPB_SIZEOF_FLEX_WOULD_OVERFLOW
 #undef UPB_MAPTYPE_STRING
 #undef UPB_EXPORT
