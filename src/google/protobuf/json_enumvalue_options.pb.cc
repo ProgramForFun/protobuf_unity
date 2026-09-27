@@ -94,9 +94,8 @@ inline constexpr JsonEnumValueOptions::Impl_::Impl_(
             ::_pbi::ConstantInitialized()) {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr JsonEnumValueOptions::JsonEnumValueOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr JsonEnumValueOptions::JsonEnumValueOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -119,8 +118,7 @@ constexpr auto JsonEnumValueOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<JsonEnumValueOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &JsonEnumValueOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(JsonEnumValueOptions, _impl_._cached_size_),
       &file_reflection_data[0],
@@ -269,7 +267,7 @@ JsonEnumValueOptions::GetClassData() const {
   return &JsonEnumValueOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void JsonEnumValueOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void JsonEnumValueOptions::Clear(MessageLite& base) {
   JsonEnumValueOptions& this_ = static_cast<JsonEnumValueOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void JsonEnumValueOptions::Clear() {
@@ -289,7 +287,7 @@ PROTOBUF_NOINLINE void JsonEnumValueOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL JsonEnumValueOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL JsonEnumValueOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const JsonEnumValueOptions& this_ = static_cast<const JsonEnumValueOptions&>(base);
@@ -325,7 +323,7 @@ PROTOBUF_NOINLINE void JsonEnumValueOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t JsonEnumValueOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t JsonEnumValueOptions::ByteSizeLong(const MessageLite& base) {
   const JsonEnumValueOptions& this_ = static_cast<const JsonEnumValueOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t JsonEnumValueOptions::ByteSizeLong() const {

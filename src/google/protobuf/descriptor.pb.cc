@@ -169,9 +169,8 @@ inline constexpr UninterpretedOption_NamePart::Impl_::Impl_(
         is_extension_{false} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr UninterpretedOption_NamePart::UninterpretedOption_NamePart(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr UninterpretedOption_NamePart::UninterpretedOption_NamePart(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -194,8 +193,7 @@ constexpr auto UninterpretedOption_NamePart::_Internal::GenerateClassData() {
       Super_::GetNewImpl<UninterpretedOption_NamePart>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &UninterpretedOption_NamePart::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(UninterpretedOption_NamePart, _impl_._cached_size_),
       &file_reflection_data[24],
@@ -329,9 +327,8 @@ inline constexpr SourceCodeInfo_Location::Impl_::Impl_(
             ::_pbi::ConstantInitialized()) {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr SourceCodeInfo_Location::SourceCodeInfo_Location(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr SourceCodeInfo_Location::SourceCodeInfo_Location(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -354,8 +351,7 @@ constexpr auto SourceCodeInfo_Location::_Internal::GenerateClassData() {
       Super_::GetNewImpl<SourceCodeInfo_Location>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &SourceCodeInfo_Location::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(SourceCodeInfo_Location, _impl_._cached_size_),
       &file_reflection_data[31],
@@ -481,9 +477,8 @@ inline constexpr GeneratedCodeInfo_Annotation::Impl_::Impl_(
         semantic_{static_cast< ::google::protobuf::GeneratedCodeInfo_Annotation_Semantic >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr GeneratedCodeInfo_Annotation::GeneratedCodeInfo_Annotation(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr GeneratedCodeInfo_Annotation::GeneratedCodeInfo_Annotation(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -506,8 +501,7 @@ constexpr auto GeneratedCodeInfo_Annotation::_Internal::GenerateClassData() {
       Super_::GetNewImpl<GeneratedCodeInfo_Annotation>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &GeneratedCodeInfo_Annotation::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(GeneratedCodeInfo_Annotation, _impl_._cached_size_),
       &file_reflection_data[33],
@@ -633,9 +627,8 @@ inline constexpr FieldOptions_FeatureSupport::Impl_::Impl_(
         edition_removed_{static_cast< ::google::protobuf::Edition >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FieldOptions_FeatureSupport::FieldOptions_FeatureSupport(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FieldOptions_FeatureSupport::FieldOptions_FeatureSupport(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -658,8 +651,7 @@ constexpr auto FieldOptions_FeatureSupport::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FieldOptions_FeatureSupport>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FieldOptions_FeatureSupport::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FieldOptions_FeatureSupport, _impl_._cached_size_),
       &file_reflection_data[17],
@@ -757,9 +749,8 @@ inline constexpr FieldOptions_EditionDefault::Impl_::Impl_(
         edition_{static_cast< ::google::protobuf::Edition >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FieldOptions_EditionDefault::FieldOptions_EditionDefault(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FieldOptions_EditionDefault::FieldOptions_EditionDefault(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -782,8 +773,7 @@ constexpr auto FieldOptions_EditionDefault::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FieldOptions_EditionDefault>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FieldOptions_EditionDefault::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FieldOptions_EditionDefault, _impl_._cached_size_),
       &file_reflection_data[16],
@@ -855,9 +845,8 @@ constexpr FeatureSet_VisibilityFeature::ParseTableT_ FeatureSet_VisibilityFeatur
 }
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FeatureSet_VisibilityFeature::FeatureSet_VisibilityFeature(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FeatureSet_VisibilityFeature::FeatureSet_VisibilityFeature(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -951,9 +940,8 @@ constexpr FeatureSet_ProtoLimitsFeature::ParseTableT_ FeatureSet_ProtoLimitsFeat
 }
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FeatureSet_ProtoLimitsFeature::FeatureSet_ProtoLimitsFeature(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FeatureSet_ProtoLimitsFeature::FeatureSet_ProtoLimitsFeature(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -1135,9 +1123,8 @@ inline constexpr FeatureSet::Impl_::Impl_(
         enforce_proto_limits_{static_cast< ::google::protobuf::FeatureSet_ProtoLimitsFeature_EnforceProtoLimits >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FeatureSet::FeatureSet(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FeatureSet::FeatureSet(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -1160,8 +1147,7 @@ constexpr auto FeatureSet::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FeatureSet>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FeatureSet::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FeatureSet, _impl_._cached_size_),
       &file_reflection_data[28],
@@ -1283,9 +1269,8 @@ inline constexpr ExtensionRangeOptions_Declaration::Impl_::Impl_(
         repeated_{false} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr ExtensionRangeOptions_Declaration::ExtensionRangeOptions_Declaration(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr ExtensionRangeOptions_Declaration::ExtensionRangeOptions_Declaration(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -1308,8 +1293,7 @@ constexpr auto ExtensionRangeOptions_Declaration::_Internal::GenerateClassData()
       Super_::GetNewImpl<ExtensionRangeOptions_Declaration>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &ExtensionRangeOptions_Declaration::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(ExtensionRangeOptions_Declaration, _impl_._cached_size_),
       &file_reflection_data[5],
@@ -1403,9 +1387,8 @@ inline constexpr EnumDescriptorProto_EnumReservedRange::Impl_::Impl_(
         end_{0} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr EnumDescriptorProto_EnumReservedRange::EnumDescriptorProto_EnumReservedRange(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr EnumDescriptorProto_EnumReservedRange::EnumDescriptorProto_EnumReservedRange(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -1428,8 +1411,7 @@ constexpr auto EnumDescriptorProto_EnumReservedRange::_Internal::GenerateClassDa
       Super_::GetNewImpl<EnumDescriptorProto_EnumReservedRange>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &EnumDescriptorProto_EnumReservedRange::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(EnumDescriptorProto_EnumReservedRange, _impl_._cached_size_),
       &file_reflection_data[9],
@@ -1523,9 +1505,8 @@ inline constexpr DescriptorProto_ReservedRange::Impl_::Impl_(
         end_{0} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr DescriptorProto_ReservedRange::DescriptorProto_ReservedRange(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr DescriptorProto_ReservedRange::DescriptorProto_ReservedRange(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -1548,8 +1529,7 @@ constexpr auto DescriptorProto_ReservedRange::_Internal::GenerateClassData() {
       Super_::GetNewImpl<DescriptorProto_ReservedRange>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &DescriptorProto_ReservedRange::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(DescriptorProto_ReservedRange, _impl_._cached_size_),
       &file_reflection_data[3],
@@ -1691,9 +1671,8 @@ inline constexpr UninterpretedOption::Impl_::Impl_(
         double_value_{0.} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr UninterpretedOption::UninterpretedOption(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr UninterpretedOption::UninterpretedOption(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -1716,8 +1695,7 @@ constexpr auto UninterpretedOption::_Internal::GenerateClassData() {
       Super_::GetNewImpl<UninterpretedOption>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &UninterpretedOption::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(UninterpretedOption, _impl_._cached_size_),
       &file_reflection_data[25],
@@ -1810,9 +1788,8 @@ inline constexpr SourceCodeInfo::Impl_::Impl_(
      {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr SourceCodeInfo::SourceCodeInfo(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr SourceCodeInfo::SourceCodeInfo(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -1835,8 +1812,7 @@ constexpr auto SourceCodeInfo::_Internal::GenerateClassData() {
       Super_::GetNewImpl<SourceCodeInfo>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &SourceCodeInfo::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(SourceCodeInfo, _impl_._cached_size_),
       &file_reflection_data[32],
@@ -1929,9 +1905,8 @@ inline constexpr GeneratedCodeInfo::Impl_::Impl_(
      {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr GeneratedCodeInfo::GeneratedCodeInfo(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr GeneratedCodeInfo::GeneratedCodeInfo(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -1954,8 +1929,7 @@ constexpr auto GeneratedCodeInfo::_Internal::GenerateClassData() {
       Super_::GetNewImpl<GeneratedCodeInfo>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &GeneratedCodeInfo::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(GeneratedCodeInfo, _impl_._cached_size_),
       &file_reflection_data[34],
@@ -2061,9 +2035,8 @@ inline constexpr FeatureSetDefaults_FeatureSetEditionDefault::Impl_::Impl_(
         edition_{static_cast< ::google::protobuf::Edition >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FeatureSetDefaults_FeatureSetEditionDefault::FeatureSetDefaults_FeatureSetEditionDefault(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FeatureSetDefaults_FeatureSetEditionDefault::FeatureSetDefaults_FeatureSetEditionDefault(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -2086,8 +2059,7 @@ constexpr auto FeatureSetDefaults_FeatureSetEditionDefault::_Internal::GenerateC
       Super_::GetNewImpl<FeatureSetDefaults_FeatureSetEditionDefault>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FeatureSetDefaults_FeatureSetEditionDefault::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FeatureSetDefaults_FeatureSetEditionDefault, _impl_._cached_size_),
       &file_reflection_data[29],
@@ -2200,9 +2172,8 @@ inline constexpr ServiceOptions::Impl_::Impl_(
         deprecated_{false} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr ServiceOptions::ServiceOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr ServiceOptions::ServiceOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -2225,8 +2196,7 @@ constexpr auto ServiceOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<ServiceOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &ServiceOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(ServiceOptions, _impl_._cached_size_),
       &file_reflection_data[22],
@@ -2331,9 +2301,8 @@ inline constexpr OneofOptions::Impl_::Impl_(
         features_{nullptr} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr OneofOptions::OneofOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr OneofOptions::OneofOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -2356,8 +2325,7 @@ constexpr auto OneofOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<OneofOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &OneofOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(OneofOptions, _impl_._cached_size_),
       &file_reflection_data[19],
@@ -2481,9 +2449,8 @@ inline constexpr MethodOptions::Impl_::Impl_(
         idempotency_level_{static_cast< ::google::protobuf::MethodOptions_IdempotencyLevel >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr MethodOptions::MethodOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr MethodOptions::MethodOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -2506,8 +2473,7 @@ constexpr auto MethodOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<MethodOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &MethodOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(MethodOptions, _impl_._cached_size_),
       &file_reflection_data[23],
@@ -2640,9 +2606,8 @@ inline constexpr MessageOptions::Impl_::Impl_(
      {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr MessageOptions::MessageOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr MessageOptions::MessageOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -2665,8 +2630,7 @@ constexpr auto MessageOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<MessageOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &MessageOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(MessageOptions, _impl_._cached_size_),
       &file_reflection_data[15],
@@ -2924,9 +2888,8 @@ inline constexpr FileOptions::Impl_::Impl_(
      {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FileOptions::FileOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FileOptions::FileOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -2949,8 +2912,7 @@ constexpr auto FileOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FileOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FileOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FileOptions, _impl_._cached_size_),
       &file_reflection_data[14],
@@ -3141,9 +3103,8 @@ inline constexpr FieldOptions::Impl_::Impl_(
      {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FieldOptions::FieldOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FieldOptions::FieldOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -3166,8 +3127,7 @@ constexpr auto FieldOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FieldOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FieldOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FieldOptions, _impl_._cached_size_),
       &file_reflection_data[18],
@@ -3272,9 +3232,8 @@ inline constexpr FeatureSetDefaults::Impl_::Impl_(
         maximum_edition_{static_cast< ::google::protobuf::Edition >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FeatureSetDefaults::FeatureSetDefaults(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FeatureSetDefaults::FeatureSetDefaults(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -3297,8 +3256,7 @@ constexpr auto FeatureSetDefaults::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FeatureSetDefaults>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FeatureSetDefaults::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FeatureSetDefaults, _impl_._cached_size_),
       &file_reflection_data[30],
@@ -3424,9 +3382,8 @@ inline constexpr ExtensionRangeOptions::Impl_::Impl_(
         verification_{static_cast< ::google::protobuf::ExtensionRangeOptions_VerificationState >(1)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr ExtensionRangeOptions::ExtensionRangeOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr ExtensionRangeOptions::ExtensionRangeOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -3449,8 +3406,7 @@ constexpr auto ExtensionRangeOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<ExtensionRangeOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &ExtensionRangeOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(ExtensionRangeOptions, _impl_._cached_size_),
       &file_reflection_data[6],
@@ -3578,9 +3534,8 @@ inline constexpr EnumValueOptions::Impl_::Impl_(
         debug_redact_{false} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr EnumValueOptions::EnumValueOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr EnumValueOptions::EnumValueOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -3603,8 +3558,7 @@ constexpr auto EnumValueOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<EnumValueOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &EnumValueOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(EnumValueOptions, _impl_._cached_size_),
       &file_reflection_data[21],
@@ -3728,9 +3682,8 @@ inline constexpr EnumOptions::Impl_::Impl_(
      {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr EnumOptions::EnumOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr EnumOptions::EnumOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -3753,8 +3706,7 @@ constexpr auto EnumOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<EnumOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &EnumOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(EnumOptions, _impl_._cached_size_),
       &file_reflection_data[20],
@@ -3852,9 +3804,8 @@ inline constexpr OneofDescriptorProto::Impl_::Impl_(
         options_{nullptr} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr OneofDescriptorProto::OneofDescriptorProto(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr OneofDescriptorProto::OneofDescriptorProto(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -3877,8 +3828,7 @@ constexpr auto OneofDescriptorProto::_Internal::GenerateClassData() {
       Super_::GetNewImpl<OneofDescriptorProto>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &OneofDescriptorProto::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(OneofDescriptorProto, _impl_._cached_size_),
       &file_reflection_data[8],
@@ -4010,9 +3960,8 @@ inline constexpr MethodDescriptorProto::Impl_::Impl_(
         server_streaming_{false} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr MethodDescriptorProto::MethodDescriptorProto(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr MethodDescriptorProto::MethodDescriptorProto(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -4035,8 +3984,7 @@ constexpr auto MethodDescriptorProto::_Internal::GenerateClassData() {
       Super_::GetNewImpl<MethodDescriptorProto>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &MethodDescriptorProto::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(MethodDescriptorProto, _impl_._cached_size_),
       &file_reflection_data[13],
@@ -4209,9 +4157,8 @@ inline constexpr FieldDescriptorProto::Impl_::Impl_(
         type_{static_cast< ::google::protobuf::FieldDescriptorProto_Type >(1)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FieldDescriptorProto::FieldDescriptorProto(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FieldDescriptorProto::FieldDescriptorProto(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -4234,8 +4181,7 @@ constexpr auto FieldDescriptorProto::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FieldDescriptorProto>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FieldDescriptorProto::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FieldDescriptorProto, _impl_._cached_size_),
       &file_reflection_data[7],
@@ -4341,9 +4287,8 @@ inline constexpr EnumValueDescriptorProto::Impl_::Impl_(
         number_{0} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr EnumValueDescriptorProto::EnumValueDescriptorProto(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr EnumValueDescriptorProto::EnumValueDescriptorProto(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -4366,8 +4311,7 @@ constexpr auto EnumValueDescriptorProto::_Internal::GenerateClassData() {
       Super_::GetNewImpl<EnumValueDescriptorProto>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &EnumValueDescriptorProto::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(EnumValueDescriptorProto, _impl_._cached_size_),
       &file_reflection_data[11],
@@ -4471,9 +4415,8 @@ inline constexpr DescriptorProto_ExtensionRange::Impl_::Impl_(
         end_{0} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr DescriptorProto_ExtensionRange::DescriptorProto_ExtensionRange(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr DescriptorProto_ExtensionRange::DescriptorProto_ExtensionRange(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -4496,8 +4439,7 @@ constexpr auto DescriptorProto_ExtensionRange::_Internal::GenerateClassData() {
       Super_::GetNewImpl<DescriptorProto_ExtensionRange>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &DescriptorProto_ExtensionRange::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(DescriptorProto_ExtensionRange, _impl_._cached_size_),
       &file_reflection_data[2],
@@ -4608,9 +4550,8 @@ inline constexpr ServiceDescriptorProto::Impl_::Impl_(
         options_{nullptr} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr ServiceDescriptorProto::ServiceDescriptorProto(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr ServiceDescriptorProto::ServiceDescriptorProto(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -4633,8 +4574,7 @@ constexpr auto ServiceDescriptorProto::_Internal::GenerateClassData() {
       Super_::GetNewImpl<ServiceDescriptorProto>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &ServiceDescriptorProto::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(ServiceDescriptorProto, _impl_._cached_size_),
       &file_reflection_data[12],
@@ -4777,9 +4717,8 @@ inline constexpr EnumDescriptorProto::Impl_::Impl_(
         visibility_{static_cast< ::google::protobuf::SymbolVisibility >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr EnumDescriptorProto::EnumDescriptorProto(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr EnumDescriptorProto::EnumDescriptorProto(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -4802,8 +4741,7 @@ constexpr auto EnumDescriptorProto::_Internal::GenerateClassData() {
       Super_::GetNewImpl<EnumDescriptorProto>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &EnumDescriptorProto::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(EnumDescriptorProto, _impl_._cached_size_),
       &file_reflection_data[10],
@@ -5009,9 +4947,8 @@ inline constexpr DescriptorProto::Impl_::Impl_(
         visibility_{static_cast< ::google::protobuf::SymbolVisibility >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr DescriptorProto::DescriptorProto(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr DescriptorProto::DescriptorProto(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -5034,8 +4971,7 @@ constexpr auto DescriptorProto::_Internal::GenerateClassData() {
       Super_::GetNewImpl<DescriptorProto>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &DescriptorProto::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(DescriptorProto, _impl_._cached_size_),
       &file_reflection_data[4],
@@ -5261,9 +5197,8 @@ inline constexpr FileDescriptorProto::Impl_::Impl_(
         edition_{static_cast< ::google::protobuf::Edition >(0)} {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FileDescriptorProto::FileDescriptorProto(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FileDescriptorProto::FileDescriptorProto(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -5286,8 +5221,7 @@ constexpr auto FileDescriptorProto::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FileDescriptorProto>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FileDescriptorProto::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FileDescriptorProto, _impl_._cached_size_),
       &file_reflection_data[1],
@@ -5380,9 +5314,8 @@ inline constexpr FileDescriptorSet::Impl_::Impl_(
      {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FileDescriptorSet::FileDescriptorSet(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FileDescriptorSet::FileDescriptorSet(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -5405,8 +5338,7 @@ constexpr auto FileDescriptorSet::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FileDescriptorSet>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FileDescriptorSet::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FileDescriptorSet, _impl_._cached_size_),
       &file_reflection_data[0],
@@ -6584,7 +6516,7 @@ FileDescriptorSet::GetClassData() const {
   return &FileDescriptorSet_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FileDescriptorSet::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FileDescriptorSet::Clear(MessageLite& base) {
   FileDescriptorSet& this_ = static_cast<FileDescriptorSet&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FileDescriptorSet::Clear() {
@@ -6605,7 +6537,7 @@ PROTOBUF_NOINLINE void FileDescriptorSet::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FileDescriptorSet::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FileDescriptorSet::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FileDescriptorSet& this_ = static_cast<const FileDescriptorSet&>(base);
@@ -6648,7 +6580,7 @@ PROTOBUF_NOINLINE void FileDescriptorSet::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FileDescriptorSet::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FileDescriptorSet::ByteSizeLong(const MessageLite& base) {
   const FileDescriptorSet& this_ = static_cast<const FileDescriptorSet&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FileDescriptorSet::ByteSizeLong() const {
@@ -6915,7 +6847,7 @@ FileDescriptorProto::GetClassData() const {
   return &FileDescriptorProto_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FileDescriptorProto::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FileDescriptorProto::Clear(MessageLite& base) {
   FileDescriptorProto& this_ = static_cast<FileDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FileDescriptorProto::Clear() {
@@ -6978,7 +6910,7 @@ PROTOBUF_NOINLINE void FileDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FileDescriptorProto::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FileDescriptorProto::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FileDescriptorProto& this_ = static_cast<const FileDescriptorProto&>(base);
@@ -7127,7 +7059,7 @@ PROTOBUF_NOINLINE void FileDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FileDescriptorProto::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FileDescriptorProto::ByteSizeLong(const MessageLite& base) {
   const FileDescriptorProto& this_ = static_cast<const FileDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FileDescriptorProto::ByteSizeLong() const {
@@ -7464,7 +7396,7 @@ DescriptorProto_ExtensionRange::GetClassData() const {
   return &DescriptorProto_ExtensionRange_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void DescriptorProto_ExtensionRange::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void DescriptorProto_ExtensionRange::Clear(MessageLite& base) {
   DescriptorProto_ExtensionRange& this_ = static_cast<DescriptorProto_ExtensionRange&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void DescriptorProto_ExtensionRange::Clear() {
@@ -7492,7 +7424,7 @@ PROTOBUF_NOINLINE void DescriptorProto_ExtensionRange::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL DescriptorProto_ExtensionRange::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL DescriptorProto_ExtensionRange::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const DescriptorProto_ExtensionRange& this_ = static_cast<const DescriptorProto_ExtensionRange&>(base);
@@ -7541,7 +7473,7 @@ PROTOBUF_NOINLINE void DescriptorProto_ExtensionRange::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t DescriptorProto_ExtensionRange::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t DescriptorProto_ExtensionRange::ByteSizeLong(const MessageLite& base) {
   const DescriptorProto_ExtensionRange& this_ = static_cast<const DescriptorProto_ExtensionRange&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t DescriptorProto_ExtensionRange::ByteSizeLong() const {
@@ -7699,7 +7631,7 @@ DescriptorProto_ReservedRange::GetClassData() const {
   return &DescriptorProto_ReservedRange_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void DescriptorProto_ReservedRange::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void DescriptorProto_ReservedRange::Clear(MessageLite& base) {
   DescriptorProto_ReservedRange& this_ = static_cast<DescriptorProto_ReservedRange&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void DescriptorProto_ReservedRange::Clear() {
@@ -7723,7 +7655,7 @@ PROTOBUF_NOINLINE void DescriptorProto_ReservedRange::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL DescriptorProto_ReservedRange::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL DescriptorProto_ReservedRange::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const DescriptorProto_ReservedRange& this_ = static_cast<const DescriptorProto_ReservedRange&>(base);
@@ -7765,7 +7697,7 @@ PROTOBUF_NOINLINE void DescriptorProto_ReservedRange::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t DescriptorProto_ReservedRange::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t DescriptorProto_ReservedRange::ByteSizeLong(const MessageLite& base) {
   const DescriptorProto_ReservedRange& this_ = static_cast<const DescriptorProto_ReservedRange&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t DescriptorProto_ReservedRange::ByteSizeLong() const {
@@ -8017,7 +7949,7 @@ DescriptorProto::GetClassData() const {
   return &DescriptorProto_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void DescriptorProto::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void DescriptorProto::Clear(MessageLite& base) {
   DescriptorProto& this_ = static_cast<DescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void DescriptorProto::Clear() {
@@ -8070,7 +8002,7 @@ PROTOBUF_NOINLINE void DescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL DescriptorProto::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL DescriptorProto::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const DescriptorProto& this_ = static_cast<const DescriptorProto&>(base);
@@ -8210,7 +8142,7 @@ PROTOBUF_NOINLINE void DescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t DescriptorProto::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t DescriptorProto::ByteSizeLong(const MessageLite& base) {
   const DescriptorProto& this_ = static_cast<const DescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t DescriptorProto::ByteSizeLong() const {
@@ -8517,7 +8449,7 @@ ExtensionRangeOptions_Declaration::GetClassData() const {
   return &ExtensionRangeOptions_Declaration_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void ExtensionRangeOptions_Declaration::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void ExtensionRangeOptions_Declaration::Clear(MessageLite& base) {
   ExtensionRangeOptions_Declaration& this_ = static_cast<ExtensionRangeOptions_Declaration&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void ExtensionRangeOptions_Declaration::Clear() {
@@ -8549,7 +8481,7 @@ PROTOBUF_NOINLINE void ExtensionRangeOptions_Declaration::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL ExtensionRangeOptions_Declaration::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL ExtensionRangeOptions_Declaration::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const ExtensionRangeOptions_Declaration& this_ = static_cast<const ExtensionRangeOptions_Declaration&>(base);
@@ -8610,7 +8542,7 @@ PROTOBUF_NOINLINE void ExtensionRangeOptions_Declaration::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t ExtensionRangeOptions_Declaration::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t ExtensionRangeOptions_Declaration::ByteSizeLong(const MessageLite& base) {
   const ExtensionRangeOptions_Declaration& this_ = static_cast<const ExtensionRangeOptions_Declaration&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t ExtensionRangeOptions_Declaration::ByteSizeLong() const {
@@ -8808,7 +8740,7 @@ ExtensionRangeOptions::GetClassData() const {
   return &ExtensionRangeOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void ExtensionRangeOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void ExtensionRangeOptions::Clear(MessageLite& base) {
   ExtensionRangeOptions& this_ = static_cast<ExtensionRangeOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void ExtensionRangeOptions::Clear() {
@@ -8839,7 +8771,7 @@ PROTOBUF_NOINLINE void ExtensionRangeOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL ExtensionRangeOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL ExtensionRangeOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const ExtensionRangeOptions& this_ = static_cast<const ExtensionRangeOptions&>(base);
@@ -8911,7 +8843,7 @@ PROTOBUF_NOINLINE void ExtensionRangeOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t ExtensionRangeOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t ExtensionRangeOptions::ByteSizeLong(const MessageLite& base) {
   const ExtensionRangeOptions& this_ = static_cast<const ExtensionRangeOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t ExtensionRangeOptions::ByteSizeLong() const {
@@ -9137,7 +9069,7 @@ FieldDescriptorProto::GetClassData() const {
   return &FieldDescriptorProto_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FieldDescriptorProto::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FieldDescriptorProto::Clear(MessageLite& base) {
   FieldDescriptorProto& this_ = static_cast<FieldDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FieldDescriptorProto::Clear() {
@@ -9187,7 +9119,7 @@ PROTOBUF_NOINLINE void FieldDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FieldDescriptorProto::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FieldDescriptorProto::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FieldDescriptorProto& this_ = static_cast<const FieldDescriptorProto&>(base);
@@ -9287,7 +9219,7 @@ PROTOBUF_NOINLINE void FieldDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FieldDescriptorProto::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FieldDescriptorProto::ByteSizeLong(const MessageLite& base) {
   const FieldDescriptorProto& this_ = static_cast<const FieldDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FieldDescriptorProto::ByteSizeLong() const {
@@ -9530,7 +9462,7 @@ OneofDescriptorProto::GetClassData() const {
   return &OneofDescriptorProto_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void OneofDescriptorProto::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void OneofDescriptorProto::Clear(MessageLite& base) {
   OneofDescriptorProto& this_ = static_cast<OneofDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void OneofDescriptorProto::Clear() {
@@ -9556,7 +9488,7 @@ PROTOBUF_NOINLINE void OneofDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL OneofDescriptorProto::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL OneofDescriptorProto::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const OneofDescriptorProto& this_ = static_cast<const OneofDescriptorProto&>(base);
@@ -9597,7 +9529,7 @@ PROTOBUF_NOINLINE void OneofDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t OneofDescriptorProto::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t OneofDescriptorProto::ByteSizeLong(const MessageLite& base) {
   const OneofDescriptorProto& this_ = static_cast<const OneofDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t OneofDescriptorProto::ByteSizeLong() const {
@@ -9745,7 +9677,7 @@ EnumDescriptorProto_EnumReservedRange::GetClassData() const {
   return &EnumDescriptorProto_EnumReservedRange_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void EnumDescriptorProto_EnumReservedRange::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void EnumDescriptorProto_EnumReservedRange::Clear(MessageLite& base) {
   EnumDescriptorProto_EnumReservedRange& this_ = static_cast<EnumDescriptorProto_EnumReservedRange&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void EnumDescriptorProto_EnumReservedRange::Clear() {
@@ -9769,7 +9701,7 @@ PROTOBUF_NOINLINE void EnumDescriptorProto_EnumReservedRange::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL EnumDescriptorProto_EnumReservedRange::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL EnumDescriptorProto_EnumReservedRange::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const EnumDescriptorProto_EnumReservedRange& this_ = static_cast<const EnumDescriptorProto_EnumReservedRange&>(base);
@@ -9811,7 +9743,7 @@ PROTOBUF_NOINLINE void EnumDescriptorProto_EnumReservedRange::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t EnumDescriptorProto_EnumReservedRange::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t EnumDescriptorProto_EnumReservedRange::ByteSizeLong(const MessageLite& base) {
   const EnumDescriptorProto_EnumReservedRange& this_ = static_cast<const EnumDescriptorProto_EnumReservedRange&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t EnumDescriptorProto_EnumReservedRange::ByteSizeLong() const {
@@ -10003,7 +9935,7 @@ EnumDescriptorProto::GetClassData() const {
   return &EnumDescriptorProto_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void EnumDescriptorProto::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void EnumDescriptorProto::Clear(MessageLite& base) {
   EnumDescriptorProto& this_ = static_cast<EnumDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void EnumDescriptorProto::Clear() {
@@ -10039,7 +9971,7 @@ PROTOBUF_NOINLINE void EnumDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL EnumDescriptorProto::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL EnumDescriptorProto::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const EnumDescriptorProto& this_ = static_cast<const EnumDescriptorProto&>(base);
@@ -10119,7 +10051,7 @@ PROTOBUF_NOINLINE void EnumDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t EnumDescriptorProto::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t EnumDescriptorProto::ByteSizeLong(const MessageLite& base) {
   const EnumDescriptorProto& this_ = static_cast<const EnumDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t EnumDescriptorProto::ByteSizeLong() const {
@@ -10343,7 +10275,7 @@ EnumValueDescriptorProto::GetClassData() const {
   return &EnumValueDescriptorProto_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void EnumValueDescriptorProto::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void EnumValueDescriptorProto::Clear(MessageLite& base) {
   EnumValueDescriptorProto& this_ = static_cast<EnumValueDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void EnumValueDescriptorProto::Clear() {
@@ -10370,7 +10302,7 @@ PROTOBUF_NOINLINE void EnumValueDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL EnumValueDescriptorProto::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL EnumValueDescriptorProto::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const EnumValueDescriptorProto& this_ = static_cast<const EnumValueDescriptorProto&>(base);
@@ -10418,7 +10350,7 @@ PROTOBUF_NOINLINE void EnumValueDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t EnumValueDescriptorProto::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t EnumValueDescriptorProto::ByteSizeLong(const MessageLite& base) {
   const EnumValueDescriptorProto& this_ = static_cast<const EnumValueDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t EnumValueDescriptorProto::ByteSizeLong() const {
@@ -10605,7 +10537,7 @@ ServiceDescriptorProto::GetClassData() const {
   return &ServiceDescriptorProto_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void ServiceDescriptorProto::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void ServiceDescriptorProto::Clear(MessageLite& base) {
   ServiceDescriptorProto& this_ = static_cast<ServiceDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void ServiceDescriptorProto::Clear() {
@@ -10634,7 +10566,7 @@ PROTOBUF_NOINLINE void ServiceDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL ServiceDescriptorProto::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL ServiceDescriptorProto::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const ServiceDescriptorProto& this_ = static_cast<const ServiceDescriptorProto&>(base);
@@ -10687,7 +10619,7 @@ PROTOBUF_NOINLINE void ServiceDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t ServiceDescriptorProto::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t ServiceDescriptorProto::ByteSizeLong(const MessageLite& base) {
   const ServiceDescriptorProto& this_ = static_cast<const ServiceDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t ServiceDescriptorProto::ByteSizeLong() const {
@@ -10882,7 +10814,7 @@ MethodDescriptorProto::GetClassData() const {
   return &MethodDescriptorProto_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void MethodDescriptorProto::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void MethodDescriptorProto::Clear(MessageLite& base) {
   MethodDescriptorProto& this_ = static_cast<MethodDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void MethodDescriptorProto::Clear() {
@@ -10919,7 +10851,7 @@ PROTOBUF_NOINLINE void MethodDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL MethodDescriptorProto::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL MethodDescriptorProto::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const MethodDescriptorProto& this_ = static_cast<const MethodDescriptorProto&>(base);
@@ -10986,7 +10918,7 @@ PROTOBUF_NOINLINE void MethodDescriptorProto::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t MethodDescriptorProto::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t MethodDescriptorProto::ByteSizeLong(const MessageLite& base) {
   const MethodDescriptorProto& this_ = static_cast<const MethodDescriptorProto&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t MethodDescriptorProto::ByteSizeLong() const {
@@ -11237,7 +11169,7 @@ FileOptions::GetClassData() const {
   return &FileOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FileOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FileOptions::Clear(MessageLite& base) {
   FileOptions& this_ = static_cast<FileOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FileOptions::Clear() {
@@ -11312,7 +11244,7 @@ PROTOBUF_NOINLINE void FileOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FileOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FileOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FileOptions& this_ = static_cast<const FileOptions&>(base);
@@ -11488,7 +11420,7 @@ PROTOBUF_NOINLINE void FileOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FileOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FileOptions::ByteSizeLong(const MessageLite& base) {
   const FileOptions& this_ = static_cast<const FileOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FileOptions::ByteSizeLong() const {
@@ -11828,7 +11760,7 @@ MessageOptions::GetClassData() const {
   return &MessageOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void MessageOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void MessageOptions::Clear(MessageLite& base) {
   MessageOptions& this_ = static_cast<MessageOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void MessageOptions::Clear() {
@@ -11860,7 +11792,7 @@ PROTOBUF_NOINLINE void MessageOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL MessageOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL MessageOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const MessageOptions& this_ = static_cast<const MessageOptions&>(base);
@@ -11948,7 +11880,7 @@ PROTOBUF_NOINLINE void MessageOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t MessageOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t MessageOptions::ByteSizeLong(const MessageLite& base) {
   const MessageOptions& this_ = static_cast<const MessageOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t MessageOptions::ByteSizeLong() const {
@@ -12139,7 +12071,7 @@ FieldOptions_EditionDefault::GetClassData() const {
   return &FieldOptions_EditionDefault_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FieldOptions_EditionDefault::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FieldOptions_EditionDefault::Clear(MessageLite& base) {
   FieldOptions_EditionDefault& this_ = static_cast<FieldOptions_EditionDefault&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FieldOptions_EditionDefault::Clear() {
@@ -12160,7 +12092,7 @@ PROTOBUF_NOINLINE void FieldOptions_EditionDefault::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FieldOptions_EditionDefault::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FieldOptions_EditionDefault::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FieldOptions_EditionDefault& this_ = static_cast<const FieldOptions_EditionDefault&>(base);
@@ -12201,7 +12133,7 @@ PROTOBUF_NOINLINE void FieldOptions_EditionDefault::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FieldOptions_EditionDefault::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FieldOptions_EditionDefault::ByteSizeLong(const MessageLite& base) {
   const FieldOptions_EditionDefault& this_ = static_cast<const FieldOptions_EditionDefault&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FieldOptions_EditionDefault::ByteSizeLong() const {
@@ -12359,7 +12291,7 @@ FieldOptions_FeatureSupport::GetClassData() const {
   return &FieldOptions_FeatureSupport_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FieldOptions_FeatureSupport::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FieldOptions_FeatureSupport::Clear(MessageLite& base) {
   FieldOptions_FeatureSupport& this_ = static_cast<FieldOptions_FeatureSupport&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FieldOptions_FeatureSupport::Clear() {
@@ -12391,7 +12323,7 @@ PROTOBUF_NOINLINE void FieldOptions_FeatureSupport::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FieldOptions_FeatureSupport::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FieldOptions_FeatureSupport::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FieldOptions_FeatureSupport& this_ = static_cast<const FieldOptions_FeatureSupport&>(base);
@@ -12452,7 +12384,7 @@ PROTOBUF_NOINLINE void FieldOptions_FeatureSupport::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FieldOptions_FeatureSupport::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FieldOptions_FeatureSupport::ByteSizeLong(const MessageLite& base) {
   const FieldOptions_FeatureSupport& this_ = static_cast<const FieldOptions_FeatureSupport&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FieldOptions_FeatureSupport::ByteSizeLong() const {
@@ -12685,7 +12617,7 @@ FieldOptions::GetClassData() const {
   return &FieldOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FieldOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FieldOptions::Clear(MessageLite& base) {
   FieldOptions& this_ = static_cast<FieldOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FieldOptions::Clear() {
@@ -12736,7 +12668,7 @@ PROTOBUF_NOINLINE void FieldOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FieldOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FieldOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FieldOptions& this_ = static_cast<const FieldOptions&>(base);
@@ -12881,7 +12813,7 @@ PROTOBUF_NOINLINE void FieldOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FieldOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FieldOptions::ByteSizeLong(const MessageLite& base) {
   const FieldOptions& this_ = static_cast<const FieldOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FieldOptions::ByteSizeLong() const {
@@ -13161,7 +13093,7 @@ OneofOptions::GetClassData() const {
   return &OneofOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void OneofOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void OneofOptions::Clear(MessageLite& base) {
   OneofOptions& this_ = static_cast<OneofOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void OneofOptions::Clear() {
@@ -13188,7 +13120,7 @@ PROTOBUF_NOINLINE void OneofOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL OneofOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL OneofOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const OneofOptions& this_ = static_cast<const OneofOptions&>(base);
@@ -13241,7 +13173,7 @@ PROTOBUF_NOINLINE void OneofOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t OneofOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t OneofOptions::ByteSizeLong(const MessageLite& base) {
   const OneofOptions& this_ = static_cast<const OneofOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t OneofOptions::ByteSizeLong() const {
@@ -13442,7 +13374,7 @@ EnumOptions::GetClassData() const {
   return &EnumOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void EnumOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void EnumOptions::Clear(MessageLite& base) {
   EnumOptions& this_ = static_cast<EnumOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void EnumOptions::Clear() {
@@ -13472,7 +13404,7 @@ PROTOBUF_NOINLINE void EnumOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL EnumOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL EnumOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const EnumOptions& this_ = static_cast<const EnumOptions&>(base);
@@ -13546,7 +13478,7 @@ PROTOBUF_NOINLINE void EnumOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t EnumOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t EnumOptions::ByteSizeLong(const MessageLite& base) {
   const EnumOptions& this_ = static_cast<const EnumOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t EnumOptions::ByteSizeLong() const {
@@ -13766,7 +13698,7 @@ EnumValueOptions::GetClassData() const {
   return &EnumValueOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void EnumValueOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void EnumValueOptions::Clear(MessageLite& base) {
   EnumValueOptions& this_ = static_cast<EnumValueOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void EnumValueOptions::Clear() {
@@ -13802,7 +13734,7 @@ PROTOBUF_NOINLINE void EnumValueOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL EnumValueOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL EnumValueOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const EnumValueOptions& this_ = static_cast<const EnumValueOptions&>(base);
@@ -13876,7 +13808,7 @@ PROTOBUF_NOINLINE void EnumValueOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t EnumValueOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t EnumValueOptions::ByteSizeLong(const MessageLite& base) {
   const EnumValueOptions& this_ = static_cast<const EnumValueOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t EnumValueOptions::ByteSizeLong() const {
@@ -14096,7 +14028,7 @@ ServiceOptions::GetClassData() const {
   return &ServiceOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void ServiceOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void ServiceOptions::Clear(MessageLite& base) {
   ServiceOptions& this_ = static_cast<ServiceOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void ServiceOptions::Clear() {
@@ -14124,7 +14056,7 @@ PROTOBUF_NOINLINE void ServiceOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL ServiceOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL ServiceOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const ServiceOptions& this_ = static_cast<const ServiceOptions&>(base);
@@ -14184,7 +14116,7 @@ PROTOBUF_NOINLINE void ServiceOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t ServiceOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t ServiceOptions::ByteSizeLong(const MessageLite& base) {
   const ServiceOptions& this_ = static_cast<const ServiceOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t ServiceOptions::ByteSizeLong() const {
@@ -14394,7 +14326,7 @@ MethodOptions::GetClassData() const {
   return &MethodOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void MethodOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void MethodOptions::Clear(MessageLite& base) {
   MethodOptions& this_ = static_cast<MethodOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void MethodOptions::Clear() {
@@ -14428,7 +14360,7 @@ PROTOBUF_NOINLINE void MethodOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL MethodOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL MethodOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const MethodOptions& this_ = static_cast<const MethodOptions&>(base);
@@ -14495,7 +14427,7 @@ PROTOBUF_NOINLINE void MethodOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t MethodOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t MethodOptions::ByteSizeLong(const MessageLite& base) {
   const MethodOptions& this_ = static_cast<const MethodOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t MethodOptions::ByteSizeLong() const {
@@ -14682,7 +14614,7 @@ UninterpretedOption_NamePart::GetClassData() const {
   return &UninterpretedOption_NamePart_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void UninterpretedOption_NamePart::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void UninterpretedOption_NamePart::Clear(MessageLite& base) {
   UninterpretedOption_NamePart& this_ = static_cast<UninterpretedOption_NamePart&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void UninterpretedOption_NamePart::Clear() {
@@ -14703,7 +14635,7 @@ PROTOBUF_NOINLINE void UninterpretedOption_NamePart::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL UninterpretedOption_NamePart::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL UninterpretedOption_NamePart::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const UninterpretedOption_NamePart& this_ = static_cast<const UninterpretedOption_NamePart&>(base);
@@ -14744,7 +14676,7 @@ PROTOBUF_NOINLINE void UninterpretedOption_NamePart::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t UninterpretedOption_NamePart::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t UninterpretedOption_NamePart::ByteSizeLong(const MessageLite& base) {
   const UninterpretedOption_NamePart& this_ = static_cast<const UninterpretedOption_NamePart&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t UninterpretedOption_NamePart::ByteSizeLong() const {
@@ -14921,7 +14853,7 @@ UninterpretedOption::GetClassData() const {
   return &UninterpretedOption_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void UninterpretedOption::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void UninterpretedOption::Clear(MessageLite& base) {
   UninterpretedOption& this_ = static_cast<UninterpretedOption&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void UninterpretedOption::Clear() {
@@ -14959,7 +14891,7 @@ PROTOBUF_NOINLINE void UninterpretedOption::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL UninterpretedOption::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL UninterpretedOption::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const UninterpretedOption& this_ = static_cast<const UninterpretedOption&>(base);
@@ -15038,7 +14970,7 @@ PROTOBUF_NOINLINE void UninterpretedOption::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t UninterpretedOption::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t UninterpretedOption::ByteSizeLong(const MessageLite& base) {
   const UninterpretedOption& this_ = static_cast<const UninterpretedOption&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t UninterpretedOption::ByteSizeLong() const {
@@ -15340,7 +15272,7 @@ FeatureSet::GetClassData() const {
   return &FeatureSet_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FeatureSet::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FeatureSet::Clear(MessageLite& base) {
   FeatureSet& this_ = static_cast<FeatureSet&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FeatureSet::Clear() {
@@ -15366,7 +15298,7 @@ PROTOBUF_NOINLINE void FeatureSet::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FeatureSet::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FeatureSet::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FeatureSet& this_ = static_cast<const FeatureSet&>(base);
@@ -15460,7 +15392,7 @@ PROTOBUF_NOINLINE void FeatureSet::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FeatureSet::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FeatureSet::ByteSizeLong(const MessageLite& base) {
   const FeatureSet& this_ = static_cast<const FeatureSet&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FeatureSet::ByteSizeLong() const {
@@ -15690,7 +15622,7 @@ FeatureSetDefaults_FeatureSetEditionDefault::GetClassData() const {
   return &FeatureSetDefaults_FeatureSetEditionDefault_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FeatureSetDefaults_FeatureSetEditionDefault::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FeatureSetDefaults_FeatureSetEditionDefault::Clear(MessageLite& base) {
   FeatureSetDefaults_FeatureSetEditionDefault& this_ = static_cast<FeatureSetDefaults_FeatureSetEditionDefault&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FeatureSetDefaults_FeatureSetEditionDefault::Clear() {
@@ -15718,7 +15650,7 @@ PROTOBUF_NOINLINE void FeatureSetDefaults_FeatureSetEditionDefault::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FeatureSetDefaults_FeatureSetEditionDefault::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FeatureSetDefaults_FeatureSetEditionDefault::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FeatureSetDefaults_FeatureSetEditionDefault& this_ = static_cast<const FeatureSetDefaults_FeatureSetEditionDefault&>(base);
@@ -15767,7 +15699,7 @@ PROTOBUF_NOINLINE void FeatureSetDefaults_FeatureSetEditionDefault::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FeatureSetDefaults_FeatureSetEditionDefault::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FeatureSetDefaults_FeatureSetEditionDefault::ByteSizeLong(const MessageLite& base) {
   const FeatureSetDefaults_FeatureSetEditionDefault& this_ = static_cast<const FeatureSetDefaults_FeatureSetEditionDefault&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FeatureSetDefaults_FeatureSetEditionDefault::ByteSizeLong() const {
@@ -15963,7 +15895,7 @@ FeatureSetDefaults::GetClassData() const {
   return &FeatureSetDefaults_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FeatureSetDefaults::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FeatureSetDefaults::Clear(MessageLite& base) {
   FeatureSetDefaults& this_ = static_cast<FeatureSetDefaults&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FeatureSetDefaults::Clear() {
@@ -15990,7 +15922,7 @@ PROTOBUF_NOINLINE void FeatureSetDefaults::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FeatureSetDefaults::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FeatureSetDefaults::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FeatureSetDefaults& this_ = static_cast<const FeatureSetDefaults&>(base);
@@ -16044,7 +15976,7 @@ PROTOBUF_NOINLINE void FeatureSetDefaults::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FeatureSetDefaults::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FeatureSetDefaults::ByteSizeLong(const MessageLite& base) {
   const FeatureSetDefaults& this_ = static_cast<const FeatureSetDefaults&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FeatureSetDefaults::ByteSizeLong() const {
@@ -16248,7 +16180,7 @@ SourceCodeInfo_Location::GetClassData() const {
   return &SourceCodeInfo_Location_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void SourceCodeInfo_Location::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void SourceCodeInfo_Location::Clear(MessageLite& base) {
   SourceCodeInfo_Location& this_ = static_cast<SourceCodeInfo_Location&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void SourceCodeInfo_Location::Clear() {
@@ -16282,7 +16214,7 @@ PROTOBUF_NOINLINE void SourceCodeInfo_Location::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL SourceCodeInfo_Location::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL SourceCodeInfo_Location::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const SourceCodeInfo_Location& this_ = static_cast<const SourceCodeInfo_Location&>(base);
@@ -16352,7 +16284,7 @@ PROTOBUF_NOINLINE void SourceCodeInfo_Location::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t SourceCodeInfo_Location::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t SourceCodeInfo_Location::ByteSizeLong(const MessageLite& base) {
   const SourceCodeInfo_Location& this_ = static_cast<const SourceCodeInfo_Location&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t SourceCodeInfo_Location::ByteSizeLong() const {
@@ -16547,7 +16479,7 @@ SourceCodeInfo::GetClassData() const {
   return &SourceCodeInfo_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void SourceCodeInfo::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void SourceCodeInfo::Clear(MessageLite& base) {
   SourceCodeInfo& this_ = static_cast<SourceCodeInfo&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void SourceCodeInfo::Clear() {
@@ -16568,7 +16500,7 @@ PROTOBUF_NOINLINE void SourceCodeInfo::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL SourceCodeInfo::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL SourceCodeInfo::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const SourceCodeInfo& this_ = static_cast<const SourceCodeInfo&>(base);
@@ -16611,7 +16543,7 @@ PROTOBUF_NOINLINE void SourceCodeInfo::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t SourceCodeInfo::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t SourceCodeInfo::ByteSizeLong(const MessageLite& base) {
   const SourceCodeInfo& this_ = static_cast<const SourceCodeInfo&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t SourceCodeInfo::ByteSizeLong() const {
@@ -16783,7 +16715,7 @@ GeneratedCodeInfo_Annotation::GetClassData() const {
   return &GeneratedCodeInfo_Annotation_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void GeneratedCodeInfo_Annotation::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void GeneratedCodeInfo_Annotation::Clear(MessageLite& base) {
   GeneratedCodeInfo_Annotation& this_ = static_cast<GeneratedCodeInfo_Annotation&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void GeneratedCodeInfo_Annotation::Clear() {
@@ -16815,7 +16747,7 @@ PROTOBUF_NOINLINE void GeneratedCodeInfo_Annotation::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL GeneratedCodeInfo_Annotation::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL GeneratedCodeInfo_Annotation::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const GeneratedCodeInfo_Annotation& this_ = static_cast<const GeneratedCodeInfo_Annotation&>(base);
@@ -16881,7 +16813,7 @@ PROTOBUF_NOINLINE void GeneratedCodeInfo_Annotation::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t GeneratedCodeInfo_Annotation::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t GeneratedCodeInfo_Annotation::ByteSizeLong(const MessageLite& base) {
   const GeneratedCodeInfo_Annotation& this_ = static_cast<const GeneratedCodeInfo_Annotation&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t GeneratedCodeInfo_Annotation::ByteSizeLong() const {
@@ -17064,7 +16996,7 @@ GeneratedCodeInfo::GetClassData() const {
   return &GeneratedCodeInfo_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void GeneratedCodeInfo::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void GeneratedCodeInfo::Clear(MessageLite& base) {
   GeneratedCodeInfo& this_ = static_cast<GeneratedCodeInfo&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void GeneratedCodeInfo::Clear() {
@@ -17084,7 +17016,7 @@ PROTOBUF_NOINLINE void GeneratedCodeInfo::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL GeneratedCodeInfo::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL GeneratedCodeInfo::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const GeneratedCodeInfo& this_ = static_cast<const GeneratedCodeInfo&>(base);
@@ -17124,7 +17056,7 @@ PROTOBUF_NOINLINE void GeneratedCodeInfo::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t GeneratedCodeInfo::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t GeneratedCodeInfo::ByteSizeLong(const MessageLite& base) {
   const GeneratedCodeInfo& this_ = static_cast<const GeneratedCodeInfo&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t GeneratedCodeInfo::ByteSizeLong() const {

@@ -94,9 +94,8 @@ inline constexpr CppFileOptions::Impl_::Impl_(
             ::_pbi::ConstantInitialized()) {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr CppFileOptions::CppFileOptions(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr CppFileOptions::CppFileOptions(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -119,8 +118,7 @@ constexpr auto CppFileOptions::_Internal::GenerateClassData() {
       Super_::GetNewImpl<CppFileOptions>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &CppFileOptions::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(CppFileOptions, _impl_._cached_size_),
       &file_reflection_data[0],
@@ -268,7 +266,7 @@ CppFileOptions::GetClassData() const {
   return &CppFileOptions_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void CppFileOptions::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void CppFileOptions::Clear(MessageLite& base) {
   CppFileOptions& this_ = static_cast<CppFileOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void CppFileOptions::Clear() {
@@ -288,7 +286,7 @@ PROTOBUF_NOINLINE void CppFileOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL CppFileOptions::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL CppFileOptions::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const CppFileOptions& this_ = static_cast<const CppFileOptions&>(base);
@@ -324,7 +322,7 @@ PROTOBUF_NOINLINE void CppFileOptions::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t CppFileOptions::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t CppFileOptions::ByteSizeLong(const MessageLite& base) {
   const CppFileOptions& this_ = static_cast<const CppFileOptions&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t CppFileOptions::ByteSizeLong() const {

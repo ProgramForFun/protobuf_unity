@@ -107,9 +107,8 @@ inline constexpr Any::Impl_::Impl_(
             ::_pbi::ConstantInitialized()) {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr Any::Any(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr Any::Any(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -132,8 +131,7 @@ constexpr auto Any::_Internal::GenerateClassData() {
       Super_::GetNewImpl<Any>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &Any::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(Any, _impl_._cached_size_),
       &file_reflection_data[0],
@@ -293,7 +291,7 @@ Any::GetClassData() const {
   return &Any_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void Any::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void Any::Clear(MessageLite& base) {
   Any& this_ = static_cast<Any&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void Any::Clear() {
@@ -318,7 +316,7 @@ PROTOBUF_NOINLINE void Any::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL Any::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL Any::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const Any& this_ = static_cast<const Any&>(base);
@@ -364,7 +362,7 @@ PROTOBUF_NOINLINE void Any::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t Any::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t Any::ByteSizeLong(const MessageLite& base) {
   const Any& this_ = static_cast<const Any&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t Any::ByteSizeLong() const {

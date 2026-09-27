@@ -96,9 +96,8 @@ inline constexpr FieldMask::Impl_::Impl_(
      {}
 
 template <typename>
-PROTOBUF_ALWAYS_INLINE_NODEBUG constexpr FieldMask::FieldMask(
-    ::_pbi::ConstantInitialized,
-    const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
+constexpr FieldMask::FieldMask(::_pbi::ConstantInitialized,
+                       const ::_pbi::ClassData* PROTOBUF_NONNULL class_data)
     : Super_(
 #if defined(PROTOBUF_CUSTOM_VTABLE)
           class_data
@@ -121,8 +120,7 @@ constexpr auto FieldMask::_Internal::GenerateClassData() {
       Super_::GetNewImpl<FieldMask>(),
 #if defined(PROTOBUF_CUSTOM_VTABLE)
       &FieldMask::SharedDtor,
-      &Helpers_::Clear, &Helpers_::ByteSizeLong,
-          &Helpers_::_InternalSerialize,
+      &Clear, &ByteSizeLong, &_InternalSerialize,
 #endif  // PROTOBUF_CUSTOM_VTABLE
       PROTOBUF_FIELD_OFFSET(FieldMask, _impl_._cached_size_),
       &file_reflection_data[0],
@@ -275,7 +273,7 @@ FieldMask::GetClassData() const {
   return &FieldMask_globals_.class_data;
 }
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-PROTOBUF_NOINLINE void FieldMask::Helpers_::Clear(MessageLite& base) {
+PROTOBUF_NOINLINE void FieldMask::Clear(MessageLite& base) {
   FieldMask& this_ = static_cast<FieldMask&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 PROTOBUF_NOINLINE void FieldMask::Clear() {
@@ -295,7 +293,7 @@ PROTOBUF_NOINLINE void FieldMask::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::uint8_t* PROTOBUF_NONNULL FieldMask::Helpers_::_InternalSerialize(
+::uint8_t* PROTOBUF_NONNULL FieldMask::_InternalSerialize(
     const ::google::protobuf::MessageLite& base, ::uint8_t* PROTOBUF_NONNULL target,
     ::google::protobuf::io::EpsCopyOutputStream* PROTOBUF_NONNULL stream) {
   const FieldMask& this_ = static_cast<const FieldMask&>(base);
@@ -333,7 +331,7 @@ PROTOBUF_NOINLINE void FieldMask::Clear() {
 }
 
 #if defined(PROTOBUF_CUSTOM_VTABLE)
-::size_t FieldMask::Helpers_::ByteSizeLong(const MessageLite& base) {
+::size_t FieldMask::ByteSizeLong(const MessageLite& base) {
   const FieldMask& this_ = static_cast<const FieldMask&>(base);
 #else   // PROTOBUF_CUSTOM_VTABLE
 ::size_t FieldMask::ByteSizeLong() const {

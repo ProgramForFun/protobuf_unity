@@ -853,9 +853,7 @@ void BinaryAndJsonConformanceSuiteImpl<
       prototype, test_name, input_json);
   const ConformanceRequest& request = setting.GetRequest();
   ConformanceResponse response;
-  std::string effective_test_name = absl::StrCat(
-      setting.ConformanceLevelToString(level), ".",
-      setting.GetSyntaxIdentifier(), ".JsonInput.", test_name, ".Validator");
+  const std::string& effective_test_name = setting.GetTestName();
 
   if (!suite_.RunTest(effective_test_name, request, &response)) {
     return;
@@ -1003,9 +1001,7 @@ void BinaryAndJsonConformanceSuiteImpl<MessageType>::
       payload_message.SerializeAsString());
   const ConformanceRequest& request = setting.GetRequest();
   ConformanceResponse response;
-  std::string effective_test_name =
-      absl::StrCat(setting.ConformanceLevelToString(level), ".",
-                   SyntaxIdentifier(), ".", test_name, ".JsonOutput");
+  const std::string& effective_test_name = setting.GetTestName();
 
   if (!suite_.RunTest(effective_test_name, request, &response)) {
     return;
@@ -1766,6 +1762,21 @@ void BinaryAndJsonConformanceSuiteImpl<MessageType>::TestIllegalTags() {
 }
 
 template <typename MessageType>
+void BinaryAndJsonConformanceSuiteImpl<MessageType>::TestIllegalLengths() {
+  const FieldDescriptor* string_field =
+      GetFieldForType(FieldDescriptor::TYPE_STRING, false);
+
+  // A 5-byte varint length where bits 32-34 are set (e.g. bit 32 = 0x10), which
+  // overflows 32-bit arithmetic and wraps to 0 modulo 2^32. Parsers must not
+  // overflow and must reject this invalid wire format.
+  ExpectParseFailureForProto(
+      absl::StrCat(tag(string_field->number(),
+                       WireFormatLite::WIRETYPE_LENGTH_DELIMITED),
+                   "\x80\x80\x80\x80\x10"),
+      "BadLength_Varint32BitOverflow", REQUIRED);
+}
+
+template <typename MessageType>
 void BinaryAndJsonConformanceSuiteImpl<MessageType>::TestUnmatchedGroup() {
   ExpectParseFailureForProto(tag(201, WireFormatLite::WIRETYPE_END_GROUP),
                              "UnmatchedEndGroup", REQUIRED);
@@ -2023,6 +2034,7 @@ void BinaryAndJsonConformanceSuiteImpl<MessageType>::RunAllTests() {
     }
 
     TestIllegalTags();
+    TestIllegalLengths();
     TestUnmatchedGroup();
     TestUnknownWireType();
     TestInvalidUtf8String();
@@ -2645,7 +2657,7 @@ void BinaryAndJsonConformanceSuiteImpl<
                                          value.isMember("FieldName3") &&
                                          value.isMember("fieldName4");
                                 });
-  RunValidJsonTestWithValidator("FieldNameWithNumbers", REQUIRED,
+  RunValidJsonTestWithValidator("FieldNameWithNumbersValidator", REQUIRED,
                                 R"({
         "field0name5": 5,
         "field0Name6": 6
@@ -2655,7 +2667,7 @@ void BinaryAndJsonConformanceSuiteImpl<
                                          value.isMember("field0Name6");
                                 });
   RunValidJsonTestWithValidator(
-      "FieldNameWithMixedCases", REQUIRED,
+      "FieldNameWithMixedCasesValidator", REQUIRED,
       R"({
         "fieldName7": 7,
         "FieldName8": 8,
@@ -2670,7 +2682,7 @@ void BinaryAndJsonConformanceSuiteImpl<
                value.isMember("FIELDNAME11") && value.isMember("FIELDName12");
       });
   RunValidJsonTestWithValidator(
-      "FieldNameWithDoubleUnderscores", RECOMMENDED,
+      "FieldNameWithDoubleUnderscoresValidator", RECOMMENDED,
       R"({
         "FieldName13": 13,
         "FieldName14": 14,
