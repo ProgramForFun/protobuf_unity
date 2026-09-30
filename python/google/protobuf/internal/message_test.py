@@ -91,6 +91,8 @@ class MessageTest(unittest.TestCase):
 
       msg4 = message_module.TestAllTypes()
       msg4.CopyFrom(msg3)
+      _ = msg4.optional_nested_message
+      msg4.Clear()
 
       # Try deepcopy
       _ = copy.deepcopy(msg3)
@@ -932,6 +934,34 @@ class MessageTest(unittest.TestCase):
     except ValueError:
       pass
     self.assertEqual(len(msg.repeated_nested_message), 0)
+
+  def testAddRepeatedNestedFieldReentrantFailure(self, message_module):
+    msg = message_module.TestAllTypes()
+
+    class ClearOnIndex:
+
+      def __index__(self):
+        msg.repeated_nested_message.clear()
+        raise ValueError('clear during add')
+
+    with self.assertRaises(ValueError):
+      msg.repeated_nested_message.add(bb=ClearOnIndex())
+    self.assertEqual(len(msg.repeated_nested_message), 0)
+
+    leaked = []
+
+    class LeakOnIndex:
+
+      def __index__(self):
+        leaked.append(list(msg.repeated_nested_message))
+        raise ValueError('leak during add')
+
+    with self.assertRaises(ValueError):
+      msg.repeated_nested_message.add(bb=LeakOnIndex())
+    self.assertEqual(leaked, [[]])
+    self.assertEqual(len(msg.repeated_nested_message), 0)
+    sub = msg.repeated_nested_message.add(bb=7)
+    self.assertEqual(sub.bb, 7)
 
   def testRepeatedContains(self, message_module):
     msg = message_module.TestAllTypes()

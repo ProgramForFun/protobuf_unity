@@ -553,6 +553,25 @@ Error, UINTPTR_MAX is undefined
 #define UPB_DEPRECATED
 #endif
 
+#if defined(__clang__)
+#define UPB_IGNORE_DEPRECATION_START \
+  _Pragma("clang diagnostic push")   \
+      _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")
+#define UPB_IGNORE_DEPRECATION_STOP _Pragma("clang diagnostic pop")
+#elif defined(__GNUC__)
+#define UPB_IGNORE_DEPRECATION_START \
+  _Pragma("GCC diagnostic push")     \
+      _Pragma("GCC diagnostic ignored \"-Wdeprecated-declarations\"")
+#define UPB_IGNORE_DEPRECATION_STOP _Pragma("GCC diagnostic pop")
+#elif defined(_MSC_VER)
+#define UPB_IGNORE_DEPRECATION_START \
+  __pragma(warning(push)) __pragma(warning(disable : 4996))
+#define UPB_IGNORE_DEPRECATION_STOP __pragma(warning(pop))
+#else
+#define UPB_IGNORE_DEPRECATION_START
+#define UPB_IGNORE_DEPRECATION_STOP
+#endif
+
 #if defined(UPB_IS_GOOGLE3) && \
     (!defined(UPB_BOOTSTRAP_STAGE) || UPB_BOOTSTRAP_STAGE != 0)
 #define UPB_DESC_MINITABLE(sym) &proto2__##sym##_msg_init
@@ -5519,9 +5538,14 @@ static void jsonenc_enum(int32_t val, const upb_FieldDef* f, jsonenc* e) {
 }
 
 static void jsonenc_bytes(jsonenc* e, upb_StringView str) {
-  /* This is the regular base64, not the "web-safe" version. */
-  static const char base64[] =
+  /* Regular base64 (RFC 4648 section 4) by default; the URL- and filename-safe
+   * alphabet (RFC 4648 section 5) when upb_JsonEncode_WebSafeBase64 is set. */
+  static const char kBase64[] =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  static const char kWebSafeBase64[] =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  const char* base64 =
+      (e->options & upb_JsonEncode_WebSafeBase64) ? kWebSafeBase64 : kBase64;
   const unsigned char* ptr = (unsigned char*)str.data;
   const unsigned char* end = UPB_PTRADD(ptr, str.size);
   char buf[4];
@@ -19502,6 +19526,8 @@ const char* UPB_PRIVATE(_upb_WireReader_SkipGroup)(
 #undef UPB_MALLOC_ALIGN
 #undef UPB_TSAN
 #undef UPB_DEPRECATED
+#undef UPB_IGNORE_DEPRECATION_START
+#undef UPB_IGNORE_DEPRECATION_STOP
 #undef UPB_GNUC_MIN
 #undef UPB_CLANG_MIN
 #undef UPB_DESCRIPTOR_UPB_H_FILENAME

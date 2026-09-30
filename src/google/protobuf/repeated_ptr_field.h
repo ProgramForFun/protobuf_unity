@@ -33,6 +33,7 @@
 #include <utility>
 
 #include "absl/base/attributes.h"
+#include "absl/base/macros.h"
 #include "absl/base/no_destructor.h"
 #include "absl/base/optimization.h"
 #include "absl/base/prefetch.h"
@@ -1870,7 +1871,7 @@ inline void RepeatedPtrField<Element>::DeleteSubrange(int start, int num) {
       H::Delete(static_cast<Element*>(subrange[i]));
     }
   }
-  UnsafeArenaExtractSubrange(start, num, nullptr);
+  UnsafeArenaExtractSubrange(start, num, /*elements=*/nullptr);
 }
 
 template <typename Element>
@@ -2663,14 +2664,6 @@ class UnsafeArenaAllocatedRepeatedPtrFieldBackInsertIterator {
 };
 }  // namespace internal
 
-// Provides a back insert iterator for RepeatedPtrField instances,
-// similar to std::back_inserter().
-template <typename T>
-internal::RepeatedPtrFieldBackInsertIterator<T> RepeatedPtrFieldBackInserter(
-    RepeatedPtrField<T>* const mutable_field) {
-  return internal::RepeatedPtrFieldBackInsertIterator<T>(mutable_field);
-}
-
 // Special back insert iterator for RepeatedPtrField instances, just in
 // case someone wants to write generic template code that can access both
 // RepeatedFields and RepeatedPtrFields using a common name.
@@ -2678,6 +2671,15 @@ template <typename T>
 internal::RepeatedPtrFieldBackInsertIterator<T> RepeatedFieldBackInserter(
     RepeatedPtrField<T>* const mutable_field) {
   return internal::RepeatedPtrFieldBackInsertIterator<T>(mutable_field);
+}
+
+// Provides a back insert iterator for RepeatedPtrField instances,
+// similar to std::back_inserter().
+template <typename T>
+PROTOBUF_DEPRECATE_AND_INLINE()
+internal::RepeatedPtrFieldBackInsertIterator<T> RepeatedPtrFieldBackInserter(
+    RepeatedPtrField<T>* const mutable_field) {
+  return RepeatedFieldBackInserter(mutable_field);
 }
 
 // Provides a back insert iterator for RepeatedPtrField instances
