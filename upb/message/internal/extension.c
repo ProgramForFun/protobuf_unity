@@ -29,7 +29,7 @@ const upb_Extension* UPB_PRIVATE(_upb_Message_Getext)(
     if (upb_TaggedAuxPtr_IsCanonicalExtension(tagged_ptr)) {
       const upb_Extension* ext =
           upb_TaggedAuxPtr_CanonicalExtension(tagged_ptr);
-      if (ext->ext == e) {
+      if (upb_Extension_MiniTableExtension(ext) == e) {
         return ext;
       }
     }
@@ -59,7 +59,7 @@ upb_Extension* UPB_PRIVATE(_upb_Message_GetOrCreateExtensionWithTag)(
   upb_Extension* ext = upb_Arena_Malloc(a, sizeof(upb_Extension));
   if (!ext) return NULL;
   memset(ext, 0, sizeof(upb_Extension));
-  ext->ext = e;
+  ext->UPB_ONLYBITS(ext) = e;
   in->aux_data[in->size++] = upb_TaggedAuxPtr_MakeExtension(ext, tag);
   return ext;
 }

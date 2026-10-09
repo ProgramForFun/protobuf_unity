@@ -797,6 +797,7 @@ set(libupb_hdrs
   ${protobuf_SOURCE_DIR}/upb/message/internal/array.h
   ${protobuf_SOURCE_DIR}/upb/message/internal/compare_unknown.h
   ${protobuf_SOURCE_DIR}/upb/message/internal/extension.h
+  ${protobuf_SOURCE_DIR}/upb/message/internal/field_data.h
   ${protobuf_SOURCE_DIR}/upb/message/internal/iterator.h
   ${protobuf_SOURCE_DIR}/upb/message/internal/map.h
   ${protobuf_SOURCE_DIR}/upb/message/internal/map_entry.h
@@ -1444,6 +1445,7 @@ set(compiler_test_files
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/csharp/csharp_generator_unittest.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/importer_unittest.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/java/doc_comment_unittest.cc
+  ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/java/enum_unittest.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/java/generator_unittest.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/java/message_serialization_unittest.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/java/name_resolver_test.cc
@@ -1467,6 +1469,7 @@ set(compiler_test_protos_files
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/cpp/test_bad_identifiers_editions.proto
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/cpp/test_bad_identifiers_proto2.proto
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/cpp/test_large_enum_value.proto
+  ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/java/enum_unittest.proto
   ${protobuf_SOURCE_DIR}/src/google/protobuf/compiler/java/message_serialization_unittest.proto
 )
 
@@ -1481,6 +1484,7 @@ set(io_test_files
   ${protobuf_SOURCE_DIR}/src/google/protobuf/io/io_win32_unittest.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/io/printer_death_test.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/io/printer_unittest.cc
+  ${protobuf_SOURCE_DIR}/src/google/protobuf/io/strtod_unittest.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/io/test_zero_copy_stream_test.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/io/tokenizer_unittest.cc
   ${protobuf_SOURCE_DIR}/src/google/protobuf/io/zero_copy_sink_test.cc
