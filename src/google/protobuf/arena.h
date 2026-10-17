@@ -84,6 +84,14 @@ SerialArena* PROTOBUF_NULLABLE GetSerialArena(Arena* PROTOBUF_NULLABLE);
 template <typename Type>
 class GenericTypeHandler;  // defined in repeated_field.h
 
+// Returns true if the message is on an arena. As a free function, we can call
+// it in contexts where `MessageLite` is incomplete. Use this instead of
+// `message.GetArena() == nullptr`.
+bool HasArena(const MessageLite& message);
+
+// Defined in message_lite.h
+Arena* PROTOBUF_NULLABLE GetArena(const MessageLite& message);
+
 // This struct maps field types to the types that we will use to represent them
 // when allocated on an arena. This is necessary because fields no longer own an
 // arena pointer, but can be allocated directly on an arena. In this case, we
@@ -182,7 +190,7 @@ struct ABSL_ATTRIBUTE_WARN_UNUSED ArenaOptions final {
   // An initial block of memory for the arena to use, or nullptr for none. If
   // provided, the block must live at least as long as the arena itself. The
   // creator of the Arena retains ownership of the block after the Arena is
-  // destroyed.
+  // destroyed. Must be aligned to at least 8 bytes.
   char* PROTOBUF_NULLABLE initial_block = nullptr;
 
   // The size of the initial block, if provided.
@@ -192,7 +200,8 @@ struct ABSL_ATTRIBUTE_WARN_UNUSED ArenaOptions final {
   // requested. By default, it contains a ptr to the malloc function.
   //
   // NOTE: block_alloc and dealloc functions are expected to behave like
-  // malloc and free, including Asan poisoning.
+  // malloc and free, including Asan poisoning. Returned blocks must be aligned
+  // to at least 8 bytes.
   void* PROTOBUF_NONNULL (*PROTOBUF_NULLABLE block_alloc)(size_t) = nullptr;
   // A function pointer to a dealloc method that takes ownership of the blocks
   // from the arena. By default, it contains a ptr to a wrapper function that
@@ -858,13 +867,12 @@ struct ArenaPtrCmpBase {
   }
 
   template <typename T>
-  static auto PROTOBUF_NULLABLE
-  Unpack(const typename Arena::UniquePtr<T>& ptr) {
+  static T* PROTOBUF_NULLABLE Unpack(const typename Arena::UniquePtr<T>& ptr) {
     return ptr.get();
   }
 
   template <typename T>
-  static auto PROTOBUF_NONNULL
+  static T* PROTOBUF_NONNULL
   Unpack(const typename Arena::template Ptr<T>& ptr) {
     return ptr.get();
   }
