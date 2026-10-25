@@ -166,7 +166,9 @@ static bool PyUpb_CPythonBits_Init(PyUpb_CPythonBits* bits) {
 
 err:
   Py_XDECREF(bases);
-  Py_XDECREF(type);
+  // Plain cast instead of an *_AsPyObj() helper: type is a CPython type object
+  // rather than a upb struct.
+  Py_XDECREF((PyObject*)type);
   Py_XDECREF(size);
   Py_XDECREF(sys);
   Py_XDECREF(hex_version);
@@ -221,6 +223,10 @@ typedef struct PyUpb_Message {
 
 static PyObject* PyUpb_Message_GetAttr(PyObject* _self, PyObject* attr);
 static PyObject* PyUpb_Message_Clear(PyUpb_Message* self);
+
+static PyObject* PyUpb_Message_AsPyObj(PyUpb_Message* msg) {
+  return &msg->ob_base;
+}
 
 bool PyUpb_Message_IsStub(PyUpb_Message* msg) { return msg->def & 1; }
 
@@ -740,7 +746,8 @@ bool PyUpb_Message_AssureWritable(PyUpb_Message* self) {
   PyUpb_Message* parent = self->ptr.parent;
   const upb_FieldDef* child_f = PyUpb_Message_InitAsMsg(child, arena);
   if (!child_f) return false;
-  Py_INCREF(child);  // To avoid a special-case in PyUpb_Message_SetField().
+  // To avoid a special-case in PyUpb_Message_SetField().
+  Py_INCREF(PyUpb_Message_AsPyObj(child));
 
   do {
     PyUpb_Message* next_parent = parent->ptr.parent;
@@ -972,7 +979,7 @@ static PyObject* PyUpb_Message_RichCompare(PyObject* _self, PyObject* other,
     return PyObject_CallMethod(_self, "_internal_compare", "O", other);
   }
 
-  if (!PyObject_TypeCheck(other, Py_TYPE(self))) {
+  if (!PyObject_TypeCheck(other, Py_TYPE(PyUpb_Message_AsPyObj(self)))) {
     Py_INCREF(Py_NotImplemented);
     return Py_NotImplemented;
   }
@@ -1238,8 +1245,7 @@ bool PyUpb_Message_IsFrozen(PyObject* _self) {
   while (PyUpb_Message_IsStub(self)) {
     self = self->ptr.parent;
   }
-  bool is_frozen =
-      upb_Message_IsFrozen(self->ptr.msg) || PyUpb_Arena_IsFrozen(self->arena);
+  bool is_frozen = upb_Message_IsFrozen(self->ptr.msg);
   // Invariant: Since we only store the parent *message* (and not any parent
   // repeated field or map) in a stub's `ptr.parent`, we wouldn't correctly
   // handle the case where a parent message is unfrozen but a containing
@@ -2378,7 +2384,12 @@ static PyObject* PyUpb_MessageMeta_GetDynamicAttr(PyObject* self,
 
   PyObject* py_key =
       PyBytes_FromFormat("%s.%s", upb_MessageDef_FullName(msgdef), name_buf);
+  if (!py_key) return NULL;
   const char* key = PyUpb_GetStrData(py_key);
+  if (!key) {
+    Py_DECREF(py_key);
+    return NULL;
+  }
   PyObject* ret = NULL;
   const upb_MessageDef* nested = upb_DefPool_FindMessageByName(symtab, key);
   const upb_EnumDef* enumdef;
