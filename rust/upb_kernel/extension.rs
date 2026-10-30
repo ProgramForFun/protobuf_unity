@@ -47,7 +47,9 @@ impl<Extendee, T: Proxied> ExtensionId<Extendee, T> {
 #[linkme::distributed_slice]
 pub static EXTENSIONS: [LazyLock<MiniTableExtensionInitPtr>];
 
-#[cfg(all(target_family = "unix", not(target_os = "macos")))]
+// The sentinel sections use ELF-only directives, so skip every Apple (Mach-O) target, not just
+// macOS.
+#[cfg(all(target_family = "unix", not(target_vendor = "apple")))]
 core::arch::global_asm!(
     r#"
     .section linkme_EXTENSIONS,"awR",@progbits
@@ -59,6 +61,33 @@ core::arch::global_asm!(
     .globl LINKM2_SENTINEL_EXTENSIONS
     LINKM2_SENTINEL_EXTENSIONS:
     .size   LINKM2_SENTINEL_EXTENSIONS, 0
+    "#
+);
+
+// Add the extension's MiniTable and the def_init of the file that declares it to the global
+// EXTENSION_MINI_TABLE_TO_DEF_INITS registry; this is used for reflection.
+//
+// Registered the same way as EXTENSIONS.
+pub struct ExtensionMiniTableToDefInit {
+    pub mini_table: &'static LazyLock<MiniTableExtensionInitPtr>,
+    pub def_init: fn() -> DefPoolInit,
+}
+
+#[linkme::distributed_slice]
+pub static EXTENSION_MINI_TABLE_TO_DEF_INITS: [ExtensionMiniTableToDefInit];
+
+#[cfg(all(target_family = "unix", not(target_vendor = "apple")))]
+core::arch::global_asm!(
+    r#"
+    .section linkme_EXTENSION_MINI_TABLE_TO_DEF_INITS,"awR",@progbits
+    .globl LINKME_SENTINEL_EXTENSION_MINI_TABLE_TO_DEF_INITS
+    LINKME_SENTINEL_EXTENSION_MINI_TABLE_TO_DEF_INITS:
+    .size   LINKME_SENTINEL_EXTENSION_MINI_TABLE_TO_DEF_INITS, 0
+
+    .section linkm2_EXTENSION_MINI_TABLE_TO_DEF_INITS,"awR",@progbits
+    .globl LINKM2_SENTINEL_EXTENSION_MINI_TABLE_TO_DEF_INITS
+    LINKM2_SENTINEL_EXTENSION_MINI_TABLE_TO_DEF_INITS:
+    .size   LINKM2_SENTINEL_EXTENSION_MINI_TABLE_TO_DEF_INITS, 0
     "#
 );
 

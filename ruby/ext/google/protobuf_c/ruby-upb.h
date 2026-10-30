@@ -4873,10 +4873,15 @@ UPB_NODISCARD upb_Extension* UPB_PRIVATE(
                                               const upb_MiniTableExtension* ext,
                                               upb_Arena* arena);
 
-// Returns an extension for a message with a given mini table,
-// or NULL if no extension exists with this mini table.
+// Returns the canonical extension of `msg` that is described by `ext`, or NULL
+// if there is no such extension.
 const upb_Extension* UPB_PRIVATE(_upb_Message_Getext)(
     const struct upb_Message* msg, const upb_MiniTableExtension* ext);
+
+// Same as _upb_Message_Getext(), but finds the canonical extension by the
+// upb_MiniTableField that describes it.
+const upb_Extension* UPB_PRIVATE(_upb_Message_GetExtension)(
+    const struct upb_Message* msg, const upb_MiniTableField* f);
 
 UPB_INLINE bool UPB_PRIVATE(_upb_Extension_IsEmpty)(const upb_Extension* ext) {
   const upb_MiniTableField* f = upb_Extension_MiniTableField(ext);
@@ -5416,6 +5421,61 @@ UPB_INLINE bool UPB_PRIVATE(_upb_Message_NextExtensionReverse)(
     if (UPB_PRIVATE(_upb_Extension_IsEmpty)(ext)) continue;
 
     *out_e = upb_Extension_MiniTableExtension(ext);
+    *out_v = upb_Extension_GetValue(ext);
+    *iter = i;
+    return true;
+  }
+  *iter = i;
+  return false;
+}
+
+UPB_INLINE bool upb_Message_NextExtensionField(const struct upb_Message* msg,
+                                               const upb_MiniTableField** out_f,
+                                               upb_MessageValue* out_v,
+                                               uintptr_t* iter) {
+  const upb_Message_Internal* in = UPB_PRIVATE(_upb_Message_GetInternal)(msg);
+  uintptr_t i = *iter;
+  if (in) {
+    while (i < in->size) {
+      upb_TaggedAuxPtr tagged_ptr = in->aux_data[i++];
+      if (upb_TaggedAuxPtr_IsCanonicalExtension(tagged_ptr)) {
+        const upb_Extension* ext =
+            upb_TaggedAuxPtr_CanonicalExtension(tagged_ptr);
+
+        // Empty repeated fields or maps semantically don't exist.
+        if (UPB_PRIVATE(_upb_Extension_IsEmpty)(ext)) continue;
+
+        *out_f = upb_Extension_MiniTableField(ext);
+        *out_v = upb_Extension_GetValue(ext);
+        *iter = i;
+        return true;
+      }
+    }
+  }
+  *iter = i;
+
+  return false;
+}
+
+UPB_INLINE bool UPB_PRIVATE(_upb_Message_NextExtensionFieldReverse)(
+    const struct upb_Message* msg, const upb_MiniTableField** out_f,
+    upb_MessageValue* out_v, uintptr_t* iter) {
+  upb_Message_Internal* in = UPB_PRIVATE(_upb_Message_GetInternal)(msg);
+  if (!in) return false;
+  uintptr_t i = *iter;
+  uint32_t size = in->size;
+  while (i < size) {
+    upb_TaggedAuxPtr tagged_ptr = in->aux_data[size - 1 - i];
+    i++;
+    if (!upb_TaggedAuxPtr_IsCanonicalExtension(tagged_ptr)) {
+      continue;
+    }
+    const upb_Extension* ext = upb_TaggedAuxPtr_CanonicalExtension(tagged_ptr);
+
+    // Empty repeated fields or maps semantically don't exist.
+    if (UPB_PRIVATE(_upb_Extension_IsEmpty)(ext)) continue;
+
+    *out_f = upb_Extension_MiniTableField(ext);
     *out_v = upb_Extension_GetValue(ext);
     *iter = i;
     return true;
@@ -6304,12 +6364,13 @@ UPB_API_INLINE void upb_Message_ClearExtension(
   UPB_ASSERT(!upb_Message_IsFrozen(msg));
   upb_Message_Internal* in = UPB_PRIVATE(_upb_Message_GetInternal)(msg);
   if (!in) return;
+  const upb_MiniTableField* f = upb_MiniTableExtension_ToField(e);
   for (size_t i = 0; i < in->size; i++) {
     upb_TaggedAuxPtr tagged_ptr = in->aux_data[i];
     if (upb_TaggedAuxPtr_IsCanonicalExtension(tagged_ptr)) {
       const upb_Extension* ext =
           upb_TaggedAuxPtr_CanonicalExtension(tagged_ptr);
-      if (upb_Extension_MiniTableExtension(ext) == e) {
+      if (upb_Extension_MiniTableField(ext) == f) {
         in->aux_data[i] = upb_TaggedAuxPtr_Null();
         return;
       }
@@ -6615,14 +6676,32 @@ UPB_INLINE bool upb_Message_HasUnknown(const upb_Message* msg) {
 size_t upb_Message_ExtensionCount(const upb_Message* msg);
 
 // Iterates extensions in wire order
+//
+// Prefer upb_Message_NextExtensionField() when the upb_MiniTableField that
+// describes each extension is sufficient (e.g. for its number, type, or
+// sub-message). Use this function when the upb_MiniTableExtension is needed,
+// e.g. for its extendee.
 UPB_INLINE bool upb_Message_NextExtension(const upb_Message* msg,
                                           const upb_MiniTableExtension** out_e,
                                           upb_MessageValue* out_v,
                                           uintptr_t* iter);
 
+// Iterates extensions in wire order, returning the upb_MiniTableField
+// that describes each extension.
+UPB_INLINE bool upb_Message_NextExtensionField(const upb_Message* msg,
+                                               const upb_MiniTableField** out_f,
+                                               upb_MessageValue* out_v,
+                                               uintptr_t* iter);
+
 // Iterates extensions in reverse wire order
 UPB_INLINE bool UPB_PRIVATE(_upb_Message_NextExtensionReverse)(
     const struct upb_Message* msg, const upb_MiniTableExtension** out_e,
+    upb_MessageValue* out_v, uintptr_t* iter);
+
+// Iterates extensions in reverse wire order, returning the upb_MiniTableField
+// that describes each extension.
+UPB_INLINE bool UPB_PRIVATE(_upb_Message_NextExtensionFieldReverse)(
+    const struct upb_Message* msg, const upb_MiniTableField** out_f,
     upb_MessageValue* out_v, uintptr_t* iter);
 
 #define kUpb_Message_SerializableFieldBegin 0
@@ -17543,11 +17622,30 @@ extern "C" {
 #endif
 
 // Same as upb_Message_NextExtension but iterates in reverse wire order
+//
+// Prefer upb_Message_NextExtensionFieldReverse() when the upb_MiniTableField
+// that describes each extension is sufficient. Use this function when the
+// upb_MiniTableExtension is needed, e.g. for its extendee.
 bool upb_Message_NextExtensionReverse(const upb_Message* msg,
                                       const upb_MiniTableExtension** result,
                                       uintptr_t* iter);
+
 // Returns the minitable with the given field number, or NULL on failure.
+//
+// Prefer upb_Message_FindExtensionFieldByNumber() when the upb_MiniTableField
+// that describes the extension is sufficient. Use this function when the
+// upb_MiniTableExtension is needed, e.g. for its extendee.
 const upb_MiniTableExtension* upb_Message_FindExtensionByNumber(
+    const upb_Message* msg, uint32_t field_number);
+
+// Same as upb_Message_NextExtensionField but iterates in reverse wire order.
+bool upb_Message_NextExtensionFieldReverse(const upb_Message* msg,
+                                           const upb_MiniTableField** result,
+                                           uintptr_t* iter);
+
+// Returns the upb_MiniTableField that describes the extension with the given
+// field number, or NULL if the message has no such extension.
+const upb_MiniTableField* upb_Message_FindExtensionFieldByNumber(
     const upb_Message* msg, uint32_t field_number);
 
 #ifdef __cplusplus
