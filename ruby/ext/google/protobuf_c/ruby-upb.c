@@ -10770,6 +10770,7 @@ bool upb_Message_MergeFrom(upb_Message* dst, const upb_Message* src,
 }
 
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -10847,6 +10848,28 @@ upb_AuxField* UPB_PRIVATE(_upb_Message_CreateUnknownField)(
   // accumulate; an existing entry for the same field is never reused.
   return _upb_Message_AppendAuxField(msg, f, a,
                                      kUpb_TaggedAuxType_UnknownAuxField);
+}
+
+const upb_MiniTableField* upb_MiniTableField_ConvertToAuxField(
+    const upb_MiniTableField* f, upb_Arena* a) {
+  typedef struct {
+    upb_MiniTableField field;
+    upb_MiniTableSubInternal sub;
+  } upb_FieldWithSub;
+  UPB_ASSERT(!upb_MiniTableField_IsExtension(f));
+  const bool has_sub = f->UPB_PRIVATE(submsg_ofs) != kUpb_NoSub;
+  upb_FieldWithSub* ret = upb_Arena_Malloc(
+      a, has_sub ? sizeof(upb_FieldWithSub) : sizeof(upb_MiniTableField));
+  if (!ret) return NULL;
+  upb_MiniTableField* aux = &ret->field;
+  *aux = *f;
+  aux->UPB_PRIVATE(offset) = 0;
+  aux->presence = 0;
+  if (has_sub) {
+    ret->sub = *UPB_PRIVATE(_upb_MiniTableField_Sub)(f);
+    UPB_PRIVATE(_upb_MiniTableField_SetSub)(aux, &ret->sub);
+  }
+  return aux;
 }
 
 
@@ -14253,7 +14276,7 @@ upb_ExtensionRange* _upb_ExtensionRanges_New(
 
 typedef struct {
   size_t len;
-  char str[1];  // Null-terminated string data follows.
+  char str[];  // Null-terminated string data follows.
 } str_t;
 
 struct upb_FieldDef {
@@ -14591,9 +14614,18 @@ static char* make_json_name(const char* name, size_t size, upb_Arena* a) {
   return out;
 }
 
+// Allocates a str_t with room for `len` bytes plus a null terminator.
+static str_t* alloc_str(upb_DefBuilder* ctx, size_t len) {
+  size_t count;
+  if (upb_AddOverflow(len, (size_t)1, &count) ||
+      UPB_SIZEOF_FLEX_WOULD_OVERFLOW(str_t, str, count)) {
+    _upb_DefBuilder_OomErr(ctx);
+  }
+  return _upb_DefBuilder_Alloc(ctx, UPB_SIZEOF_FLEX(str_t, str, count));
+}
+
 static str_t* newstr(upb_DefBuilder* ctx, const char* data, size_t len) {
-  str_t* ret = _upb_DefBuilder_Alloc(ctx, sizeof(*ret) + len);
-  if (!ret) _upb_DefBuilder_OomErr(ctx);
+  str_t* ret = alloc_str(ctx, len);
   ret->len = len;
   if (len) memcpy(ret->str, data, len);
   ret->str[len] = '\0';
@@ -14603,7 +14635,7 @@ static str_t* newstr(upb_DefBuilder* ctx, const char* data, size_t len) {
 static str_t* unescape(upb_DefBuilder* ctx, const upb_FieldDef* f,
                        const char* data, size_t len) {
   // Size here is an upper bound; escape sequences could ultimately shrink it.
-  str_t* ret = _upb_DefBuilder_Alloc(ctx, sizeof(*ret) + len);
+  str_t* ret = alloc_str(ctx, len);
   char* dst = &ret->str[0];
   const char* src = data;
   const char* end = UPB_PTRADD(data, len);
@@ -14618,6 +14650,7 @@ static str_t* unescape(upb_DefBuilder* ctx, const upb_FieldDef* f,
   }
 
   ret->len = dst - &ret->str[0];
+  *dst = '\0';
   return ret;
 }
 
